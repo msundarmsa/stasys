@@ -166,7 +166,13 @@ int main(int argc, char *argv[]) {
 			return -1;
 		}
 	} else {
-		cap.open(atoi(webcam_id));
+		int id = atoi(webcam_id);
+		if (id < 0) {
+			cerr << "invalid webcam_id defaulting to id = 1" << endl;
+			id = 1;
+		}
+
+		cap.open(id);
 		if (!cap.isOpened()) {
 			cerr << "Webcam " << webcam_id << " cannot be opened!" << endl;
 			return -1;
