@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ui/fonts/segoe-ui-light.ttf</file>
+        <file>ui/fonts/segoe-ui-semibold.ttf</file>
+        <file>ui/fonts/segoe-ui.ttf</file>
+        <file>ui/images/logo.svg</file>
+    </qresource>
+</RCC>

@@ -10,10 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(OpenCV REQUIRED)
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 
-file(GLOB SRC
-    "*.h"
-    "*.cpp"
-)
+add_executable(stasys-cli stasys-cli.cpp CalibrationThread.cpp RecordThread.cpp
+	RecordThread.h ShootController.h ShootThread.cpp ShootThread.h Shot.cpp
+	Shot.h ShotTrace.cpp ShotTrace.h SoundPressureSensor.cpp SystemClock.cpp
+	SystemClock.h Utils.h)
 
-add_executable(stasys-cli main.cpp ${SRC})
 target_link_libraries(stasys-cli ${OpenCV_LIBS} sfml-graphics sfml-audio)
