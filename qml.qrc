@@ -5,5 +5,8 @@
         <file>ui/fonts/segoe-ui-semibold.ttf</file>
         <file>ui/fonts/segoe-ui.ttf</file>
         <file>ui/images/logo.svg</file>
+        <file>ui/images/close.svg</file>
+        <file>ui/images/aim.svg</file>
+        <file>ui/images/desc.svg</file>
     </qresource>
 </RCC>
