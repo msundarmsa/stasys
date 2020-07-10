@@ -8,5 +8,7 @@
         <file>ui/images/close.svg</file>
         <file>ui/images/aim.svg</file>
         <file>ui/images/desc.svg</file>
+        <file>ui/images/zoomedTarget.png</file>
+        <file>ui/images/target.png</file>
     </qresource>
 </RCC>

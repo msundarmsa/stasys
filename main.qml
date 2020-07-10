@@ -104,9 +104,47 @@ Window {
         color: "transparent"
 
         Rectangle {
+            id: leftContent
             anchors.margins: 20
             anchors.fill: parent
             color: "transparent"
+
+            Rectangle {
+                width: parent.width
+                height: parent.height - 120
+                anchors.top: leftContent.top
+                anchors.left: leftContent.left
+                color: "transparent"
+
+                Rectangle {
+                    width: parent.width < parent.height - 20 ? parent.width : parent.height - 20
+                    height: width
+                    anchors.top: parent.top
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    Image {
+                        width: parent.width
+                        height: parent.height
+                        source: "ui/images/target.png"
+                        mipmap: true
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Canvas {
+                        width: parent.width
+                        height: parent.height
+                        /* onPaint: {
+                            var ctx = getContext("2d");
+                            ctx.strokeStyle = Qt.rgba(1, 0, 0, 1);
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(20, 0);//start point
+                            ctx.bezierCurveTo(-10, 90, 210, 90, 180, 0);
+                            ctx.stroke();
+                        } */
+                    }
+                }
+            }
 
             Rectangle {
                 width: parent.width
