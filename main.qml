@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Styles 1.4
+import QtCharts 2.3
 import Qt.labs.qmlmodels 1.0
 
 Window {
@@ -358,7 +359,7 @@ Window {
                     ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
                     ListView {
-                        id: shotLogList
+                        id: shotGroupList
                         verticalLayoutDirection: ListView.BottomToTop
                         model: 0
                         anchors.left: parent.left
@@ -367,7 +368,7 @@ Window {
                         spacing: 20
 
                         delegate: ItemDelegate {
-                            width: shotLogList.width - 10
+                            width: shotGroupList.width - 10
                             height: width
                             anchors.horizontalCenter: parent.horizontalCenter
 
@@ -392,6 +393,125 @@ Window {
                 anchors.left: zoomedTargetRect.right
                 anchors.leftMargin: 10
                 color: "transparent"
+
+                ScrollView {
+                    width: parent.width
+                    height: parent.height
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    clip: true
+
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+
+                    ListView {
+                        id: shotLogList
+                        verticalLayoutDirection: ListView.BottomToTop
+                        model: 10
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        spacing: 20
+
+                        delegate: ItemDelegate {
+                            width: shotLogList.width - 10
+                            height: 75
+
+                            Rectangle {
+                                height: parent.height
+                                width: parent.width
+                                color: "#ffffff"
+
+                                Text {
+                                    id: logScoreLbl
+                                    text: "7.0"
+                                    color: "#04bfbf"
+                                    font.family: segoeUILight.name
+                                    font.pointSize: 30
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 20
+                                }
+
+                                ProgressBar {
+                                    id: logStab
+                                    value: 0.5
+
+                                    anchors.right: logDescLbl.left
+                                    anchors.rightMargin: 10
+                                    anchors.left: logScoreLbl.right
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    background: Rectangle {
+                                        implicitWidth: 200
+                                        implicitHeight: 6
+                                        color: "#e6e6e6"
+                                        radius: 3
+                                    }
+
+                                    contentItem: Item {
+                                        implicitWidth: 200
+                                        implicitHeight: 4
+
+                                        Rectangle {
+                                            width: logStab.visualPosition * parent.width
+                                            height: parent.height
+                                            radius: 2
+                                            // average color: "#DADF46"
+                                            // good color: "#8CDF46"
+                                            color: "#DF6F45"
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    id: logDescLbl
+                                    text: "3.0s"
+                                    color: "#04bfbf"
+                                    font.family: segoeUILight.name
+                                    font.pointSize: 25
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.right: logDescIcon.left
+                                    anchors.rightMargin: 10
+                                }
+
+                                Image {
+                                    id: logDescIcon
+                                    source: "ui/images/desc.svg"
+                                    height: 30
+                                    width: height
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.right: logAimLbl.left
+                                    anchors.rightMargin: 10
+                                    mipmap: true
+                                }
+
+                                Text {
+                                    id: logAimLbl
+                                    text: "1.2s"
+                                    color: "#04bfbf"
+                                    font.family: segoeUILight.name
+                                    font.pointSize: 25
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.right: logAimIcon.left
+                                    anchors.rightMargin: 10
+                                }
+
+                                Image {
+                                    id: logAimIcon
+                                    source: "ui/images/aim.svg"
+                                    height: 30
+                                    width: height
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 20
+                                    mipmap: true
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             Rectangle {
@@ -403,6 +523,62 @@ Window {
                 anchors.top: shotLogRect.bottom
                 anchors.topMargin: 10
                 color: "transparent"
+
+                ChartView {
+                    title: ""
+                    x: -12
+                    y: -12
+                    height: parent.height + 24
+                    width: parent.width + 24
+                    anchors.margins: 0
+                    antialiasing: true
+
+                    ValueAxis {
+                        id: xAxis
+                        min: -0.5
+                        max: 0.5
+                    }
+
+                    ValueAxis {
+                        id: yAxis
+                        min: -2.975
+                        max: 2.975
+                    }
+
+                    LineSeries {
+                        name: "X-T"
+                        axisX: xAxis
+                        axisY: yAxis
+                        XYPoint { x: -0.5; y: 3.3 }
+                        XYPoint { x: -0.4; y: 4.9 }
+                        XYPoint { x: -0.3; y: 2.1 }
+                        XYPoint { x: -0.2; y: 3.3 }
+                        XYPoint { x: -0.1; y: 2.1 }
+                        XYPoint { x: 0; y: 0 }
+                        XYPoint { x: 0.1; y: 2.1 }
+                        XYPoint { x: 0.2; y: 3.3 }
+                        XYPoint { x: 0.3; y: 2.1 }
+                        XYPoint { x: 0.4; y: 4.9 }
+                        XYPoint { x: 0.5; y: 3.3 }
+                    }
+
+                    LineSeries {
+                        name: "Y-T"
+                        axisX: xAxis
+                        axisY: yAxis
+                        XYPoint { x: -0.5; y: 4.9 }
+                        XYPoint { x: -0.4; y: 2.1 }
+                        XYPoint { x: -0.3; y: 3.3 }
+                        XYPoint { x: -0.2; y: 2.1 }
+                        XYPoint { x: -0.1; y: 1.5 }
+                        XYPoint { x: 0; y: 0 }
+                        XYPoint { x: 0.1; y: 1.5 }
+                        XYPoint { x: 0.2; y: 2.1 }
+                        XYPoint { x: 0.3; y: 3.3 }
+                        XYPoint { x: 0.4; y: 2.1 }
+                        XYPoint { x: 0.5; y: 4.9 }
+                    }
+                }
             }
         }
     }
