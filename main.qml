@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls.Styles 1.4
+import Qt.labs.qmlmodels 1.0
 
 Window {
     visible: true
@@ -319,6 +320,89 @@ Window {
                         color: "#04bfbf"
                     }
                 }
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.top: topBar.bottom
+        anchors.right: parent.right
+
+        width: parent.width / 2
+        height: parent.height - topBar.height
+        color: "transparent"
+
+        Rectangle {
+            id: rightContent
+            anchors.margins: 20
+            anchors.fill: parent
+            color: "transparent"
+
+            Rectangle {
+                // zoomed target
+                id: zoomedTargetRect
+                width: parent.width / 3
+                height: parent.height * 2 / 3
+                anchors.left: parent.left
+                anchors.top: parent.top
+                color: "#ffffff"
+
+                ScrollView {
+                    width: parent.width
+                    height: parent.height
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    clip: true
+
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+
+                    ListView {
+                        id: shotLogList
+                        verticalLayoutDirection: ListView.BottomToTop
+                        model: 0
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        spacing: 20
+
+                        delegate: ItemDelegate {
+                            width: shotLogList.width - 10
+                            height: width
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            Image {
+                                source: "ui/images/zoomedTarget.png"
+                                width: parent.width
+                                height: width
+                                mipmap: true
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                // shot log
+                id: shotLogRect
+                width: parent.width * 2 / 3
+                height: parent.height * 2 / 3
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.left: zoomedTargetRect.right
+                anchors.leftMargin: 10
+                color: "transparent"
+            }
+
+            Rectangle {
+                // x-t/y-t chart
+                id: chartRect
+                width: parent.width
+                height: parent.height / 3
+                anchors.bottom: parent.bottom
+                anchors.top: shotLogRect.bottom
+                anchors.topMargin: 10
+                color: "transparent"
             }
         }
     }
