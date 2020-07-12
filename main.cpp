@@ -17,8 +17,10 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     QObject *rootObject = qobject_cast<QObject*>(engine.rootObjects().first());
-    QMetaObject::invokeMethod(rootObject, "showStabDescAim",
-            Q_ARG(QVariant, 60), Q_ARG(QVariant, 5.55), Q_ARG(QVariant, 1.25));
+    QMetaObject::invokeMethod(rootObject, "addShotStats",
+            Q_ARG(QVariant, 0), Q_ARG(QVariant, 0), Q_ARG(QVariant, 9.9), Q_ARG(QVariant, 60), Q_ARG(QVariant, 5.55), Q_ARG(QVariant, 1.25));
+    QMetaObject::invokeMethod(rootObject, "addShotStats",
+            Q_ARG(QVariant, -30), Q_ARG(QVariant, -30), Q_ARG(QVariant, 9.9), Q_ARG(QVariant, 60), Q_ARG(QVariant, 5.55), Q_ARG(QVariant, 1.25));
 
     return app.exec();
 }

@@ -16,10 +16,13 @@ Window {
     FontLoader { id: segoeUISemiBold; source: "ui/fonts/segoe-ui-semibold.ttf" }
     FontLoader { id: segoeUI; source: "ui/fonts/segoe-ui.ttf" }
 
-    function showStabDescAim(stab, desc, aim) {
+    function addShotStats(x, y, score, stab, desc, aim) {
         stabilityLbl.setStab(stab);
         descLbl.setDesc(desc);
         aimLbl.setAim(aim);
+
+        shotLogList.model.append({score: score, stab: stab, desc: desc, aim: aim});
+        shotGroupList.addShot(x, y);
     }
 
     Rectangle {
@@ -395,22 +398,92 @@ Window {
                     ListView {
                         id: shotGroupList
                         verticalLayoutDirection: ListView.BottomToTop
-                        model: 3
+                        model: 1
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         spacing: 20
+                        property var shotCount: 0;
+
+                        function addShot(x, y) {
+                            shotCount += 1;
+                            if (shotCount != 1 && shotCount % 10 == 1) {
+                                model += 1;
+                            }
+                            currentItem.addShot(x, y);
+                        }
+
+                        onCountChanged: {
+                            var newIndex = count - 1
+                            currentIndex = newIndex
+                        }
 
                         delegate: ItemDelegate {
                             width: shotGroupList.width - 10
                             height: width
                             anchors.horizontalCenter: parent.horizontalCenter
+                            property var factor: (width / 2) / 29.75 // convert mm to px
+
+                            function addShot(x, y) {
+                                if (Math.sqrt(x * x + y * y) <= 29.75) {
+                                    // within black circle
+                                    zoomedShotCanvas.inPoints.push({x: x * factor + width / 2, y: height / 2 - y * factor});
+                                } else {
+                                    var angle = Math.atan2(y, x);
+                                    var newX = 29.75 * Math.cos(angle);
+                                    var newY = 29.75 * Math.sin(angle);
+                                    zoomedShotCanvas.outPoints.push({x: newX * factor + width / 2, y: height / 2 - newY * factor});
+                                }
+
+                                zoomedShotCanvas.requestPaint();
+                            }
+
+                            Canvas {
+                                id: zoomedShotCanvas
+                                width: parent.width
+                                height: parent.height
+
+                                property var inPoints: [];
+                                property var outPoints: [];
+                                property var radius: parent.factor * 2.25;
+
+                                onPaint: {
+                                    var context = getContext("2d");
+                                    context.strokeStyle = "#ffffff";
+                                    context.lineWidth = 3;
+
+                                    context.fillStyle = "#04bfbf";
+                                    inPoints.forEach(point => drawShot(context, point));
+
+                                    context.fillStyle = "#df468e";
+                                    outPoints.forEach(point => drawShot(context, point));
+
+                                    context.restore();
+                                }
+
+                                function drawShot(context, point) {
+                                    context.beginPath();
+                                    context.ellipse(point["x"] - radius, point["y"] - radius, 2 * radius, 2 * radius);
+                                    context.stroke();
+                                    context.fill();
+                                }
+
+                                MouseArea {
+                                    width: parent.width
+                                    height: parent.height
+
+                                    onClicked: {
+                                        return;
+                                    }
+                                }
+                            }
 
                             Image {
                                 source: "ui/images/zoomedTarget.png"
                                 width: parent.width
-                                height: width
+                                height: parent.height
                                 mipmap: true
+                                z: -1
                             }
                         }
                     }
@@ -441,11 +514,16 @@ Window {
                     ListView {
                         id: shotLogList
                         verticalLayoutDirection: ListView.BottomToTop
-                        model: 10
+                        model: ShotLogListModel {}
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         spacing: 20
+
+                        onCountChanged: {
+                            var newIndex = count - 1
+                            currentIndex = newIndex
+                        }
 
                         delegate: ItemDelegate {
                             width: shotLogList.width - 10
@@ -458,7 +536,7 @@ Window {
 
                                 Text {
                                     id: logScoreLbl
-                                    text: "7.0"
+                                    text: score.toFixed(1)
                                     color: "#04bfbf"
                                     font.family: segoeUILight.name
                                     font.pointSize: 30
@@ -469,7 +547,7 @@ Window {
 
                                 ProgressBar {
                                     id: logStab
-                                    value: 0.5
+                                    value: stab / 100
 
                                     anchors.right: logDescLbl.left
                                     anchors.rightMargin: 10
@@ -494,14 +572,14 @@ Window {
                                             radius: 2
                                             // average color: "#DADF46"
                                             // good color: "#8CDF46"
-                                            color: "#DF6F45"
+                                            color: if (stab < 50) { "#DF6F45" } else if (stab < 70) { "#DADF46" } else { "#8CDF46" }
                                         }
                                     }
                                 }
 
                                 Text {
                                     id: logDescLbl
-                                    text: "3.0s"
+                                    text: desc.toFixed(1) + "s"
                                     color: "#04bfbf"
                                     font.family: segoeUILight.name
                                     font.pointSize: 25
@@ -523,7 +601,7 @@ Window {
 
                                 Text {
                                     id: logAimLbl
-                                    text: "1.2s"
+                                    text: aim.toFixed(1) + "s"
                                     color: "#04bfbf"
                                     font.family: segoeUILight.name
                                     font.pointSize: 25
