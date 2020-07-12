@@ -11,5 +11,6 @@
         <file>ui/images/zoomedTarget.png</file>
         <file>ui/images/target.png</file>
         <file>ShotLogListModel.qml</file>
+        <file>ShotGroupListModel.qml</file>
     </qresource>
 </RCC>

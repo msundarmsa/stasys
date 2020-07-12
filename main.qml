@@ -398,7 +398,7 @@ Window {
                     ListView {
                         id: shotGroupList
                         verticalLayoutDirection: ListView.BottomToTop
-                        model: 1
+                        model: ShotGroupListModel {}
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
@@ -408,14 +408,14 @@ Window {
                         function addShot(x, y) {
                             shotCount += 1;
                             if (shotCount != 1 && shotCount % 10 == 1) {
-                                model += 1;
+                                model.append({inPoints: [], outPoints: []});
                             }
+                            currentIndex = count - 1
                             currentItem.addShot(x, y);
                         }
 
                         onCountChanged: {
-                            var newIndex = count - 1
-                            currentIndex = newIndex
+                            currentIndex = count - 1
                         }
 
                         delegate: ItemDelegate {
@@ -427,12 +427,12 @@ Window {
                             function addShot(x, y) {
                                 if (Math.sqrt(x * x + y * y) <= 29.75) {
                                     // within black circle
-                                    zoomedShotCanvas.inPoints.push({x: x * factor + width / 2, y: height / 2 - y * factor});
+                                    inPoints.append({x: x * factor + width / 2, y: height / 2 - y * factor});
                                 } else {
                                     var angle = Math.atan2(y, x);
                                     var newX = 29.75 * Math.cos(angle);
                                     var newY = 29.75 * Math.sin(angle);
-                                    zoomedShotCanvas.outPoints.push({x: newX * factor + width / 2, y: height / 2 - newY * factor});
+                                    outPoints.append({x: newX * factor + width / 2, y: height / 2 - newY * factor});
                                 }
 
                                 zoomedShotCanvas.requestPaint();
@@ -443,8 +443,6 @@ Window {
                                 width: parent.width
                                 height: parent.height
 
-                                property var inPoints: [];
-                                property var outPoints: [];
                                 property var radius: parent.factor * 2.25;
 
                                 onPaint: {
@@ -453,12 +451,12 @@ Window {
                                     context.lineWidth = 3;
 
                                     context.fillStyle = "#04bfbf";
-                                    inPoints.forEach(point => drawShot(context, point));
+                                    for (let i = 0; i < inPoints.count; i++)
+                                        drawShot(context, inPoints.get(i));
 
                                     context.fillStyle = "#df468e";
-                                    outPoints.forEach(point => drawShot(context, point));
-
-                                    context.restore();
+                                    for (let i = 0; i < outPoints.count; i++)
+                                        drawShot(context, outPoints.get(i));
                                 }
 
                                 function drawShot(context, point) {
