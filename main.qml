@@ -16,6 +16,12 @@ Window {
     FontLoader { id: segoeUISemiBold; source: "ui/fonts/segoe-ui-semibold.ttf" }
     FontLoader { id: segoeUI; source: "ui/fonts/segoe-ui.ttf" }
 
+    function showStabDescAim(stab, desc, aim) {
+        stabilityLbl.setStab(stab);
+        descLbl.setDesc(desc);
+        aimLbl.setAim(aim);
+    }
+
     Rectangle {
         id: topBar
         color: "#4f5859"
@@ -163,6 +169,20 @@ Window {
                     color: "#ffffff"
                     border.color: "#0000001E"
 
+                    function setStab(stab) {
+                        stab = stab.toFixed(0);
+                        if (stab < 50) {
+                            stabilityPBColor.color = "#DF6F45";
+                        } else if (stab < 70) {
+                            stabilityPBColor.color = "#DADF46";
+                        } else {
+                            stabilityPBColor.color = "#8CDF46";
+                        }
+
+                        stabilityPB.value = stab / 100;
+                        stabilityVal.text = stab + "%";
+                    }
+
                     layer.enabled: true
                     layer.effect: DropShadow {
                         horizontalOffset: 2
@@ -184,7 +204,7 @@ Window {
 
                     ProgressBar {
                         id: stabilityPB
-                        value: 0.5
+                        value: 0
 
                         anchors.right: parent.right
                         anchors.rightMargin: 10
@@ -204,6 +224,7 @@ Window {
                             implicitHeight: 4
 
                             Rectangle {
+                                id: stabilityPBColor
                                 width: stabilityPB.visualPosition * parent.width
                                 height: parent.height
                                 radius: 2
@@ -215,12 +236,13 @@ Window {
                     }
 
                     Text {
+                        id: stabilityVal
                         font.family: segoeUILight.name
                         font.pointSize: 60
                         anchors.top: stabilityTitle.bottom
                         anchors.topMargin: 0
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "69%"
+                        text: "0%"
                         color: "#04bfbf"
                     }
                 }
@@ -232,6 +254,11 @@ Window {
                     anchors.left: stabilityLbl.right
                     anchors.leftMargin: 20
                     color: "#ffffff"
+
+                    function setDesc(desc) {
+                        desc = desc.toFixed(1);
+                        descVal.text = desc + "s";
+                    }
 
                     layer.enabled: true
                     layer.effect: DropShadow {
@@ -263,12 +290,13 @@ Window {
                     }
 
                     Text {
+                        id: descVal
                         font.family: segoeUILight.name
                         font.pointSize: 60
                         anchors.top: descTitle.bottom
                         anchors.topMargin: 0
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "3.0s"
+                        text: "0.0s"
                         color: "#04bfbf"
                     }
                 }
@@ -280,6 +308,11 @@ Window {
                     anchors.left: descLbl.right
                     anchors.leftMargin: 20
                     color: "#ffffff"
+
+                    function setAim(aim) {
+                        aim = aim.toFixed(1);
+                        aimVal.text = aim + "s";
+                    }
 
                     layer.enabled: true
                     layer.effect: DropShadow {
@@ -312,12 +345,13 @@ Window {
                     }
 
                     Text {
+                        id: aimVal
                         font.family: segoeUILight.name
                         font.pointSize: 60
                         anchors.top: aimTitle.bottom
                         anchors.topMargin: 0
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "1.5s"
+                        text: "0.0s"
                         color: "#04bfbf"
                     }
                 }
@@ -361,7 +395,7 @@ Window {
                     ListView {
                         id: shotGroupList
                         verticalLayoutDirection: ListView.BottomToTop
-                        model: 0
+                        model: 3
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom

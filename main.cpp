@@ -1,4 +1,3 @@
-#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QApplication>
 
@@ -16,6 +15,10 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
+
+    QObject *rootObject = qobject_cast<QObject*>(engine.rootObjects().first());
+    QMetaObject::invokeMethod(rootObject, "showStabDescAim",
+            Q_ARG(QVariant, 60), Q_ARG(QVariant, 5.55), Q_ARG(QVariant, 1.25));
 
     return app.exec();
 }
