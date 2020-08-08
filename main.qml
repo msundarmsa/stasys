@@ -103,6 +103,15 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 20
+
+            MouseArea {
+                width: parent.width
+                height: parent.height
+
+                onClicked: {
+                    Qt.quit();
+                }
+            }
         }
     }
 
