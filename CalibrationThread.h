@@ -9,15 +9,15 @@ class CalibrationThread : public RecordThread {
 	private:
 		cv::VideoCapture video;
 		std::vector<TraceCircle> currentTrace;
-		void (*calibrationFinished)(bool, double, double, double, int, int);
+        std::function<void(bool, double, double, double, int, int)> calibrationFinished;
 		cv::SimpleBlobDetector::Params params;
 		cv::Ptr<cv::SimpleBlobDetector> detector;
 		bool stopRecording = false;
 		FILE *logFile;
 	public:
-		CalibrationThread(cv::VideoCapture video, void (*calibrationFinished)(bool, double, double, double, int, int), FILE* logFile) {
+        CalibrationThread(cv::VideoCapture video, std::function<void(bool, double, double, double, int, int)> calibrationFinished, FILE* logFile) {
 			this->video = video;
-			this->calibrationFinished = calibrationFinished;
+            this->calibrationFinished = calibrationFinished;
 			this->logFile = logFile;
 
 			params.maxThreshold = 100;
@@ -227,6 +227,6 @@ class CalibrationThread : public RecordThread {
 			}
 
 			// callback result
-			calibrationFinished(success, vecX, vecY, avgCircle.radius, frameHeight, frameWidth);
+            this->calibrationFinished(success, vecX, vecY, avgCircle.radius, frameHeight, frameWidth);
 		}
 };

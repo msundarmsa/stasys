@@ -12,5 +12,7 @@
         <file>ui/images/target.png</file>
         <file>ShotLogListModel.qml</file>
         <file>ShotGroupListModel.qml</file>
+        <file>ToastManager.qml</file>
+        <file>Toast.qml</file>
     </qresource>
 </RCC>

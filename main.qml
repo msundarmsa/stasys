@@ -6,6 +6,8 @@ import QtQuick.Controls.Styles 1.4
 import QtCharts 2.3
 import Qt.labs.qmlmodels 1.0
 
+import com.mrmmsmsa 1.0
+
 Window {
     visible: true
     flags: Qt.FramelessWindowHint | Qt.Window
@@ -16,6 +18,26 @@ Window {
     FontLoader { id: segoeUISemiBold; source: "ui/fonts/segoe-ui-semibold.ttf" }
     FontLoader { id: segoeUI; source: "ui/fonts/segoe-ui.ttf" }
 
+    function calibrationFinished() {
+        calibrateBtn.text = "CALIBRATE";
+    }
+
+    function addToBeforeShotTrace(x, y) {
+        targetTrace.addToBeforeShotTrace(x, y);
+    }
+
+    function addToAfterShotTrace(x, y) {
+        targetTrace.addToAfterShotTrace(x, y);
+    }
+
+    function drawShotCircle(x, y) {
+        targetTrace.drawShotCircle(x, y);
+    }
+
+    function resetTrace(resetGroupIfNecessary) {
+        targetTrace.resetTrace(resetGroupIfNecessary);
+    }
+
     function addShotStats(x, y, score, stab, desc, aim) {
         stabilityLbl.setStab(stab);
         descLbl.setDesc(desc);
@@ -23,6 +45,21 @@ Window {
 
         shotLogList.model.append({score: score, stab: stab, desc: desc, aim: aim});
         shotGroupList.addShot(x, y);
+    }
+
+    QMLCppBridge {
+        id: qmlCppBridge
+        onCalibrationCompleted: {
+            if (success) {
+                toast.show("Calibration finished successfully!");
+            } else {
+                toast.show("Calibration could not complete. Please try again");
+            }
+        }
+    }
+
+    ToastManager {
+        id: toast
     }
 
     Rectangle {
@@ -61,6 +98,15 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider1.left
             anchors.rightMargin: 20
+
+            MouseArea {
+                width: parent.width
+                height: parent.height
+
+                onClicked: {
+                    qmlCppBridge.calibrationClicked();
+                }
+            }
         }
 
         Rectangle {
@@ -82,6 +128,16 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider2.left
             anchors.rightMargin: 20
+
+            MouseArea {
+                width: parent.width
+                height: parent.height
+
+                onClicked: {
+                    qmlCppBridge.calibrationSuccess = true;
+                    qmlCppBridge.shootClicked();
+                }
+            }
         }
 
         Rectangle {
@@ -151,17 +207,81 @@ Window {
                     }
 
                     Canvas {
+                        id: targetTrace
                         width: parent.width
                         height: parent.height
-                        /* onPaint: {
-                            var ctx = getContext("2d");
-                            ctx.strokeStyle = Qt.rgba(1, 0, 0, 1);
-                            ctx.lineWidth = 1;
-                            ctx.beginPath();
-                            ctx.moveTo(20, 0);//start point
-                            ctx.bezierCurveTo(-10, 90, 210, 90, 180, 0);
-                            ctx.stroke();
-                        } */
+                        property var beforeShotTrace: []
+                        property var afterShotTrace: []
+                        property var shotPoints: []
+                        property var factor: width / 170
+                        property var radius: factor * 2.25
+
+                        function transformPoint(x, y) {
+                            return {x: x * factor + targetTrace.width / 2, y: targetTrace.height / 2 - y * factor};
+                        }
+
+                        function addToBeforeShotTrace(x, y) {
+                            beforeShotTrace.push(transformPoint(x, y));
+                            targetTrace.requestPaint();
+                        }
+
+                        function addToAfterShotTrace(x, y) {
+                            afterShotTrace.push(transformPoint(x, y));
+                            targetTrace.requestPaint();
+                        }
+
+                        function drawShotCircle(x, y) {
+                            shotPoints.push(transformPoint(x, y));
+                            targetTrace.requestPaint();
+                        }
+
+                        function resetTrace(resetGroupIfNecessary) {
+                            beforeShotTrace = [];
+                            afterShotTrace = [];
+
+                            if (resetGroupIfNecessary && shotPoints.length == 10) {
+                                shotPoints = [];
+                            }
+
+                            targetTrace.requestPaint();
+                        }
+
+                        onPaint: {
+                            if (beforeShotTrace.length > 0) {
+                                let ctx = getContext("2d");
+                                ctx.strokeStyle = "#8ddf46";
+                                ctx.lineWidth = 2;
+
+                                ctx.beginPath();
+                                ctx.moveTo(beforeShotTrace[0]["x"], beforeShotTrace[0]["y"]);
+                                for (let i = 1; i < beforeShotTrace.length; i++) {
+                                    ctx.lineTo(beforeShotTrace[i]["x"], beforeShotTrace[i]["y"]);
+                                    // TODO: change this to bezier curve or some other interpolation
+                                }
+                                ctx.stroke();
+
+                                ctx.strokeStyle = "#df6f46";
+                                ctx.lineWidth = 2;
+                                ctx.beginPath();
+                                ctx.moveTo(afterShotTrace[0]["x"], afterShotTrace[0]["y"]);
+                                for (let i = 1; i < afterShotTrace.length; i++) {
+                                    ctx.lineTo(afterShotTrace[i]["x"], afterShotTrace[i]["y"]);
+                                    // TODO: change this to bezier curve or some other interpolation
+                                }
+                                ctx.stroke();
+
+                                ctx.strokeStyle = "#ffffff";
+                                ctx.lineWidth = 3;
+                                ctx.fillStyle = "#04bfbf";
+
+                                for (let i = 0; i < shotPoints.length; i++) {
+                                    ctx.beginPath();
+                                    ctx.ellipse(shotPoints[i]["x"] - radius, shotPoints[i]["y"] - radius, 2 * radius, 2 * radius);
+                                    ctx.stroke();
+                                    ctx.fill();
+                                }
+                            }
+                        }
                     }
                 }
             }
