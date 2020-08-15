@@ -1,6 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "CalibrationThread.cpp"
+#include "CalibrationThread.h"
 #include "ShootThread.h"
 #include "ShootController.h"
 #include "Utils.h"
