@@ -14,5 +14,6 @@
         <file>ShotGroupListModel.qml</file>
         <file>ToastManager.qml</file>
         <file>Toast.qml</file>
+        <file>ui/sounds/done.wav</file>
     </qresource>
 </RCC>

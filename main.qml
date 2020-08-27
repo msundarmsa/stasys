@@ -5,6 +5,7 @@ import QtGraphicalEffects 1.0
 import QtQuick.Controls.Styles 1.4
 import QtCharts 2.3
 import Qt.labs.qmlmodels 1.0
+import QtMultimedia 5.12
 
 import com.mrmmsmsa 1.0
 
@@ -17,6 +18,11 @@ Window {
     FontLoader { id: segoeUILight; source: "ui/fonts/segoe-ui-light.ttf" }
     FontLoader { id: segoeUISemiBold; source: "ui/fonts/segoe-ui-semibold.ttf" }
     FontLoader { id: segoeUI; source: "ui/fonts/segoe-ui.ttf" }
+
+    SoundEffect {
+        id: calibrationDoneSound
+        source: "ui/sounds/done.wav"
+    }
 
     function addToBeforeShotTrace(x, y) {
         targetTrace.addToBeforeShotTrace(x, y);
@@ -46,6 +52,7 @@ Window {
     QMLCppBridge {
         id: qmlCppBridge
         onCalibrationCompleted: {
+            calibrationDoneSound.play();
             calibrateBtn.text = "CALIBRATE";
             if (success) {
                 toast.show("Calibration finished successfully!");
