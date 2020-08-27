@@ -10,7 +10,7 @@ class QMLCppBridge : public QObject
 public:
     explicit QMLCppBridge(QObject *parent = nullptr);
     void calibrationFinished(bool success, double x, double y, double radius, int frameWidth, int frameHeight);
-    void testCallback();
+    FILE* logFile;
 
     Q_INVOKABLE void calibrationClicked();
     Q_INVOKABLE void shootClicked();

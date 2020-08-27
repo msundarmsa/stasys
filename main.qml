@@ -18,10 +18,6 @@ Window {
     FontLoader { id: segoeUISemiBold; source: "ui/fonts/segoe-ui-semibold.ttf" }
     FontLoader { id: segoeUI; source: "ui/fonts/segoe-ui.ttf" }
 
-    function calibrationFinished() {
-        calibrateBtn.text = "CALIBRATE";
-    }
-
     function addToBeforeShotTrace(x, y) {
         targetTrace.addToBeforeShotTrace(x, y);
     }
@@ -50,6 +46,7 @@ Window {
     QMLCppBridge {
         id: qmlCppBridge
         onCalibrationCompleted: {
+            calibrateBtn.text = "CALIBRATE";
             if (success) {
                 toast.show("Calibration finished successfully!");
             } else {
@@ -104,6 +101,7 @@ Window {
                 height: parent.height
 
                 onClicked: {
+                    calibrateBtn.text = "CALIBRATING";
                     qmlCppBridge.calibrationClicked();
                 }
             }
@@ -134,7 +132,7 @@ Window {
                 height: parent.height
 
                 onClicked: {
-                    qmlCppBridge.calibrationSuccess = true;
+                    shootBtn.text = "SHOOTING"
                     qmlCppBridge.shootClicked();
                 }
             }
