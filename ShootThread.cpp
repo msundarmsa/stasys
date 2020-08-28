@@ -173,9 +173,9 @@ void ShootThread::run() {
             }
         }
 
-        // clip 1.75x size of card around aim center
+        // clip 1.5x size of card around aim center
 		cv::Rect roi;
-        roi.width = 1.75 * TARGET_SIZE / RATIO1;
+        roi.width = 1.5 * TARGET_SIZE / RATIO1;
 		roi.height = roi.width;
 
         roi.x = adjustmentVec.x - roi.width/2;
