@@ -26,7 +26,12 @@ Window {
 
     QMLCppBridge {
         id: qmlCppBridge
-        onCalibrationCompleted: {
+
+        onUiCalibrationStarted: {
+            calibrateBtn.text = "CALIBRATING";
+        }
+
+        onUiCalibrationEnded: {
             calibrationDoneSound.play();
             calibrateBtn.text = "CALIBRATE";
             if (success) {
@@ -34,6 +39,18 @@ Window {
             } else {
                 toast.show("Calibration could not complete. Please try again", 3000);
             }
+        }
+
+        onUiShootingStarted: {
+            shootBtn.text = "SHOOTING";
+        }
+
+        onUiShootingEnded: {
+            shootBtn.text = "SHOOT";
+        }
+
+        onUiShowToast: {
+            toast.show(message, 3000);
         }
 
         onUiRemovePreviousCalibCircle: {
@@ -114,7 +131,6 @@ Window {
                 height: parent.height
 
                 onClicked: {
-                    calibrateBtn.text = "CALIBRATING";
                     qmlCppBridge.calibrationClicked();
                 }
             }
@@ -145,7 +161,6 @@ Window {
                 height: parent.height
 
                 onClicked: {
-                    shootBtn.text = "SHOOTING"
                     qmlCppBridge.shootClicked();
                 }
             }

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QDebug>
 #include "Utils.h"
+#include "CalibrationThread.h"
+#include "ShootThread.h"
 
 class QMLCppBridge : public QObject
 {
@@ -24,16 +26,21 @@ private:
     FILE* logFile = NULL;
     Vector2D adjustmentVec = {0, 0};
     double radius = 0;
+    CalibrationThread* calibThread = NULL;
+    ShootThread* shootThread = NULL;
 
 signals:
-    void calibrationCompleted(bool success);
+    void uiCalibrationStarted();
+    void uiCalibrationEnded(bool success);
+    void uiShootingStarted();
+    void uiShootingEnded();
+    void uiShowToast(QString message);
     void uiRemovePreviousCalibCircle();
     void uiClearTrace(bool resetGroupIfNecessary);
     void uiUpdateView(double x, double y, double score, double stab, double desc, double aim, QVariant xt, QVariant yt, QVariant ts);
     void uiAddToBeforeShotTrace(double x, double y);
     void uiDrawShotCircle(double x, double y);
     void uiAddToAfterShotTrace(double x, double y);
-
 };
 
 #endif // QMLCPPBRIDGE_H

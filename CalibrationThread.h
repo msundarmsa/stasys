@@ -5,9 +5,6 @@
 #include "RecordThread.h"
 #include "Utils.h"
 
-#include <thread>
-#include <chrono>
-
 class CalibrationThread : public RecordThread {
 	private:
 		cv::VideoCapture video;
@@ -226,7 +223,6 @@ class CalibrationThread : public RecordThread {
 					}
 				}
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(16));
                 frameId++;
 			}
 
