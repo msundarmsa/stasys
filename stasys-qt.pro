@@ -28,6 +28,9 @@ LIBS += /usr/local/Cellar/sfml/2.5.1/lib/libsfml-system.dylib
 
 SOURCES += \
         RecordThread.cpp \
+        ShootThread.cpp \
+        Shot.cpp \
+        ShotTrace.cpp \
         SystemClock.cpp \
         main.cpp \
         qmlcppbridge.cpp
@@ -48,6 +51,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     CalibrationThread.h \
     RecordThread.h \
+    ShootThread.h \
+    Shot.h \
+    ShotTrace.h \
     SystemClock.h \
     Utils.h \
     qmlcppbridge.h

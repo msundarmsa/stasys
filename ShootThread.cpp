@@ -2,7 +2,7 @@
 #include "SoundPressureSensor.cpp"
 #include "ShotTrace.h"
 
-ShootThread::ShootThread(cv::VideoCapture video, double radius, Vector2D adjustmentVec, ShootController* page, FILE* logFile) {
+ShootThread::ShootThread(cv::VideoCapture video, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile) {
 	this->video = video;
 	this->page = page;
 	this->radius = radius;
@@ -11,7 +11,7 @@ ShootThread::ShootThread(cv::VideoCapture video, double radius, Vector2D adjustm
 
 	RATIO1 = PISTOL_CIRCLE_SIZE / radius;
 
-	params.maxThreshold = 100;
+    params.maxThreshold = 100;
 
 	params.filterByArea = true;
 	params.minArea = 450;
@@ -82,7 +82,7 @@ void ShootThread::run() {
 	fprintf(logFile, "Radius (px) %.3f\n", radius);
 	fprintf(logFile, "Adjustment Vec: (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
 
-	page->removePreviousCalibCircle();
+    page.removePreviousCalibCircle();
 
     /*if (!sensor->setDevice(sf::SoundRecorder::getAvailableDevices()[0]))
     {
@@ -92,16 +92,16 @@ void ShootThread::run() {
     sensor->start();*/
 
     int testTriggers[10] = {
-        1376,
-        4427,
-        7479,
-        10470,
-        12863,
-        14957,
-        17171,
-        20163,
-        22735,
-        25427
+        1501,
+        4474,
+        7512,
+        10564,
+        12949,
+        15016,
+        17275,
+        20238,
+        22831,
+        25518
     };
 
     int testTriggerIndex = 0;
@@ -120,7 +120,7 @@ void ShootThread::run() {
             lStartTime = SystemClock::getCurrentTimeMillis();
             frameHeight = frame.rows;
             frameWidth = frame.cols;
-		}
+        }
         
         if (testTriggerIndex < 10 && frameid == testTriggers[testTriggerIndex]) {
             audio_triggered = true;
@@ -141,7 +141,7 @@ void ShootThread::run() {
                 currShotTrace.reset();
                 preTrace[0] = { -1, -1 };
                 preTrace[1] = { -1, -1 };
-                page->clearTrace(false);
+                page.clearTrace(false);
             }
             else {
                 double relativeFrameTime = timeSinceShotStart;
@@ -150,7 +150,7 @@ void ShootThread::run() {
                 {
                     // reset trace if shot has started but trigger has not been pulled for 60s
                     currShotTrace.reset();
-                    page->clearTrace(false);
+                    page.clearTrace(false);
 
                     // but update the start time to the current time
                     lShotStartTime = lFrameTime;
@@ -162,7 +162,7 @@ void ShootThread::run() {
                     // 2s after trigger is pulled, shot is finished. create new object for this shot
                     // and draw the x-t and y-t graph
                     Shot* shot = new Shot(++sn, currShotTrace);
-                    page->updateView(shot);
+                    page.updateView(shot);
 
                     // reset shot
                     shotStarted = false;
@@ -173,13 +173,13 @@ void ShootThread::run() {
             }
         }
 
-		// clip 1.5x size of card around aim center
+        // clip 1.75x size of card around aim center
 		cv::Rect roi;
-		roi.width = 1.5 * TARGET_SIZE / RATIO1;
+        roi.width = 1.75 * TARGET_SIZE / RATIO1;
 		roi.height = roi.width;
 
-		roi.x = frameWidth / 2 - adjustmentVec.x - roi.width/2;
-		roi.y = frameHeight / 2 - adjustmentVec.y - roi.height/2;
+        roi.x = adjustmentVec.x - roi.width/2;
+        roi.y = adjustmentVec.y - roi.height/2;
 		frame = frame(roi);
 
         TargetCircle circle = findCircle(frame);
@@ -191,8 +191,8 @@ void ShootThread::run() {
             Vector2D center = { xShift, yShift };
             fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
 
-            if (center.x >= -TARGET_SIZE / 2 && center.x <= TARGET_SIZE / 2 &&
-                center.y >= -TARGET_SIZE / 2 && center.y <= TARGET_SIZE / 2) {
+            if (center.x >= -roi.width / 2 && center.x <= roi.width / 2 &&
+                center.y >= -roi.width / 2 && center.y <= roi.width / 2) {
                 // aim is found and within the target
                 lLastCircleDetectedFrameTime = lFrameTime;
             }
@@ -213,10 +213,10 @@ void ShootThread::run() {
 
                         // reset traces
                         currShotTrace.reset();
-                        page->clearTrace(true);
+                        page.clearTrace(true);
 
                         lShotStartTime = lFrameTime;
-                        page->addToBeforeShotTrace(center);
+                        page.addToBeforeShotTrace(center);
                         currShotTrace.addTracePoint({ center, 0 });
                     }
                 }
@@ -230,20 +230,20 @@ void ShootThread::run() {
 
                         currShotTrace.setShotPoint({ center, timeSinceShotStart });
 
-                        page->addToBeforeShotTrace(center);
-                        page->drawShotCircle(center);
-                        page->addToAfterShotTrace(center);
+                        page.addToBeforeShotTrace(center);
+                        page.drawShotCircle(center);
+                        page.addToAfterShotTrace(center);
                     }
                     else {
                         // trigger has not been pulled
                         currShotTrace.addTracePoint({ center, timeSinceShotStart });
-                        page->addToBeforeShotTrace(center);
+                        page.addToBeforeShotTrace(center);
                     }
                 }
                 else {
                     // trigger has been pulled
                     currShotTrace.addTracePoint({ center, timeSinceShotStart });
-                    page->addToAfterShotTrace(center);
+                    page.addToAfterShotTrace(center);
                 }
             }
         }

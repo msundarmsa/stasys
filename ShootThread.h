@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ShootController.h"
 #include "Utils.h"
 #include "Shot.h"
 #include <opencv2/opencv.hpp>
@@ -15,7 +14,7 @@ private:
 	double RATIO1; // px from camera to cm
 	double radius; // radius of black circle (px)
 	Vector2D adjustmentVec;
-	ShootController* page;
+    ShootController page;
 	bool audio_triggered = false;
 	int sn = 0;
 	cv::SimpleBlobDetector::Params params;
@@ -23,7 +22,7 @@ private:
 	SoundPressureSensor* sensor;
 	bool stopRecording = false;
 public:
-	ShootThread(cv::VideoCapture video, double radius, Vector2D adjustmentVec, ShootController* page, FILE* logFile);
+    ShootThread(cv::VideoCapture video, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile);
 	void audio_trigger();
 	void start();
 	void stop();

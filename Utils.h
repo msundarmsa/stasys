@@ -1,5 +1,7 @@
 #pragma once
 #include <cinttypes>
+#include <functional>
+class Shot;
 
 struct Vector2D {
 	double x;
@@ -33,6 +35,15 @@ struct TraceCircle {
 	uint64_t time;
 };
 
+struct ShootController {
+    std::function<void()> removePreviousCalibCircle;
+    std::function<void(bool)> clearTrace;
+    std::function<void(Shot*)> updateView;
+    std::function<void(Vector2D)> addToBeforeShotTrace;
+    std::function<void(Vector2D)> drawShotCircle;
+    std::function<void(Vector2D)> addToAfterShotTrace;
+};
+
 enum ANGLE {
 	TOP,
 	TOP_RIGHT,
@@ -61,3 +72,5 @@ enum ANGLE {
 
 #define TRIGGER_DB 65.0
 #define SILENCE_DURATION 5
+
+#define FPS 120

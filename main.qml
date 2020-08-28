@@ -24,31 +24,6 @@ Window {
         source: "ui/sounds/done.wav"
     }
 
-    function addToBeforeShotTrace(x, y) {
-        targetTrace.addToBeforeShotTrace(x, y);
-    }
-
-    function addToAfterShotTrace(x, y) {
-        targetTrace.addToAfterShotTrace(x, y);
-    }
-
-    function drawShotCircle(x, y) {
-        targetTrace.drawShotCircle(x, y);
-    }
-
-    function resetTrace(resetGroupIfNecessary) {
-        targetTrace.resetTrace(resetGroupIfNecessary);
-    }
-
-    function addShotStats(x, y, score, stab, desc, aim) {
-        stabilityLbl.setStab(stab);
-        descLbl.setDesc(desc);
-        aimLbl.setAim(aim);
-
-        shotLogList.model.append({score: score, stab: stab, desc: desc, aim: aim});
-        shotGroupList.addShot(x, y);
-    }
-
     QMLCppBridge {
         id: qmlCppBridge
         onCalibrationCompleted: {
@@ -59,6 +34,36 @@ Window {
             } else {
                 toast.show("Calibration could not complete. Please try again");
             }
+        }
+
+        onUiRemovePreviousCalibCircle: {
+            // TODO: Implement when adding fine calibration
+        }
+
+        onUiClearTrace: {
+            console.log("onUiClearTrace called");
+            targetTrace.resetTrace(resetGroupIfNecessary);
+        }
+
+        onUiUpdateView: {
+            stabilityLbl.setStab(stab);
+            descLbl.setDesc(desc);
+            aimLbl.setAim(aim);
+
+            shotLogList.model.append({score: score, stab: stab, desc: desc, aim: aim});
+            shotGroupList.addShot(x, y);
+        }
+
+        onUiAddToBeforeShotTrace: {
+            targetTrace.addToBeforeShotTrace(x, y);
+        }
+
+        onUiDrawShotCircle: {
+            targetTrace.drawShotCircle(x, y);
+        }
+
+        onUiAddToAfterShotTrace: {
+            targetTrace.addToAfterShotTrace(x, y);
         }
     }
 
@@ -252,8 +257,10 @@ Window {
                         }
 
                         onPaint: {
+                            let ctx = getContext("2d");
+                            ctx.reset();
+
                             if (beforeShotTrace.length > 0) {
-                                let ctx = getContext("2d");
                                 ctx.strokeStyle = "#8ddf46";
                                 ctx.lineWidth = 2;
 
@@ -264,7 +271,9 @@ Window {
                                     // TODO: change this to bezier curve or some other interpolation
                                 }
                                 ctx.stroke();
+                            }
 
+                            if (afterShotTrace.length > 0) {
                                 ctx.strokeStyle = "#df6f46";
                                 ctx.lineWidth = 2;
                                 ctx.beginPath();
@@ -274,17 +283,16 @@ Window {
                                     // TODO: change this to bezier curve or some other interpolation
                                 }
                                 ctx.stroke();
+                            }
 
-                                ctx.strokeStyle = "#ffffff";
-                                ctx.lineWidth = 3;
-                                ctx.fillStyle = "#04bfbf";
-
-                                for (let i = 0; i < shotPoints.length; i++) {
-                                    ctx.beginPath();
-                                    ctx.ellipse(shotPoints[i]["x"] - radius, shotPoints[i]["y"] - radius, 2 * radius, 2 * radius);
-                                    ctx.stroke();
-                                    ctx.fill();
-                                }
+                            ctx.strokeStyle = "#ffffff";
+                            ctx.lineWidth = 3;
+                            ctx.fillStyle = "#04bfbf";
+                            for (let i = 0; i < shotPoints.length; i++) {
+                                ctx.beginPath();
+                                ctx.ellipse(shotPoints[i]["x"] - radius, shotPoints[i]["y"] - radius, 2 * radius, 2 * radius);
+                                ctx.stroke();
+                                ctx.fill();
                             }
                         }
                     }
@@ -793,7 +801,7 @@ Window {
                         name: "X-T"
                         axisX: xAxis
                         axisY: yAxis
-                        XYPoint { x: -0.5; y: 3.3 }
+                        /*XYPoint { x: -0.5; y: 3.3 }
                         XYPoint { x: -0.4; y: 4.9 }
                         XYPoint { x: -0.3; y: 2.1 }
                         XYPoint { x: -0.2; y: 3.3 }
@@ -803,14 +811,14 @@ Window {
                         XYPoint { x: 0.2; y: 3.3 }
                         XYPoint { x: 0.3; y: 2.1 }
                         XYPoint { x: 0.4; y: 4.9 }
-                        XYPoint { x: 0.5; y: 3.3 }
+                        XYPoint { x: 0.5; y: 3.3 }*/
                     }
 
                     LineSeries {
                         name: "Y-T"
                         axisX: xAxis
                         axisY: yAxis
-                        XYPoint { x: -0.5; y: 4.9 }
+                        /*XYPoint { x: -0.5; y: 4.9 }
                         XYPoint { x: -0.4; y: 2.1 }
                         XYPoint { x: -0.3; y: 3.3 }
                         XYPoint { x: -0.2; y: 2.1 }
@@ -820,7 +828,7 @@ Window {
                         XYPoint { x: 0.2; y: 2.1 }
                         XYPoint { x: 0.3; y: 3.3 }
                         XYPoint { x: 0.4; y: 2.1 }
-                        XYPoint { x: 0.5; y: 4.9 }
+                        XYPoint { x: 0.5; y: 4.9 }*/
                     }
                 }
             }

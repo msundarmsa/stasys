@@ -2,7 +2,6 @@
 #include <opencv2/opencv.hpp>
 #include "CalibrationThread.h"
 #include "ShootThread.h"
-#include "ShootController.h"
 #include "Utils.h"
 #include <string>
 #include <cstdlib>
@@ -11,42 +10,35 @@
 using namespace cv;
 using namespace std;
 
-class DummyController : public ShootController {
-	public:
-		DummyController(){
-			// DUMMY INITIALIZER
-		}
+void removePreviousCalibCircle() {
+	// DUMMY METHOD
+}
 
-		void removePreviousCalibCircle() {
-			// DUMMY METHOD
-		}
+void clearTrace(bool b) {
+	// DUMMY METHOD
+}
 
-		void clearTrace(bool b) {
-			// DUMMY METHOD
-		}
+void updateView(Shot *shot) {
+	cout << "Shot Stats: " << endl;
+	cout << "Score: " << shot->getScore() << endl;
+	cout << "Angle: " << shot->getAngle() << endl;
+	cout << "Stab: " << shot->getStab() << endl;
+	cout << "Desc: " << shot->getDesc() << endl;
+	cout << "Aim: " << shot->getAim() << endl;
+	// cout << "ShotPoint: " << shot->getShotPoint() << endl;
+}
 
-		void updateView(Shot *shot) {
-			cout << "Shot Stats: " << endl;
-			cout << "Score: " << shot->getScore() << endl;
-			cout << "Angle: " << shot->getAngle() << endl;
-			cout << "Stab: " << shot->getStab() << endl;
-			cout << "Desc: " << shot->getDesc() << endl;
-			cout << "Aim: " << shot->getAim() << endl;
-			// cout << "ShotPoint: " << shot->getShotPoint() << endl;
-		}
+void addToBeforeShotTrace(Vector2D tracePoint) {
+	// DUMMY METHOD
+}
 
-		void addToBeforeShotTrace(Vector2D tracePoint) {
-			// DUMMY METHOD
-		}
+void addToAfterShotTrace(Vector2D tracePoint) {
+	// DUMMY METHOD
+}
 
-		void addToAfterShotTrace(Vector2D tracePoint) {
-			// DUMMY METHOD
-		}
-
-		void drawShotCircle(Vector2D shotPoint) {
-			// DUMMY METHOD
-		}
-};
+void drawShotCircle(Vector2D shotPoint) {
+	// DUMMY METHOD
+}
 
 void calibrationFinished(bool success, double vecX, double vecY,
 		double radius, int frameWidth, int frameHeight) {
@@ -179,8 +171,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	DummyController controller;
-
+	ShootController controller = { removePreviousCalibCircle, clearTrace, updateView, addToBeforeShotTrace, drawShotCircle, addToAfterShotTrace };
 	if (cflag) {
 		CalibrationThread thread(cap, calibrationFinished, log_file);
 		cout << "Processing started..." << endl;
@@ -188,7 +179,7 @@ int main(int argc, char *argv[]) {
 		thread.join();
 		cout << "Processing ended!" << endl;
 	} else {
-		ShootThread thread(cap, radius, adjustmentVec, &controller, log_file);
+		ShootThread thread(cap, radius, adjustmentVec, controller, log_file);
 		cout << "Processing started..." << endl;
 		thread.start();
 		thread.join();

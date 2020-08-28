@@ -212,8 +212,8 @@ class CalibrationThread : public RecordThread {
 
 					if (avgCircle.radius != -1.0) {
 						// a valid average was produced
-						vecX = frameWidth / 2 - avgCircle.center.x;
-						vecY = frameHeight / 2 - avgCircle.center.y;
+                        vecX = avgCircle.center.x;
+                        vecY = avgCircle.center.y;
 
 						// release video, and break
 						video.release();
@@ -223,7 +223,7 @@ class CalibrationThread : public RecordThread {
 					}
 				}
 
-				frameId++;
+                frameId++;
 			}
 
 			// callback result
