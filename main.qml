@@ -30,9 +30,9 @@ Window {
             calibrationDoneSound.play();
             calibrateBtn.text = "CALIBRATE";
             if (success) {
-                toast.show("Calibration finished successfully!");
+                toast.show("Calibration finished successfully!", 3000);
             } else {
-                toast.show("Calibration could not complete. Please try again");
+                toast.show("Calibration could not complete. Please try again", 3000);
             }
         }
 

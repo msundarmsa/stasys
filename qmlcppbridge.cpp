@@ -12,7 +12,6 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 
 void QMLCppBridge::calibrationClicked()
 {
-    qDebug() << "Calibration Clicked";
     auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4, _5, _6);
     cv::VideoCapture cap("/Users/msundarmsa/stasys/5x calibration.mp4");
     CalibrationThread *thread = new CalibrationThread(cap, calibrationFinishedPtr, stdout);
@@ -21,7 +20,6 @@ void QMLCppBridge::calibrationClicked()
 
 void QMLCppBridge::shootClicked()
 {
-    qDebug() << "Shoot Clicked";
     cv::VideoCapture cap("/Users/msundarmsa/stasys/10x shots.mp4");
 
     auto removePreviousCalibCirclePtr = std::bind(&QMLCppBridge::removePreviousCalibCircle, this);
