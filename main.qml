@@ -41,7 +41,6 @@ Window {
         }
 
         onUiClearTrace: {
-            console.log("onUiClearTrace called");
             targetTrace.resetTrace(resetGroupIfNecessary);
         }
 
@@ -52,6 +51,8 @@ Window {
 
             shotLogList.model.append({score: score, stab: stab, desc: desc, aim: aim});
             shotGroupList.addShot(x, y);
+
+            xtYtChart.updateXtYt(xt, yt, ts);
         }
 
         onUiAddToBeforeShotTrace: {
@@ -777,6 +778,7 @@ Window {
                 color: "transparent"
 
                 ChartView {
+                    id: xtYtChart
                     title: ""
                     x: -12
                     y: -12
@@ -784,6 +786,17 @@ Window {
                     width: parent.width + 24
                     anchors.margins: 0
                     antialiasing: true
+
+                    function updateXtYt(xt, yt, ts) {
+                        this.removeAllSeries();
+                        var xtSeries = this.createSeries(ChartView.SeriesTypeLine, "X-T", xAxis, yAxis);
+                        var ytSeries = this.createSeries(ChartView.SeriesTypeLine, "Y-T", xAxis, yAxis);
+
+                        for (let i = 0; i < ts.length; i++) {
+                            xtSeries.append(ts[i], xt[i]);
+                            ytSeries.append(ts[i], yt[i]);
+                        }
+                    }
 
                     ValueAxis {
                         id: xAxis
@@ -793,42 +806,20 @@ Window {
 
                     ValueAxis {
                         id: yAxis
-                        min: -2.975
-                        max: 2.975
+                        min: -29.75
+                        max: 29.75
                     }
 
                     LineSeries {
                         name: "X-T"
                         axisX: xAxis
                         axisY: yAxis
-                        /*XYPoint { x: -0.5; y: 3.3 }
-                        XYPoint { x: -0.4; y: 4.9 }
-                        XYPoint { x: -0.3; y: 2.1 }
-                        XYPoint { x: -0.2; y: 3.3 }
-                        XYPoint { x: -0.1; y: 2.1 }
-                        XYPoint { x: 0; y: 0 }
-                        XYPoint { x: 0.1; y: 2.1 }
-                        XYPoint { x: 0.2; y: 3.3 }
-                        XYPoint { x: 0.3; y: 2.1 }
-                        XYPoint { x: 0.4; y: 4.9 }
-                        XYPoint { x: 0.5; y: 3.3 }*/
                     }
 
                     LineSeries {
                         name: "Y-T"
                         axisX: xAxis
                         axisY: yAxis
-                        /*XYPoint { x: -0.5; y: 4.9 }
-                        XYPoint { x: -0.4; y: 2.1 }
-                        XYPoint { x: -0.3; y: 3.3 }
-                        XYPoint { x: -0.2; y: 2.1 }
-                        XYPoint { x: -0.1; y: 1.5 }
-                        XYPoint { x: 0; y: 0 }
-                        XYPoint { x: 0.1; y: 1.5 }
-                        XYPoint { x: 0.2; y: 2.1 }
-                        XYPoint { x: 0.3; y: 3.3 }
-                        XYPoint { x: 0.4; y: 2.1 }
-                        XYPoint { x: 0.5; y: 4.9 }*/
                     }
                 }
             }

@@ -62,7 +62,37 @@ void QMLCppBridge::updateView(Shot* shot) {
     double desc = shot->getDesc();
     double aim = shot->getAim();
 
-    emit uiUpdateView(center.x, center.y, score, stab, desc, aim);
+    ShotTrace shotTrace = shot->getShotTrace();
+    std::vector<TracePoint> beforeTrace = shotTrace.getBeforeShotTrace();
+    TracePoint shotPoint = shotTrace.getShotPoint();
+    std::vector<TracePoint> afterTrace = shotTrace.getAfterShotTrace();
+
+    int frames = 0.5 * FPS;
+    QList<double> xtList = {};
+    QList<double> ytList = {};
+    QList<double> tList = {};
+    for (int i = frames; i >= 1; i--) {
+        int pos = beforeTrace.size() - i;
+        xtList.append(beforeTrace[pos].point.x);
+        ytList.append(beforeTrace[pos].point.y);
+        tList.append(-(double)i / (double)FPS);
+    }
+
+    xtList.append(shotPoint.point.x);
+    ytList.append(shotPoint.point.y);
+    tList.append(0);
+
+    for (int i = 0; i < frames; i++) {
+        xtList.append(afterTrace[i].point.x);
+        ytList.append(afterTrace[i].point.y);
+        tList.append((double)(i + 1) / (double)FPS);
+    }
+
+    QVariant xt = QVariant::fromValue(xtList);
+    QVariant yt = QVariant::fromValue(ytList);
+    QVariant ts = QVariant::fromValue(tList);
+
+    emit uiUpdateView(center.x, center.y, score, stab, desc, aim, xt, yt, ts);
 }
 
 void QMLCppBridge::addToBeforeShotTrace(Vector2D center) {

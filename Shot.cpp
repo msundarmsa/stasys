@@ -83,6 +83,11 @@ int Shot::getSn()
 	return sn;
 }
 
+ShotTrace Shot::getShotTrace()
+{
+    return shotTrace;
+}
+
 TracePoint Shot::getShotPoint()
 {
 	return shotTrace.getShotPoint();

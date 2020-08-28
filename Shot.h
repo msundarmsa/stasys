@@ -33,7 +33,8 @@ public:
 	double getAim();
 	int getSn();
 	TracePoint getShotPoint();
-	void clearShot();
+    ShotTrace getShotTrace();
+    void clearShot();
 
 private:
 	void calcStabDescAim();

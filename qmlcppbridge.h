@@ -29,7 +29,7 @@ signals:
     void calibrationCompleted(bool success);
     void uiRemovePreviousCalibCircle();
     void uiClearTrace(bool resetGroupIfNecessary);
-    void uiUpdateView(double x, double y, double score, double stab, double desc, double aim);
+    void uiUpdateView(double x, double y, double score, double stab, double desc, double aim, QVariant xt, QVariant yt, QVariant ts);
     void uiAddToBeforeShotTrace(double x, double y);
     void uiDrawShotCircle(double x, double y);
     void uiAddToAfterShotTrace(double x, double y);
