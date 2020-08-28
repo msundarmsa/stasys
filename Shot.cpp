@@ -107,9 +107,9 @@ void Shot::clearShot()
 
 void Shot::calcStabDescAim()
 {
-	int entered9RingIdx = -1;
-	double entered9RingTime = -1;
-	int num9Ring = 0;
+    int entered10RingIdx = -1;
+    double entered10RingTime = -1;
+    int num10Ring = 0;
 	std::vector<TracePoint> beforeShotTrace = shotTrace.getBeforeShotTrace();
 	double firstFrameTime = beforeShotTrace.at(0).time;
 	double lastFrameTime = beforeShotTrace.at(beforeShotTrace.size() - 1).time;
@@ -119,24 +119,24 @@ void Shot::calcStabDescAim()
 		TracePoint currTP = beforeShotTrace.at(i);
 		double currDist = D2P(currTP.point, TARGET_CENTER_PT);
 
-		if (currDist <= 16.0)
+        if (currDist <= 8.0)
 		{
-			if (entered9RingIdx == -1)
+            if (entered10RingIdx == -1)
 			{
-				entered9RingIdx = i;
-				entered9RingTime = currTP.time;
+                entered10RingIdx = i;
+                entered10RingTime = currTP.time;
 			}
 
-			num9Ring++;
+            num10Ring++;
 		}
 	}
 
-	if (entered9RingIdx != -1)
+    if (entered10RingIdx != -1)
 	{
-		double total9Ring = beforeShotTrace.size() - entered9RingIdx + 1.0;
-		stab = round((num9Ring / (total9Ring)) * 100.0);
-		desc = round(entered9RingTime - firstFrameTime);
-		aim = round(lastFrameTime - entered9RingTime);
+        double total10Ring = beforeShotTrace.size() - entered10RingIdx + 1.0;
+        stab = round((num10Ring / (total10Ring)) * 100.0);
+        desc = round(entered10RingTime - firstFrameTime);
+        aim = round(lastFrameTime - entered10RingTime);
 	}
 	else
 	{
