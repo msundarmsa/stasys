@@ -9,13 +9,13 @@ class CalibrationThread : public RecordThread {
 	private:
 		cv::VideoCapture video;
 		std::vector<TraceCircle> currentTrace;
-        std::function<void(bool, double, double, double, int, int)> calibrationFinished;
+        std::function<void(bool, double, double, double)> calibrationFinished;
 		cv::SimpleBlobDetector::Params params;
 		cv::Ptr<cv::SimpleBlobDetector> detector;
 		bool stopRecording = false;
 		FILE *logFile;
 	public:
-        CalibrationThread(cv::VideoCapture video, std::function<void(bool, double, double, double, int, int)> calibrationFinished, FILE* logFile) {
+        CalibrationThread(cv::VideoCapture video, std::function<void(bool, double, double, double)> calibrationFinished, FILE* logFile) {
 			this->video = video;
             this->calibrationFinished = calibrationFinished;
 			this->logFile = logFile;
@@ -112,10 +112,6 @@ class CalibrationThread : public RecordThread {
 				Vector2D avg = averages[0] + averages[1] + averages[2];
 				avg = { avg.x / 3, avg.y / 3 };
 
-				double dist1 = D2P(averages[0], avg);
-				double dist2 = D2P(averages[1], avg);
-				double dist3 = D2P(averages[2], avg);
-
 				if (D2P(averages[0], avg) < avgRadius &&
 						D2P(averages[1], avg) < avgRadius &&
 						D2P(averages[2], avg) < avgRadius) {
@@ -138,8 +134,6 @@ class CalibrationThread : public RecordThread {
 			avgCircle.radius = -1;
 
 			int frameId = 0;
-			int frameWidth;
-			int frameHeight;
 
 			double vecX = 0.0;
 			double vecY = 0.0;
@@ -154,8 +148,6 @@ class CalibrationThread : public RecordThread {
 
 				if (frameId == 0) {
 					lStartTime = SystemClock::getCurrentTimeMillis();
-					frameHeight = frame.rows;
-					frameWidth = frame.cols;
 				}
 
 				if (frame.empty()) {
@@ -227,6 +219,6 @@ class CalibrationThread : public RecordThread {
 			}
 
 			// callback result
-            this->calibrationFinished(success, vecX, vecY, avgCircle.radius, frameHeight, frameWidth);
+            this->calibrationFinished(success, vecX, vecY, avgCircle.radius);
 		}
 };

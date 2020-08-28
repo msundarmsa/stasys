@@ -73,9 +73,7 @@ void ShootThread::run() {
     uint64_t lShotStartTime = 0;
 	uint64_t lLastCircleDetectedFrameTime = 0;
 
-	int frameid = 0;
-    int frameWidth = 0;
-    int frameHeight = 0;
+    int frameid = 0;
 
     bool shotStarted = false;
 		
@@ -118,8 +116,6 @@ void ShootThread::run() {
 
 		if (frameid == 0) {
             lStartTime = SystemClock::getCurrentTimeMillis();
-            frameHeight = frame.rows;
-            frameWidth = frame.cols;
         }
         
         if (testTriggerIndex < 10 && frameid == testTriggers[testTriggerIndex]) {

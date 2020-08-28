@@ -12,7 +12,7 @@ class QMLCppBridge : public QObject
     Q_OBJECT
 public:
     explicit QMLCppBridge(QObject *parent = nullptr);
-    void calibrationFinished(bool success, double x, double y, double radius, int frameWidth, int frameHeight);
+    void calibrationFinished(bool success, double x, double y, double radius);
     void removePreviousCalibCircle();
     void clearTrace(bool resetGroupIfNecessary);
     void updateView(Shot* shot);

@@ -15,7 +15,7 @@ void QMLCppBridge::calibrationClicked()
     if (calibThread == NULL && shootThread == NULL) {
         cv::VideoCapture cap("/Users/msundarmsa/stasys/5x calibration.mp4");
 
-        auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4, _5, _6);
+        auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
         calibThread = new CalibrationThread(cap, calibrationFinishedPtr, stdout);
         calibThread->start();
         emit uiCalibrationStarted();
@@ -57,7 +57,7 @@ void QMLCppBridge::shootClicked()
     }
 }
 
-void QMLCppBridge::calibrationFinished(bool success, double x, double y, double radius, int frameWidth, int frameHeight) {
+void QMLCppBridge::calibrationFinished(bool success, double x, double y, double radius) {
     calibThread = NULL;
     adjustmentVec = {x, y};
     this->radius = radius;
