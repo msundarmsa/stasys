@@ -6,6 +6,7 @@ import QtQuick.Controls.Styles 1.4
 import QtCharts 2.3
 import Qt.labs.qmlmodels 1.0
 import QtMultimedia 5.12
+import QtQuick.Dialogs 1.2
 
 import com.mrmmsmsa 1.0
 
@@ -22,6 +23,17 @@ Window {
     SoundEffect {
         id: calibrationDoneSound
         source: "ui/sounds/done.wav"
+    }
+
+
+    Dialog {
+        id: settingsDialog
+        title: "Settings"
+        standardButtons: StandardButton.Ok | StandardButton.Cancel
+
+        Text {
+            text: "Hello there"
+        }
     }
 
     QMLCppBridge {
@@ -114,6 +126,36 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: logo.right
             anchors.leftMargin: 10
+        }
+
+        Image {
+            id: settingsBtn
+            width: 20
+            height: 20
+            fillMode: Image.PreserveAspectFit
+            source: "ui/images/settings.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: divider0.right
+            anchors.rightMargin: 20
+
+            MouseArea {
+                width: parent.width
+                height: parent.height
+
+                onClicked: {
+                    settingsDialog.open();
+                }
+            }
+        }
+
+        Rectangle {
+            id: divider0
+            color: "white"
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: calibrateBtn.left
+            anchors.rightMargin: 20
+            width: 2
+            height: parent.height - 30
         }
 
         Text {

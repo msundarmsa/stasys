@@ -15,5 +15,6 @@
         <file>ToastManager.qml</file>
         <file>Toast.qml</file>
         <file>ui/sounds/done.wav</file>
+        <file>ui/images/settings.svg</file>
     </qresource>
 </RCC>
