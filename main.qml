@@ -789,8 +789,8 @@ Window {
 
                     function updateXtYt(xt, yt, ts) {
                         this.removeAllSeries();
-                        var xtSeries = this.createSeries(ChartView.SeriesTypeLine, "X-T", xAxis, yAxis);
-                        var ytSeries = this.createSeries(ChartView.SeriesTypeLine, "Y-T", xAxis, yAxis);
+                        var xtSeries = this.createSeries(ChartView.SeriesTypeLine, "X", xAxis, yAxis);
+                        var ytSeries = this.createSeries(ChartView.SeriesTypeLine, "Y", xAxis, yAxis);
 
                         for (let i = 0; i < ts.length; i++) {
                             xtSeries.append(ts[i], xt[i]);
@@ -811,13 +811,13 @@ Window {
                     }
 
                     LineSeries {
-                        name: "X-T"
+                        name: "X"
                         axisX: xAxis
                         axisY: yAxis
                     }
 
                     LineSeries {
-                        name: "Y-T"
+                        name: "Y"
                         axisX: xAxis
                         axisY: yAxis
                     }
