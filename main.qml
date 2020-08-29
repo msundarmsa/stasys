@@ -47,7 +47,7 @@ Window {
             qmlCppBridge.settingsClosed();
         }
 
-        Rectangle {
+        ColumnLayout {
             width: parent.width
             height: parent.height
             RowLayout {
@@ -69,11 +69,10 @@ Window {
             }
 
             ChartView {
-                anchors.top: micSelectRect.bottom
                 id: micChart
                 title: ""
-                height: 300
-                width: parent.width
+                Layout.preferredWidth: parent.width
+                Layout.preferredHeight: 300
                 antialiasing: true
                 property var dBs: []
                 property var dBSeries: null
@@ -127,7 +126,6 @@ Window {
             }
 
             RowLayout {
-                anchors.top: micChart.bottom
                 id: thresholdRect
                 width: parent.width
                 Text {
@@ -150,7 +148,6 @@ Window {
             }
 
             RowLayout {
-                anchors.top: thresholdRect.bottom
                 id: cameraSelectRect
                 width: parent.width
                 Text {
