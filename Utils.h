@@ -68,9 +68,9 @@ enum ANGLE {
 #define TARGET_CENTER (TARGET_SIZE / 2) 
 #define TARGET_CENTER_PT Vector2D{ 0.0, 0.0 }
 
-#define CAMERA_INDEX 2
+static int CAMERA_INDEX = 1;
 
-#define TRIGGER_DB 65.0
+static float TRIGGER_DB = 65.0;
 #define SILENCE_DURATION 5
 
 #define FPS 120

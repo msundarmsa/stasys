@@ -1,13 +1,69 @@
 #include "qmlcppbridge.h"
-#include "ShootThread.h"
-#include "CalibrationThread.h"
 #include <opencv2/opencv.hpp>
+#include <SFML/Audio.hpp>
+#include <QCameraInfo>
 
 using namespace std::placeholders;
 
 QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
+    std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
+    currentMic = availableDevices[0];
+}
 
+void QMLCppBridge::settingsOpened()
+{
+    std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
+    QStringList micOptions = {QString::fromStdString(currentMic)};
+    for (int i = 0; i < availableDevices.size(); i++) {
+        if (availableDevices[i] != currentMic) {
+            micOptions.append(QString::fromStdString(availableDevices[i]));
+        }
+    }
+
+    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    QStringList cameraOptions = {cameras[CAMERA_INDEX].description()};
+    for (int i = 0; i < cameras.size(); i++){
+        if (i != CAMERA_INDEX) {
+            cameraOptions.append(cameras[i].description());
+        }
+    }
+
+    auto updateSamplesPtr = std::bind(&QMLCppBridge::updateSamples, this, _1);
+    micThread = new MicThread(updateSamplesPtr);
+    micThread->setDevice(availableDevices[0]);
+    micThread->start();
+    emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX);
+}
+
+void QMLCppBridge::settingsClosed()
+{
+    micThread->stop();
+    delete micThread;
+    micThread = NULL;
+}
+
+void QMLCppBridge::updateSamples(float dB)
+{
+    emit uiUpdateSamples(dB);
+}
+
+void QMLCppBridge::micChanged(QString newMic)
+{
+    currentMic = newMic.toStdString();
+    micThread->stop();
+    micThread->setDevice(currentMic);
+    micThread->start();
+}
+
+void QMLCppBridge::micThresholdChanged(float newThreshold)
+{
+    TRIGGER_DB = newThreshold;
+}
+
+void QMLCppBridge::cameraChanged(int camera)
+{
+    CAMERA_INDEX = camera;
 }
 
 void QMLCppBridge::calibrationClicked()
@@ -40,12 +96,7 @@ void QMLCppBridge::shootClicked()
         auto addToAfterShotTracePtr = std::bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
-        /*if (radius == 0) {
-            radius = 18.469;
-            adjustmentVec = {388.951, 324.785};
-        }*/
-
-        shootThread = new ShootThread(cap, radius, adjustmentVec, controller, stdout);
+        shootThread = new ShootThread(cap, currentMic, radius, adjustmentVec, controller, stdout);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {

@@ -22,7 +22,7 @@ private:
 	SoundPressureSensor* sensor;
 	bool stopRecording = false;
 public:
-    ShootThread(cv::VideoCapture video, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile);
+    ShootThread(cv::VideoCapture video, std::string mic, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile);
 	void audio_trigger();
 	void start();
 	void stop();

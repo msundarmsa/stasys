@@ -2,7 +2,7 @@
 #include "SoundPressureSensor.cpp"
 #include "ShotTrace.h"
 
-ShootThread::ShootThread(cv::VideoCapture video, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile) {
+ShootThread::ShootThread(cv::VideoCapture video, std::string mic, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile) {
 	this->video = video;
 	this->page = page;
 	this->radius = radius;
@@ -24,7 +24,11 @@ ShootThread::ShootThread(cv::VideoCapture video, double radius, Vector2D adjustm
 
 	detector = cv::SimpleBlobDetector::create(params);
         
-    //sensor = new SoundPressureSensor(this);
+    sensor = new SoundPressureSensor(this);
+    if (!sensor->setDevice(mic))
+    {
+        fprintf(logFile, "No Audio Input Device!\n");
+    }
 }
 
 TargetCircle ShootThread::findCircle(cv::Mat frame)
@@ -82,12 +86,9 @@ void ShootThread::run() {
 
     page.removePreviousCalibCircle();
 
-    /*if (!sensor->setDevice(sf::SoundRecorder::getAvailableDevices()[0]))
-    {
-        wxLogMessage("Cannot start audio recording!");
-        return NULL;
+    if (sensor->getDevice() != "") {
+        sensor->start();
     }
-    sensor->start();*/
 
     int testTriggers[10] = {
         1501,
@@ -256,7 +257,9 @@ void ShootThread::run() {
 	}
     
     stopRecording = true;
-    //sensor->stop();
+    if (sensor->getDevice() != "") {
+        sensor->stop();
+    }
 }
 
 void ShootThread::stop()

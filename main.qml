@@ -7,10 +7,12 @@ import QtCharts 2.3
 import Qt.labs.qmlmodels 1.0
 import QtMultimedia 5.12
 import QtQuick.Dialogs 1.2
+import QtQuick.Layouts 1.12
 
 import com.mrmmsmsa 1.0
 
 Window {
+    id: window
     visible: true
     flags: Qt.FramelessWindowHint | Qt.Window
     title: qsTr("STASYS")
@@ -26,13 +28,147 @@ Window {
     }
 
 
-    Dialog {
+    Popup {
         id: settingsDialog
-        title: "Settings"
-        standardButtons: StandardButton.Ok | StandardButton.Cancel
+        x: (window.width - width) / 2
+        y: (window.height - height) / 2
+        height: 500
+        width: 500
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        property var micOptions: []
+        property var defaultMic: ""
+        property var cameraOptions: []
+        property var defaultCamera: 0
 
-        Text {
-            text: "Hello there"
+        onClosed: {
+            micChart.reset();
+            qmlCppBridge.settingsClosed();
+        }
+
+        Rectangle {
+            width: parent.width
+            height: parent.height
+            RowLayout {
+                id: micSelectRect
+                width: parent.width
+                Text {
+                    id: micText
+                    text: "Microphone: "
+                }
+
+                ComboBox {
+                    id: micSelect
+                    Layout.fillWidth: true
+                    model: settingsDialog.micOptions
+                    onCurrentValueChanged: {
+                        qmlCppBridge.micChanged(currentValue);
+                    }
+                }
+            }
+
+            ChartView {
+                anchors.top: micSelectRect.bottom
+                id: micChart
+                title: ""
+                height: 300
+                width: parent.width
+                antialiasing: true
+                property var dBs: []
+                property var dBSeries: null
+                property var thresholdSeries: null
+
+                function reset() {
+                    dBs = [];
+                }
+
+                function updateMicChart(dB) {
+                    if (dBSeries != null) {
+                        this.removeSeries(dBSeries);
+                    }
+
+                    if (dBs.length < 60) {
+                        dBs.push(dB);
+                    } else {
+                        dBs.push(dB);
+                        dBs.shift();
+                    }
+
+                    dBSeries = this.createSeries(ChartView.SeriesTypeLine, "dB", micChartxAxis, micChartyAxis);
+
+                    for (let i = 0; i < dBs.length; i++) {
+                        dBSeries.append(i, dBs[i]);
+                    }
+                }
+
+                function setThreshold(threshold) {
+                    if (thresholdSeries != null) {
+                        this.removeSeries(thresholdSeries);
+                    }
+
+                    thresholdSeries = this.createSeries(ChartView.SeriesTypeLine, "threshold", micChartxAxis, micChartyAxis);
+                    for (let i = 0; i < micChartxAxis.max; i++) {
+                        thresholdSeries.append(i, threshold);
+                    }
+                }
+
+                ValueAxis {
+                    id: micChartxAxis
+                    min: 0
+                    max: 60
+                }
+
+                ValueAxis {
+                    id: micChartyAxis
+                    min: 0
+                    max: 100
+                }
+            }
+
+            RowLayout {
+                anchors.top: micChart.bottom
+                id: thresholdRect
+                width: parent.width
+                Text {
+                    id: thresholdText
+                    text: "Threshold: " + thresholdSlider.value.toFixed(0);
+                }
+
+                Slider {
+                    id: thresholdSlider
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 100
+                    stepSize: 1
+
+                    onValueChanged: {
+                        micChart.setThreshold(value);
+                        qmlCppBridge.micThresholdChanged(value);
+                    }
+                }
+            }
+
+            RowLayout {
+                anchors.top: thresholdRect.bottom
+                id: cameraSelectRect
+                width: parent.width
+                Text {
+                    id: cameraText
+                    text: "Camera: "
+                }
+
+                ComboBox {
+                    id: cameraSelect
+                    Layout.fillWidth: true
+                    model: settingsDialog.cameraOptions
+                    currentIndex: settingsDialog.defaultCamera
+
+                    onCurrentIndexChanged: {
+                        qmlCppBridge.cameraChanged(currentIndex);
+                    }
+                }
+            }
         }
     }
 
@@ -95,6 +231,19 @@ Window {
         onUiAddToAfterShotTrace: {
             targetTrace.addToAfterShotTrace(x, y);
         }
+
+        onUiSettingsOpened: {
+            settingsDialog.micOptions = micOptions
+            settingsDialog.defaultMic = defaultMic
+            thresholdSlider.value = TRIGGER_DB;
+            micChart.setThreshold(TRIGGER_DB);
+            settingsDialog.cameraOptions = cameraOptions
+            settingsDialog.defaultCamera = defaultCamera
+        }
+
+        onUiUpdateSamples: {
+            micChart.updateMicChart(dB);
+        }
     }
 
     ToastManager {
@@ -143,6 +292,7 @@ Window {
                 height: parent.height
 
                 onClicked: {
+                    qmlCppBridge.settingsOpened();
                     settingsDialog.open();
                 }
             }

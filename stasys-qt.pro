@@ -31,6 +31,7 @@ SOURCES += \
         ShootThread.cpp \
         Shot.cpp \
         ShotTrace.cpp \
+        SoundPressureSensor.cpp \
         SystemClock.cpp \
         main.cpp \
         qmlcppbridge.cpp
@@ -50,6 +51,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     CalibrationThread.h \
+    MicThread.h \
     RecordThread.h \
     ShootThread.h \
     Shot.h \
