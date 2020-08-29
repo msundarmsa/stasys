@@ -66,6 +66,25 @@ void QMLCppBridge::cameraChanged(int camera)
     CAMERA_INDEX = camera;
 }
 
+void QMLCppBridge::stopRecording()
+{
+    if (calibThread != NULL) {
+        calibThread->stop();
+        emit uiCalibrationEnded(false);
+    }
+
+    if (shootThread != NULL) {
+        shootThread->stop();
+        emit uiShootingEnded();
+    }
+}
+
+void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
+{
+    fineAdjustment.x += deltaX;
+    fineAdjustment.y += deltaY;
+}
+
 void QMLCppBridge::calibrationClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
@@ -96,7 +115,7 @@ void QMLCppBridge::shootClicked()
         auto addToAfterShotTracePtr = std::bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
-        shootThread = new ShootThread(cap, currentMic, radius, adjustmentVec, controller, stdout);
+        shootThread = new ShootThread(cap, currentMic, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, stdout);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {
@@ -111,7 +130,7 @@ void QMLCppBridge::shootClicked()
 void QMLCppBridge::calibrationFinished(bool success, double x, double y, double radius) {
     calibThread = NULL;
     adjustmentVec = {x, y};
-    this->radius = radius;
+    RATIO1 = PISTOL_CIRCLE_SIZE / radius;
     emit uiCalibrationEnded(success);
 }
 

@@ -10,10 +10,12 @@ private:
     ShootThread* sThread;
     uint64_t last_trigger_time = 0;
     bool ready2Trigger = false;
+    double TRIGGER_DB = 0;
 
 public:
-    SoundPressureSensor(ShootThread* sThread) {
+    SoundPressureSensor(ShootThread* sThread, double TRIGGER_DB) {
         this->sThread = sThread;
+        this->TRIGGER_DB = TRIGGER_DB;
     }
 
 private:

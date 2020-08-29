@@ -29,16 +29,21 @@ public:
     Q_INVOKABLE void micChanged(QString mic);
     Q_INVOKABLE void micThresholdChanged(float newThreshold);
     Q_INVOKABLE void cameraChanged(int camera);
+    Q_INVOKABLE void stopRecording();
+    Q_INVOKABLE void adjustCalibration(double deltaX, double deltaY);
 
 private:
     FILE* logFile = NULL;
-    Vector2D adjustmentVec = {0, 0};
-    double radius = 0;
     CalibrationThread* calibThread = NULL;
     ShootThread* shootThread = NULL;
     MicThread *micThread = NULL;
     std::string currentMic = "";
     float micThreshold = 0.0;
+    int CAMERA_INDEX = 1;
+    float TRIGGER_DB = 65.0;
+    double RATIO1 = PISTOL_CIRCLE_SIZE / 18.0; // px from camera to mm
+    Vector2D adjustmentVec = {380, 390};
+    Vector2D fineAdjustment = {0, 0};
 
 signals:
     void uiCalibrationStarted();

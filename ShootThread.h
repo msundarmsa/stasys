@@ -11,9 +11,6 @@ class SoundPressureSensor;
 class ShootThread : public RecordThread {
 private:
 	cv::VideoCapture video;
-	double RATIO1; // px from camera to cm
-	double radius; // radius of black circle (px)
-	Vector2D adjustmentVec;
     ShootController page;
 	bool audio_triggered = false;
 	int sn = 0;
@@ -21,8 +18,12 @@ private:
 	cv::Ptr<cv::SimpleBlobDetector> detector;
 	SoundPressureSensor* sensor;
 	bool stopRecording = false;
+    float TRIGGER_DB;
+    double RATIO1; // px from camera to mm
+    Vector2D adjustmentVec;
+    Vector2D fineAdjustment;
 public:
-    ShootThread(cv::VideoCapture video, std::string mic, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile);
+    ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
 	void audio_trigger();
 	void start();
 	void stop();

@@ -27,7 +27,6 @@ Window {
         source: "ui/sounds/done.wav"
     }
 
-
     Popup {
         id: settingsDialog
         x: (window.width - width) / 2
@@ -192,6 +191,8 @@ Window {
 
         onUiShootingEnded: {
             shootBtn.text = "SHOOT";
+            targetTrace.resetTrace(false);
+            targetTrace.requestPaint();
         }
 
         onUiShowToast: {
@@ -199,7 +200,7 @@ Window {
         }
 
         onUiRemovePreviousCalibCircle: {
-            // TODO: Implement when adding fine calibration
+            targetTrace.clearCalibration();
         }
 
         onUiClearTrace: {
@@ -426,10 +427,29 @@ Window {
                         width: parent.width
                         height: parent.height
                         property var beforeShotTrace: []
-                        property var afterShotTrace: []
                         property var shotPoints: []
+                        property var afterShotTrace: []
                         property var factor: width / 170
                         property var radius: factor * 2.25
+                        property var calibrationShot: null
+                        property var calibrationPoint: {"x": -1, "y": -1}
+
+                        function clearCalibration() {
+                            calibrationShot = null;
+                            calibrationPoint = {"x": -1, "y": -1};
+                            requestPaint();
+                        }
+
+                        function calibrateShot(shot) {
+                            if (calibrationShot != null) {
+                                calibrationShot.x = calibrationPoint.x;
+                                calibrationShot.y = calibrationPoint.y;
+                            }
+
+                            calibrationShot = shot;
+                            calibrationPoint = {"x": shot.x, "y": shot.y};
+                            requestPaint();
+                        }
 
                         function transformPoint(x, y) {
                             return {x: x * factor + targetTrace.width / 2, y: targetTrace.height / 2 - y * factor};
@@ -446,8 +466,38 @@ Window {
                         }
 
                         function drawShotCircle(x, y) {
-                            shotPoints.push(transformPoint(x, y));
-                            targetTrace.requestPaint();
+                            let point = transformPoint(x, y);
+                            Qt.createQmlObject("import QtQuick 2.0;
+                                Rectangle {
+                                    id: draggableCircle
+                                    width: targetTrace.radius * 2
+                                    height: targetTrace.radius * 2
+                                    color: '#04bfbf'
+                                    border.width: 2
+                                    border.color: '#ffffff'
+                                    x: " + point.x + " - width / 2
+                                    y: " + point.y + " - height / 2
+                                    radius: targetTrace.radius
+                                    Drag.active: dragArea.drag.active
+
+                                    MouseArea {
+                                        id: dragArea
+                                        anchors.fill: parent
+                                        drag.target: parent
+
+                                        onPressed: {
+                                            qmlCppBridge.stopRecording();
+                                            targetTrace.calibrateShot(parent);
+                                        }
+
+                                        onReleased: {
+                                            let deltaX = targetTrace.calibrationShot.x - targetTrace.calibrationPoint.x;
+                                            let deltaY = targetTrace.calibrationPoint.y - targetTrace.calibrationShot.y;
+                                            qmlCppBridge.adjustCalibration(deltaX / targetTrace.factor, deltaY / targetTrace.factor);
+                                        }
+                                    }
+                            }", parent);
+                            shotPoints.push(point);
                         }
 
                         function resetTrace(resetGroupIfNecessary) {
@@ -455,7 +505,9 @@ Window {
                             afterShotTrace = [];
 
                             if (resetGroupIfNecessary && shotPoints.length == 10) {
-                                shotPoints = [];
+                                for (let point of shotPoints) {
+                                    point.destroy();
+                                }
                             }
 
                             targetTrace.requestPaint();
@@ -465,9 +517,19 @@ Window {
                             let ctx = getContext("2d");
                             ctx.reset();
 
+                            if (calibrationPoint.x != -1 && calibrationPoint.y != -1) {
+                                ctx.strokeStyle = "#04bfbf";
+                                ctx.lineWidth = 2;
+                                ctx.setLineDash([1, 1]);
+                                let width = 2 * radius + 5;
+                                ctx.ellipse(calibrationPoint.x - 2.5, calibrationPoint.y - 2.5, width, width);
+                                ctx.stroke();
+                            }
+
+                            ctx.setLineDash([]);
+                            ctx.lineWidth = 2;
                             if (beforeShotTrace.length > 0) {
                                 ctx.strokeStyle = "#8ddf46";
-                                ctx.lineWidth = 2;
 
                                 ctx.beginPath();
                                 ctx.moveTo(beforeShotTrace[0]["x"], beforeShotTrace[0]["y"]);
@@ -480,7 +542,6 @@ Window {
 
                             if (afterShotTrace.length > 0) {
                                 ctx.strokeStyle = "#df6f46";
-                                ctx.lineWidth = 2;
                                 ctx.beginPath();
                                 ctx.moveTo(afterShotTrace[0]["x"], afterShotTrace[0]["y"]);
                                 for (let i = 1; i < afterShotTrace.length; i++) {
@@ -488,16 +549,6 @@ Window {
                                     // TODO: change this to bezier curve or some other interpolation
                                 }
                                 ctx.stroke();
-                            }
-
-                            ctx.strokeStyle = "#ffffff";
-                            ctx.lineWidth = 3;
-                            ctx.fillStyle = "#04bfbf";
-                            for (let i = 0; i < shotPoints.length; i++) {
-                                ctx.beginPath();
-                                ctx.ellipse(shotPoints[i]["x"] - radius, shotPoints[i]["y"] - radius, 2 * radius, 2 * radius);
-                                ctx.stroke();
-                                ctx.fill();
                             }
                         }
                     }
@@ -811,15 +862,6 @@ Window {
                                     context.ellipse(point["x"] - radius, point["y"] - radius, 2 * radius, 2 * radius);
                                     context.stroke();
                                     context.fill();
-                                }
-
-                                MouseArea {
-                                    width: parent.width
-                                    height: parent.height
-
-                                    onClicked: {
-                                        return;
-                                    }
                                 }
                             }
 

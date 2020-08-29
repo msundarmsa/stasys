@@ -2,14 +2,14 @@
 #include "SoundPressureSensor.cpp"
 #include "ShotTrace.h"
 
-ShootThread::ShootThread(cv::VideoCapture video, std::string mic, double radius, Vector2D adjustmentVec, ShootController page, FILE* logFile) {
+ShootThread::ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
 	this->video = video;
 	this->page = page;
-	this->radius = radius;
-	this->adjustmentVec = adjustmentVec;
 	this->logFile = logFile;
-
-	RATIO1 = PISTOL_CIRCLE_SIZE / radius;
+    this->TRIGGER_DB = TRIGGER_DB;
+    this->RATIO1 = RATIO1;
+    this->adjustmentVec = adjustmentVec;
+    this->fineAdjustment = fineAdjustment;
 
     params.maxThreshold = 100;
 
@@ -24,7 +24,7 @@ ShootThread::ShootThread(cv::VideoCapture video, std::string mic, double radius,
 
 	detector = cv::SimpleBlobDetector::create(params);
         
-    sensor = new SoundPressureSensor(this);
+    sensor = new SoundPressureSensor(this, TRIGGER_DB);
     if (!sensor->setDevice(mic))
     {
         fprintf(logFile, "No Audio Input Device!\n");
@@ -81,8 +81,9 @@ void ShootThread::run() {
 
     bool shotStarted = false;
 		
-	fprintf(logFile, "Radius (px) %.3f\n", radius);
-	fprintf(logFile, "Adjustment Vec: (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
+    fprintf(logFile, "RATIO1 (mm / px) %.3f\n", RATIO1);
+    fprintf(logFile, "Adjustment Vec (px, px): (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
+    fprintf(logFile, "Fine Adjustment Vec (mm, mm): (%.3f, %.3f)\n", fineAdjustment.x, fineAdjustment.y);
 
     page.removePreviousCalibCircle();
 
@@ -184,8 +185,8 @@ void ShootThread::run() {
         fprintf(logFile, "\t[%s]", (shotStarted ? "true" : "false"));
         if (circle.radius != -1) {
             // aim i.e. black circle was found
-            double xShift = (roi.width / 2 - round(circle.center.x)) * RATIO1;
-            double yShift = -(roi.height / 2 - round(circle.center.y)) * RATIO1;
+            double xShift = (roi.width / 2 - round(circle.center.x)) * RATIO1 + fineAdjustment.x;
+            double yShift = -(roi.height / 2 - round(circle.center.y)) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
             fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
 
