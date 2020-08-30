@@ -28,6 +28,7 @@ ShootThread::ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_
     if (!sensor->setDevice(mic))
     {
         fprintf(logFile, "No Audio Input Device!\n");
+        sensor = NULL;
     }
 }
 
@@ -87,7 +88,7 @@ void ShootThread::run() {
 
     page.removePreviousCalibCircle();
 
-    if (sensor->getDevice() != "") {
+    if (sensor != NULL) {
         sensor->start();
     }
 
@@ -120,7 +121,7 @@ void ShootThread::run() {
             lStartTime = SystemClock::getCurrentTimeMillis();
         }
         
-        if (testTriggerIndex < 10 && frameid == testTriggers[testTriggerIndex]) {
+        if (sensor == NULL && testTriggerIndex < 10 && frameid == testTriggers[testTriggerIndex]) {
             audio_triggered = true;
             testTriggerIndex++;
         }
@@ -258,7 +259,7 @@ void ShootThread::run() {
 	}
     
     stopRecording = true;
-    if (sensor->getDevice() != "") {
+    if (sensor != NULL) {
         sensor->stop();
     }
 }

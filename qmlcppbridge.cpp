@@ -88,7 +88,8 @@ void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
 void QMLCppBridge::calibrationClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
-        cv::VideoCapture cap("/Users/msundarmsa/stasys/5x calibration.mp4");
+        //cv::VideoCapture cap("/Users/msundarmsa/stasys/5x calibration.mp4");
+        cv::VideoCapture cap(CAMERA_INDEX);
 
         auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
         calibThread = new CalibrationThread(cap, calibrationFinishedPtr, stdout);
@@ -105,7 +106,8 @@ void QMLCppBridge::calibrationClicked()
 void QMLCppBridge::shootClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
-        cv::VideoCapture cap("/Users/msundarmsa/stasys/10x shots.mp4");
+        //cv::VideoCapture cap("/Users/msundarmsa/stasys/10x shots.mp4");
+        cv::VideoCapture cap(CAMERA_INDEX);
 
         auto removePreviousCalibCirclePtr = std::bind(&QMLCppBridge::removePreviousCalibCircle, this);
         auto clearTracePtr = std::bind(&QMLCppBridge::clearTrace, this, _1);
