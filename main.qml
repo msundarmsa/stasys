@@ -423,6 +423,47 @@ Window {
                     }
 
                     Canvas {
+                        id: calibratingCircle
+                        visible: false
+                        width: targetTrace.radius * 2 + 5
+                        height: targetTrace.radius * 2 + 5
+                        x: 0
+                        y: 0
+                        z: 100
+                        Drag.active: dragArea.drag.active
+
+                        onXChanged: {
+                            targetTrace.requestPaint();
+                        }
+
+                        onYChanged: {
+                            targetTrace.requestPaint();
+                        }
+
+                        onPaint: {
+                            let ctx = getContext("2d");
+                            ctx.strokeStyle = "#04bfbf";
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([1, 1]);
+                            ctx.ellipse(0, 0, width, width);
+                            ctx.stroke();
+                        }
+
+                        MouseArea {
+                            id: dragArea
+                            anchors.fill: parent
+                            drag.target: parent
+
+                            onReleased: {
+                                let deltaX = parent.x - targetTrace.calibrationPoint.x;
+                                let deltaY = targetTrace.calibrationPoint.y - parent.y;
+                                qmlCppBridge.adjustCalibration(deltaX / targetTrace.factor, deltaY / targetTrace.factor);
+                                targetTrace.requestPaint();
+                            }
+                        }
+                    }
+
+                    Canvas {
                         id: targetTrace
                         width: parent.width
                         height: parent.height
@@ -431,23 +472,19 @@ Window {
                         property var afterShotTrace: []
                         property var factor: width / 170
                         property var radius: factor * 2.25
-                        property var calibrationShot: null
                         property var calibrationPoint: {"x": -1, "y": -1}
 
                         function clearCalibration() {
-                            calibrationShot = null;
+                            calibratingCircle.visible = false;
                             calibrationPoint = {"x": -1, "y": -1};
                             requestPaint();
                         }
 
                         function calibrateShot(shot) {
-                            if (calibrationShot != null) {
-                                calibrationShot.x = calibrationPoint.x;
-                                calibrationShot.y = calibrationPoint.y;
-                            }
-
-                            calibrationShot = shot;
-                            calibrationPoint = {"x": shot.x, "y": shot.y};
+                            calibrationPoint = {"x": shot.x - 2.5, "y": shot.y - 2.5};
+                            calibratingCircle.x = shot.x - 2.5;
+                            calibratingCircle.y = shot.y - 2.5;
+                            calibratingCircle.visible = true;
                             requestPaint();
                         }
 
@@ -467,6 +504,7 @@ Window {
 
                         function drawShotCircle(x, y) {
                             let point = transformPoint(x, y);
+                            shotPoints.push(point);
                             Qt.createQmlObject("import QtQuick 2.0;
                                 Rectangle {
                                     id: draggableCircle
@@ -478,26 +516,19 @@ Window {
                                     x: " + point.x + " - width / 2
                                     y: " + point.y + " - height / 2
                                     radius: targetTrace.radius
-                                    Drag.active: dragArea.drag.active
 
                                     MouseArea {
-                                        id: dragArea
                                         anchors.fill: parent
-                                        drag.target: parent
 
                                         onPressed: {
-                                            qmlCppBridge.stopRecording();
-                                            targetTrace.calibrateShot(parent);
-                                        }
-
-                                        onReleased: {
-                                            let deltaX = targetTrace.calibrationShot.x - targetTrace.calibrationPoint.x;
-                                            let deltaY = targetTrace.calibrationPoint.y - targetTrace.calibrationShot.y;
-                                            qmlCppBridge.adjustCalibration(deltaX / targetTrace.factor, deltaY / targetTrace.factor);
+                                            if (" + shotPoints.length + " == targetTrace.shotPoints.length) {
+                                                // only if shot clicked is the most recent shot
+                                                qmlCppBridge.stopRecording();
+                                                targetTrace.calibrateShot(parent);
+                                            }
                                         }
                                     }
-                            }", parent);
-                            shotPoints.push(point);
+                                }", parent);
                         }
 
                         function resetTrace(resetGroupIfNecessary) {
@@ -516,18 +547,20 @@ Window {
                         onPaint: {
                             let ctx = getContext("2d");
                             ctx.reset();
+                            ctx.lineWidth = 2;
 
                             if (calibrationPoint.x != -1 && calibrationPoint.y != -1) {
                                 ctx.strokeStyle = "#04bfbf";
-                                ctx.lineWidth = 2;
-                                ctx.setLineDash([1, 1]);
-                                let width = 2 * radius + 5;
-                                ctx.ellipse(calibrationPoint.x - 2.5, calibrationPoint.y - 2.5, width, width);
+                                ctx.beginPath();
+                                let pointStartX = calibrationPoint.x + 2.5 + radius;
+                                let pointStartY = calibrationPoint.y + 2.5 + radius;
+                                let pointEndX = calibratingCircle.x + calibratingCircle.width / 2;
+                                let pointEndY = calibratingCircle.y + calibratingCircle.width / 2;
+                                ctx.moveTo(pointStartX, pointStartY);
+                                ctx.lineTo(pointEndX, pointEndY);
                                 ctx.stroke();
                             }
 
-                            ctx.setLineDash([]);
-                            ctx.lineWidth = 2;
                             if (beforeShotTrace.length > 0) {
                                 ctx.strokeStyle = "#8ddf46";
 
