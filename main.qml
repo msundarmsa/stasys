@@ -381,6 +381,7 @@ Window {
                 height: parent.height
 
                 onClicked: {
+                    qmlCppBridge.closingApplication();
                     Qt.quit();
                 }
             }
@@ -413,6 +414,7 @@ Window {
                     height: width
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
+                    clip: true
 
                     Image {
                         width: parent.width

@@ -9,6 +9,18 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
     std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
     currentMic = availableDevices[0];
+    qDebug() << "Opening log file...";
+    logFile = fopen ("STASYSLog.txt" , "w");
+    if (logFile == NULL) {
+        qDebug() << "Could not open log file";
+    }
+}
+
+void QMLCppBridge::closingApplication()
+{
+    if (logFile != NULL) {
+        fclose(logFile);
+    }
 }
 
 void QMLCppBridge::settingsOpened()
@@ -88,11 +100,11 @@ void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
 void QMLCppBridge::calibrationClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
-        //cv::VideoCapture cap("/Users/msundarmsa/stasys/5x calibration.mp4");
-        cv::VideoCapture cap(CAMERA_INDEX);
+        cv::VideoCapture cap("/Users/msundarmsa/stasys/5x calibration.mp4");
+        //cv::VideoCapture cap(CAMERA_INDEX);
 
         auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
-        calibThread = new CalibrationThread(cap, calibrationFinishedPtr, stdout);
+        calibThread = new CalibrationThread(cap, calibrationFinishedPtr, logFile);
         calibThread->start();
         emit uiCalibrationStarted();
     } else if (calibThread != NULL) {
@@ -106,8 +118,8 @@ void QMLCppBridge::calibrationClicked()
 void QMLCppBridge::shootClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
-        //cv::VideoCapture cap("/Users/msundarmsa/stasys/10x shots.mp4");
-        cv::VideoCapture cap(CAMERA_INDEX);
+        cv::VideoCapture cap("/Users/msundarmsa/stasys/10x shots.mp4");
+        //cv::VideoCapture cap(CAMERA_INDEX);
 
         auto removePreviousCalibCirclePtr = std::bind(&QMLCppBridge::removePreviousCalibCircle, this);
         auto clearTracePtr = std::bind(&QMLCppBridge::clearTrace, this, _1);
@@ -117,7 +129,7 @@ void QMLCppBridge::shootClicked()
         auto addToAfterShotTracePtr = std::bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
-        shootThread = new ShootThread(cap, currentMic, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, stdout);
+        shootThread = new ShootThread(cap, currentMic, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {

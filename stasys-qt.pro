@@ -1,4 +1,4 @@
-QT += quick widgets multimedia
+QT += quick widgets multimedia svg
 
 CONFIG += c++11
 

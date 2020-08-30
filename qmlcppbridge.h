@@ -31,6 +31,7 @@ public:
     Q_INVOKABLE void cameraChanged(int camera);
     Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void adjustCalibration(double deltaX, double deltaY);
+    Q_INVOKABLE void closingApplication();
 
 private:
     FILE* logFile = NULL;
@@ -41,8 +42,8 @@ private:
     float micThreshold = 0.0;
     int CAMERA_INDEX = 1;
     float TRIGGER_DB = 65.0;
-    double RATIO1 = PISTOL_CIRCLE_SIZE / 18.0; // px from camera to mm
-    Vector2D adjustmentVec = {380, 390};
+    double RATIO1 = 1; // px from camera to mm
+    Vector2D adjustmentVec = {0, 0};
     Vector2D fineAdjustment = {0, 0};
 
 signals:

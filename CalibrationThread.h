@@ -20,7 +20,8 @@ class CalibrationThread : public RecordThread {
             this->calibrationFinished = calibrationFinished;
 			this->logFile = logFile;
 
-			params.maxThreshold = 100;
+			params.minThreshold = 100;
+			params.maxThreshold = 200;
 
 			params.filterByArea = true;
 			params.minArea = 450;
@@ -207,8 +208,7 @@ class CalibrationThread : public RecordThread {
                         vecX = avgCircle.center.x;
                         vecY = avgCircle.center.y;
 
-						// release video, and break
-						video.release();
+                        // break
 						stopRecording = true;
 						success = true;
 						break;
@@ -217,6 +217,9 @@ class CalibrationThread : public RecordThread {
 
                 frameId++;
 			}
+
+            // release video
+            video.release();
 
 			// callback result
             this->calibrationFinished(success, vecX, vecY, avgCircle.radius);

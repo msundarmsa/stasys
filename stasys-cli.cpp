@@ -41,13 +41,12 @@ void drawShotCircle(Vector2D shotPoint) {
 }
 
 void calibrationFinished(bool success, double vecX, double vecY,
-		double radius, int frameWidth, int frameHeight) {
+		double radius) {
 
 	if (success) {
 		cout << "SUCCESS" << endl;
 		cout << "Adjustment Vector: (" << vecX << " , " << vecY << ")" << endl;
 		cout << "Radius: " << radius << endl;
-		cout << "Frame Size: " << frameWidth << " x " << frameHeight <<endl;
 		cout << "./stasys-cli -s " << vecX << "," << vecY << "," << radius << " (-v path_to_video | -w webcam_id)" << endl;
 	} else {
 		cout << "FAILURE" << endl;
@@ -179,7 +178,7 @@ int main(int argc, char *argv[]) {
 		thread.join();
 		cout << "Processing ended!" << endl;
 	} else {
-		ShootThread thread(cap, radius, adjustmentVec, controller, log_file);
+		ShootThread thread(cap, "", -1, PISTOL_CIRCLE_SIZE / radius, adjustmentVec, {0, 0}, controller, log_file);
 		cout << "Processing started..." << endl;
 		thread.start();
 		thread.join();

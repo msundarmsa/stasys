@@ -11,7 +11,8 @@ ShootThread::ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_
     this->adjustmentVec = adjustmentVec;
     this->fineAdjustment = fineAdjustment;
 
-    params.maxThreshold = 100;
+    params.minThreshold = 100;
+    params.maxThreshold = 200;
 
 	params.filterByArea = true;
 	params.minArea = 450;
@@ -180,14 +181,21 @@ void ShootThread::run() {
         roi.x = adjustmentVec.x - roi.width/2;
         roi.y = adjustmentVec.y - roi.height/2;
 
+        // clip x, y, width, height to be within the bounds of the frame
+        roi.x = roi.x < 0 ? 0 : roi.x;
+        roi.y = roi.y < 0 ? 0 : roi.y;
+        roi.width = roi.x + roi.width > frame.cols ? frame.cols - roi.x : roi.width;
+        roi.height = roi.y + roi.height > frame.rows ? frame.rows - roi.y : roi.height;
+
 		frame = frame(roi);
 
         TargetCircle circle = findCircle(frame);
         fprintf(logFile, "\t[%s]", (shotStarted ? "true" : "false"));
         if (circle.radius != -1) {
             // aim i.e. black circle was found
-            double xShift = (roi.width / 2 - round(circle.center.x)) * RATIO1 + fineAdjustment.x;
-            double yShift = -(roi.height / 2 - round(circle.center.y)) * RATIO1 + fineAdjustment.y;
+			// flip & rotate the x, y to fit camera
+			double xShift = (round(circle.center.y) - roi.height / 2) * RATIO1 + fineAdjustment.x;
+			double yShift = (-round(circle.center.x) + roi.width / 2) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
             fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
 
@@ -258,6 +266,7 @@ void ShootThread::run() {
         frameid++;
 	}
     
+    video.release();
     stopRecording = true;
     if (sensor != NULL) {
         sensor->stop();
