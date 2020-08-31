@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE void micChanged(QString mic);
     Q_INVOKABLE void micThresholdChanged(float newThreshold);
     Q_INVOKABLE void cameraChanged(int camera);
+    Q_INVOKABLE void upDownDetectionChanged(bool upDownDetection);
     Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void adjustCalibration(double deltaX, double deltaY);
     Q_INVOKABLE void closingApplication();
@@ -45,6 +46,7 @@ private:
     double RATIO1 = 1; // px from camera to mm
     Vector2D adjustmentVec = {0, 0};
     Vector2D fineAdjustment = {0, 0};
+    bool upDownDetection = true;
 
 signals:
     void uiCalibrationStarted();
@@ -58,7 +60,7 @@ signals:
     void uiAddToBeforeShotTrace(double x, double y);
     void uiDrawShotCircle(double x, double y);
     void uiAddToAfterShotTrace(double x, double y);
-    void uiSettingsOpened(QStringList micOptions, QString defaultMic, double TRIGGER_DB, QStringList cameraOptions, int defaultCamera);
+    void uiSettingsOpened(QStringList micOptions, QString defaultMic, double TRIGGER_DB, QStringList cameraOptions, int defaultCamera, bool upDownDetection);
     void uiUpdateSamples(float dB);
 };
 

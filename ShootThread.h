@@ -16,14 +16,15 @@ private:
 	int sn = 0;
 	cv::SimpleBlobDetector::Params params;
 	cv::Ptr<cv::SimpleBlobDetector> detector;
-	SoundPressureSensor* sensor;
+    SoundPressureSensor* sensor = NULL;
 	bool stopRecording = false;
     float TRIGGER_DB;
     double RATIO1; // px from camera to mm
     Vector2D adjustmentVec;
     Vector2D fineAdjustment;
+    bool upDownDetection;
 public:
-    ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
+    ShootThread(cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
 	void audio_trigger();
 	void start();
 	void stop();

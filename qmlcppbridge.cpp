@@ -62,7 +62,7 @@ void QMLCppBridge::settingsOpened()
     micThread = new MicThread(updateSamplesPtr);
     micThread->setDevice(availableDevices[0]);
     micThread->start();
-    emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX);
+    emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX, upDownDetection);
 }
 
 void QMLCppBridge::settingsClosed()
@@ -95,6 +95,11 @@ void QMLCppBridge::cameraChanged(int camera)
     CAMERA_INDEX = camera;
 }
 
+void QMLCppBridge::upDownDetectionChanged(bool upDownDetection)
+{
+    this->upDownDetection = upDownDetection;
+}
+
 void QMLCppBridge::stopRecording()
 {
     if (calibThread != NULL) {
@@ -118,6 +123,7 @@ void QMLCppBridge::calibrationClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
         cv::VideoCapture cap(CAMERA_INDEX);
+        //cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
 
         auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
         calibThread = new CalibrationThread(cap, calibrationFinishedPtr, logFile);
@@ -135,6 +141,7 @@ void QMLCppBridge::shootClicked()
 {
     if (calibThread == NULL && shootThread == NULL) {
         cv::VideoCapture cap(CAMERA_INDEX);
+        //cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
 
         auto removePreviousCalibCirclePtr = std::bind(&QMLCppBridge::removePreviousCalibCircle, this);
         auto clearTracePtr = std::bind(&QMLCppBridge::clearTrace, this, _1);
@@ -144,7 +151,7 @@ void QMLCppBridge::shootClicked()
         auto addToAfterShotTracePtr = std::bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
-        shootThread = new ShootThread(cap, currentMic, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
+        shootThread = new ShootThread(cap, currentMic, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {

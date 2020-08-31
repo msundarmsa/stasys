@@ -165,6 +165,22 @@ Window {
                     }
                 }
             }
+
+            RowLayout {
+                width: parent.width
+                Text {
+                    text: "Up/Down Detection: "
+                }
+
+                CheckBox {
+                    id: upDownDetectionCheckBox
+                    checked: true
+
+                    onCheckedChanged: {
+                        qmlCppBridge.upDownDetectionChanged(checked);
+                    }
+                }
+            }
         }
     }
 
@@ -231,12 +247,13 @@ Window {
         }
 
         onUiSettingsOpened: {
-            settingsDialog.micOptions = micOptions
-            settingsDialog.defaultMic = defaultMic
+            settingsDialog.micOptions = micOptions;
+            settingsDialog.defaultMic = defaultMic;
             thresholdSlider.value = TRIGGER_DB;
             micChart.setThreshold(TRIGGER_DB);
-            settingsDialog.cameraOptions = cameraOptions
-            settingsDialog.defaultCamera = defaultCamera
+            settingsDialog.cameraOptions = cameraOptions;
+            settingsDialog.defaultCamera = defaultCamera;
+            upDownDetectionCheckBox.checked = upDownDetection;
         }
 
         onUiUpdateSamples: {

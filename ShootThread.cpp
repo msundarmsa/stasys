@@ -2,7 +2,10 @@
 #include "SoundPressureSensor.cpp"
 #include "ShotTrace.h"
 
-ShootThread::ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
+#include <thread>
+#include <chrono>
+
+ShootThread::ShootThread(cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
 	this->video = video;
 	this->page = page;
 	this->logFile = logFile;
@@ -10,6 +13,7 @@ ShootThread::ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_
     this->RATIO1 = RATIO1;
     this->adjustmentVec = adjustmentVec;
     this->fineAdjustment = fineAdjustment;
+    this->upDownDetection = upDownDetection;
 
     params.minThreshold = 100;
     params.maxThreshold = 200;
@@ -25,11 +29,13 @@ ShootThread::ShootThread(cv::VideoCapture video, std::string mic, float TRIGGER_
 
 	detector = cv::SimpleBlobDetector::create(params);
         
-    sensor = new SoundPressureSensor(this, TRIGGER_DB);
-    if (!sensor->setDevice(mic))
-    {
-        fprintf(logFile, "No Audio Input Device!\n");
-        sensor = NULL;
+    if (TRIGGER_DB > 0) {
+        sensor = new SoundPressureSensor(this, TRIGGER_DB);
+        if (!sensor->setDevice(mic))
+        {
+            fprintf(logFile, "No Audio Input Device!\n");
+            sensor = NULL;
+        }
     }
 }
 
@@ -86,6 +92,8 @@ void ShootThread::run() {
     fprintf(logFile, "RATIO1 (mm / px) %.3f\n", RATIO1);
     fprintf(logFile, "Adjustment Vec (px, px): (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
     fprintf(logFile, "Fine Adjustment Vec (mm, mm): (%.3f, %.3f)\n", fineAdjustment.x, fineAdjustment.y);
+    fprintf(logFile, "Up/Down Detection: (%s)\n", upDownDetection ? "true" : "false");
+    fprintf(logFile, "TRIGGER: (%.3f)\n", TRIGGER_DB);
 
     page.removePreviousCalibCircle();
 
@@ -93,20 +101,40 @@ void ShootThread::run() {
         sensor->start();
     }
 
-    int testTriggers[10] = {
-        1501,
-        4474,
-        7512,
-        10564,
-        12949,
-        15016,
-        17275,
-        20238,
-        22831,
-        25518
+    /*int testTriggers[30] = {
+        312,
+        1754,
+        3295,
+        5116,
+        6506,
+        7589,
+        9914,
+        11104,
+        12424,
+        14422,
+        15713,
+        17499,
+        21796,
+        23156,
+        24537,
+        26312,
+        27402,
+        28559,
+        29944,
+        31059,
+        32233,
+        33654,
+        34582,
+        35775,
+        37593,
+        38745,
+        40029,
+        41795,
+        43269,
+        44616
     };
 
-    int testTriggerIndex = 0;
+    int testTriggerIndex = 0;*/
 
 	while (!stopRecording && (frameid == 0 || !frame.empty())) {
 		fprintf(logFile, "Frame #%d", frameid);
@@ -122,10 +150,10 @@ void ShootThread::run() {
             lStartTime = SystemClock::getCurrentTimeMillis();
         }
         
-        if (sensor == NULL && testTriggerIndex < 10 && frameid == testTriggers[testTriggerIndex]) {
+        /*if (sensor == NULL && testTriggerIndex < 30 && frameid == testTriggers[testTriggerIndex]) {
             audio_triggered = true;
             testTriggerIndex++;
-        }
+        }*/
 
         lFrameTime = SystemClock::getCurrentTimeMillis();
         double timeSinceShotStart = SystemClock::getElapsedSeconds(lFrameTime, lShotStartTime);
@@ -194,8 +222,8 @@ void ShootThread::run() {
         if (circle.radius != -1) {
             // aim i.e. black circle was found
 			// flip & rotate the x, y to fit camera
-			double xShift = (round(circle.center.y) - roi.height / 2) * RATIO1 + fineAdjustment.x;
-			double yShift = (-round(circle.center.x) + roi.width / 2) * RATIO1 + fineAdjustment.y;
+            double xShift = (round(circle.center.y) - roi.height / 2) * RATIO1 + fineAdjustment.x;
+            double yShift = (-round(circle.center.x) + roi.width / 2) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
             fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
 
@@ -206,27 +234,33 @@ void ShootThread::run() {
             }
 
             if (!shotStarted) {
-                if (preTrace[1].x == -1) {
-                    preTrace[1] = center;
-                }
-                else {
-                    preTrace[0] = preTrace[1];
-                    preTrace[1] = center;
-
-                    shotStarted = (preTrace[0].y > TARGET_SIZE / 2 && preTrace[1].y < TARGET_SIZE / 2);
-                    // shot is started if the aim went past the edge (preTrace[0].y < 0)
-                    // and came back down after that (preTrace[1].y > 0)
-                    if (shotStarted) {
-                        // new shot started
-
-                        // reset traces
-                        currShotTrace.reset();
-                        page.clearTrace(true);
-
-                        lShotStartTime = lFrameTime;
-                        page.addToBeforeShotTrace(center);
-                        currShotTrace.addTracePoint({ center, 0 });
+                if (upDownDetection) {
+                    // if up/down detection is enabled, detect aim going up and down
+                    if (preTrace[1].x == -1) {
+                        preTrace[1] = center;
                     }
+                    else {
+                        preTrace[0] = preTrace[1];
+                        preTrace[1] = center;
+
+                        shotStarted = (preTrace[0].y > TARGET_SIZE / 2 && preTrace[1].y < TARGET_SIZE / 2);
+                        // shot is started if the aim went past the edge (preTrace[0].y < 0)
+                        // and came back down after that (preTrace[1].y > 0)
+                        if (shotStarted) {
+                            // new shot started
+
+                            // reset traces
+                            currShotTrace.reset();
+                            page.clearTrace(true);
+
+                            lShotStartTime = lFrameTime;
+                            page.addToBeforeShotTrace(center);
+                            currShotTrace.addTracePoint({ center, 0 });
+                        }
+                    }
+                } else {
+                    // else shot is started from the frame the circle is detected
+                    shotStarted = true;
                 }
             }
             else {
@@ -263,6 +297,7 @@ void ShootThread::run() {
         }
 
         fprintf(logFile, "\n");
+        std::this_thread::sleep_for(std::chrono::milliseconds(8));
         frameid++;
 	}
     
