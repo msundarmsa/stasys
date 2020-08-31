@@ -34,7 +34,7 @@ public:
     Q_INVOKABLE void closingApplication();
 
 private:
-    FILE* logFile = NULL;
+    FILE* logFile = stdout;
     CalibrationThread* calibThread = NULL;
     ShootThread* shootThread = NULL;
     MicThread *micThread = NULL;

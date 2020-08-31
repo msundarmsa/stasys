@@ -281,6 +281,7 @@ Window {
             height: 20
             fillMode: Image.PreserveAspectFit
             source: "ui/images/settings.svg"
+            mipmap: true
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider0.right
             anchors.rightMargin: 20
@@ -292,6 +293,14 @@ Window {
                 onClicked: {
                     qmlCppBridge.settingsOpened();
                     settingsDialog.open();
+                }
+
+                onPressed: {
+                    parent.source = "ui/images/settings_clicked.svg";
+                }
+
+                onReleased: {
+                    parent.source = "ui/images/settings.svg";
                 }
             }
         }
@@ -309,7 +318,7 @@ Window {
         Text {
             id: calibrateBtn
             text: "CALIBRATE"
-            color: "white"
+            color: "#ffffff"
             font.family: segoeUILight.name
             font.pointSize: 20
             anchors.verticalCenter: parent.verticalCenter
@@ -322,6 +331,14 @@ Window {
 
                 onClicked: {
                     qmlCppBridge.calibrationClicked();
+                }
+
+                onPressed: {
+                    parent.color = "#BEBEBE"
+                }
+
+                onReleased: {
+                    parent.color = "#ffffff"
                 }
             }
         }
@@ -352,6 +369,14 @@ Window {
 
                 onClicked: {
                     qmlCppBridge.shootClicked();
+                }
+
+                onPressed: {
+                    parent.color = "#BEBEBE"
+                }
+
+                onReleased: {
+                    parent.color = "#ffffff"
                 }
             }
         }
@@ -384,6 +409,14 @@ Window {
                     qmlCppBridge.closingApplication();
                     Qt.quit();
                 }
+
+                onPressed: {
+                    parent.source = "ui/images/close_clicked.svg";
+                }
+
+                onReleased: {
+                    parent.source = "ui/images/close.svg";
+                }
             }
         }
     }
@@ -415,6 +448,13 @@ Window {
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
                     clip: true
+                    border.color: "#0000001E"
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        horizontalOffset: 2
+                        verticalOffset: 2
+                        color: "#19000000"
+                    }
 
                     Image {
                         width: parent.width
@@ -604,6 +644,12 @@ Window {
                     anchors.left: parent.left
                     color: "#ffffff"
                     border.color: "#0000001E"
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        horizontalOffset: 2
+                        verticalOffset: 2
+                        color: "#19000000"
+                    }
 
                     function setStab(stab) {
                         stab = stab.toFixed(0);
@@ -617,13 +663,6 @@ Window {
 
                         stabilityPB.value = stab / 100;
                         stabilityVal.text = stab + "%";
-                    }
-
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 2
-                        verticalOffset: 2
-                        color: "#19000000"
                     }
 
                     Text {
@@ -817,6 +856,13 @@ Window {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 color: "#ffffff"
+                border.color: "#0000001E"
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    horizontalOffset: 2
+                    verticalOffset: 2
+                    color: "#19000000"
+                }
 
                 ScrollView {
                     width: parent.width
@@ -921,7 +967,14 @@ Window {
                 anchors.top: parent.top
                 anchors.left: zoomedTargetRect.right
                 anchors.leftMargin: 10
-                color: "transparent"
+                color: "#ffffff"
+                border.color: "#0000001E"
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    horizontalOffset: 2
+                    verticalOffset: 2
+                    color: "#19000000"
+                }
 
                 ScrollView {
                     width: parent.width
@@ -1056,7 +1109,14 @@ Window {
                 anchors.bottom: parent.bottom
                 anchors.top: shotLogRect.bottom
                 anchors.topMargin: 10
-                color: "transparent"
+                color: "#ffffff"
+                border.color: "#0000001E"
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    horizontalOffset: 2
+                    verticalOffset: 2
+                    color: "#19000000"
+                }
 
                 ChartView {
                     id: xtYtChart
