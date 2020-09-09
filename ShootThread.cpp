@@ -62,7 +62,6 @@ TargetCircle ShootThread::findCircle(cv::Mat frame)
 }
 
 void ShootThread::audio_trigger() {
-    fprintf(logFile, "\tAudio Trigger Received.");
 	audio_triggered = true;
 }
 
@@ -157,7 +156,6 @@ void ShootThread::run() {
 
         lFrameTime = SystemClock::getCurrentTimeMillis();
         double timeSinceShotStart = SystemClock::getElapsedSeconds(lFrameTime, lShotStartTime);
-		//calculateFPS(currTime);
 
         if (shotStarted) {
             // shot has started i.e. the aim has went past the top edge and came back down

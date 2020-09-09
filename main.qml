@@ -228,7 +228,7 @@ Window {
             descLbl.setDesc(desc);
             aimLbl.setAim(aim);
 
-            shotLogList.model.append({score: score, stab: stab, desc: desc, aim: aim});
+            shotLogList.model.append({sn: sn, score: score, stab: stab, desc: desc, aim: aim});
             shotGroupList.addShot(x, y);
 
             xtYtChart.updateXtYt(xt, yt, ts);
@@ -1019,12 +1019,30 @@ Window {
 
                         delegate: ItemDelegate {
                             width: shotLogList.width - 10
-                            height: 75
 
                             Rectangle {
                                 height: parent.height
                                 width: parent.width
                                 color: "#ffffff"
+
+                                Rectangle {
+                                    id: logNumCircle
+                                    width: 20
+                                    height: 20
+                                    radius: 10
+                                    color: "#f0f0f2"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+
+                                    Text {
+                                        width: parent.width
+                                        height: parent.height
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        text: sn
+                                    }
+                                }
 
                                 Text {
                                     id: logScoreLbl
@@ -1033,8 +1051,8 @@ Window {
                                     font.family: segoeUILight.name
                                     font.pointSize: 30
                                     anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 20
+                                    anchors.left: logNumCircle.right
+                                    anchors.leftMargin: 10
                                 }
 
                                 ProgressBar {
@@ -1109,7 +1127,7 @@ Window {
                                     width: height
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 20
+                                    anchors.rightMargin: 10
                                     mipmap: true
                                 }
                             }

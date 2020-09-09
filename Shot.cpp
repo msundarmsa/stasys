@@ -9,7 +9,9 @@ Shot::Shot(int sn, double score, double angle_val, double stab, double desc, dou
 	this->angle_val = angle_val;
 	this->stab = stab;
 	this->desc = desc;
-	this->aim = aim;
+    this->aim = aim;
+
+    this->shotTrace.setShotPoint({{0, 0}, 0});
 
 	// convert angle value (0 to 2pi) to enum ANGLE
 	calcAngle();

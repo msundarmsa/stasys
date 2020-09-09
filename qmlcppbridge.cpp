@@ -4,13 +4,17 @@
 #include <QCameraInfo>
 #include <time.h>
 #include <QCoreApplication>
+#include <QAudioDeviceInfo>
+#include <cmath>
+
+#define _USE_MATH_DEFINES
 
 using namespace std::placeholders;
 
 QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
-    std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
-    currentMic = availableDevices[0];
+    currentMic = sf::SoundRecorder::getDefaultDevice();
+
     time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     char timestamp[20];
     std::strftime (timestamp, 20, "%m%d%y_%H%M%S", std::localtime(&currentTime));
@@ -45,7 +49,7 @@ void QMLCppBridge::settingsOpened()
     std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
     QStringList micOptions = {QString::fromStdString(currentMic)};
     for (int i = 0; i < availableDevices.size(); i++) {
-        if (availableDevices[i] != currentMic) {
+        if (availableDevices[i].compare(currentMic) != 0) {
             micOptions.append(QString::fromStdString(availableDevices[i]));
         }
     }
@@ -180,42 +184,47 @@ void QMLCppBridge::clearTrace(bool resetGroupIfNecessary) {
 
 void QMLCppBridge::updateView(Shot* shot) {
     Vector2D center = shot->getShotPoint().point;
+    int sn = shot->getSn();
     double score = shot->getScore();
     double stab = shot->getStab();
     double desc = shot->getDesc();
     double aim = shot->getAim();
+
+    int frames = 0.5 * FPS;
+    QList<double> xtList = {};
+    QList<double> ytList = {};
+    QList<double> tList = {};
 
     ShotTrace shotTrace = shot->getShotTrace();
     std::vector<TracePoint> beforeTrace = shotTrace.getBeforeShotTrace();
     TracePoint shotPoint = shotTrace.getShotPoint();
     std::vector<TracePoint> afterTrace = shotTrace.getAfterShotTrace();
 
-    int frames = 0.5 * FPS;
-    QList<double> xtList = {};
-    QList<double> ytList = {};
-    QList<double> tList = {};
-    for (int i = frames; i >= 1; i--) {
-        int pos = beforeTrace.size() - i;
-        xtList.append(beforeTrace[pos].point.x);
-        ytList.append(beforeTrace[pos].point.y);
-        tList.append(-(double)i / (double)FPS);
-    }
+    if (beforeTrace.size() > frames && afterTrace.size() > frames) {
+        // only plot xt/yt graph if beforeTrace and afterTrace are valid
+        for (int i = frames; i >= 1; i--) {
+            int pos = beforeTrace.size() - i;
+            xtList.append(beforeTrace[pos].point.x);
+            ytList.append(beforeTrace[pos].point.y);
+            tList.append(-(double)i / (double)FPS);
+        }
 
-    xtList.append(shotPoint.point.x);
-    ytList.append(shotPoint.point.y);
-    tList.append(0);
+        xtList.append(shotPoint.point.x);
+        ytList.append(shotPoint.point.y);
+        tList.append(0);
 
-    for (int i = 0; i < frames; i++) {
-        xtList.append(afterTrace[i].point.x);
-        ytList.append(afterTrace[i].point.y);
-        tList.append((double)(i + 1) / (double)FPS);
+        for (int i = 0; i < frames; i++) {
+            xtList.append(afterTrace[i].point.x);
+            ytList.append(afterTrace[i].point.y);
+            tList.append((double)(i + 1) / (double)FPS);
+        }
     }
 
     QVariant xt = QVariant::fromValue(xtList);
     QVariant yt = QVariant::fromValue(ytList);
     QVariant ts = QVariant::fromValue(tList);
 
-    emit uiUpdateView(center.x, center.y, score, stab, desc, aim, xt, yt, ts);
+    emit uiUpdateView(sn, center.x, center.y, score, stab, desc, aim, xt, yt, ts);
 }
 
 void QMLCppBridge::addToBeforeShotTrace(Vector2D center) {
