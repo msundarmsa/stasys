@@ -100,40 +100,42 @@ void ShootThread::run() {
         sensor->start();
     }
 
-    /*int testTriggers[30] = {
-        312,
-        1754,
-        3295,
-        5116,
-        6506,
-        7589,
-        9914,
-        11104,
-        12424,
-        14422,
-        15713,
-        17499,
-        21796,
-        23156,
-        24537,
-        26312,
-        27402,
-        28559,
-        29944,
-        31059,
-        32233,
-        33654,
-        34582,
-        35775,
-        37593,
-        38745,
-        40029,
-        41795,
-        43269,
-        44616
-    };
+    #ifdef QT_QML_DEBUG
+        int testTriggers[30] = {
+            312,
+            1754,
+            3295,
+            5116,
+            6506,
+            7589,
+            9914,
+            11104,
+            12424,
+            14422,
+            15713,
+            17499,
+            21796,
+            23156,
+            24537,
+            26312,
+            27402,
+            28559,
+            29944,
+            31059,
+            32233,
+            33654,
+            34582,
+            35775,
+            37593,
+            38745,
+            40029,
+            41795,
+            43269,
+            44616
+        };
 
-    int testTriggerIndex = 0;*/
+        int testTriggerIndex = 0;
+    #endif
 
 	while (!stopRecording && (frameid == 0 || !frame.empty())) {
 		fprintf(logFile, "Frame #%d", frameid);
@@ -148,11 +150,13 @@ void ShootThread::run() {
 		if (frameid == 0) {
             lStartTime = SystemClock::getCurrentTimeMillis();
         }
-        
-        /*if (sensor == NULL && testTriggerIndex < 30 && frameid == testTriggers[testTriggerIndex]) {
-            audio_triggered = true;
-            testTriggerIndex++;
-        }*/
+
+        #ifdef QT_QML_DEBUG
+            if (sensor == NULL && testTriggerIndex < 30 && frameid == testTriggers[testTriggerIndex]) {
+                audio_triggered = true;
+                testTriggerIndex++;
+            }
+        #endif
 
         lFrameTime = SystemClock::getCurrentTimeMillis();
         double timeSinceShotStart = SystemClock::getElapsedSeconds(lFrameTime, lShotStartTime);
@@ -242,23 +246,24 @@ void ShootThread::run() {
                         preTrace[1] = center;
 
                         shotStarted = (preTrace[0].y > TARGET_SIZE / 2 && preTrace[1].y < TARGET_SIZE / 2);
-                        // shot is started if the aim went past the edge (preTrace[0].y < 0)
-                        // and came back down after that (preTrace[1].y > 0)
-                        if (shotStarted) {
-                            // new shot started
-
-                            // reset traces
-                            currShotTrace.reset();
-                            page.clearTrace(true);
-
-                            lShotStartTime = lFrameTime;
-                            page.addToBeforeShotTrace(center);
-                            currShotTrace.addTracePoint({ center, 0 });
-                        }
                     }
                 } else {
                     // else shot is started from the frame the circle is detected
                     shotStarted = true;
+                }
+
+                // shot is started if the aim went past the edge (preTrace[0].y < 0)
+                // and came back down after that (preTrace[1].y > 0)
+                if (shotStarted) {
+                    // new shot started
+
+                    // reset traces
+                    currShotTrace.reset();
+                    page.clearTrace(true);
+
+                    lShotStartTime = lFrameTime;
+                    page.addToBeforeShotTrace(center);
+                    currShotTrace.addTracePoint({ center, 0 });
                 }
             }
             else {
