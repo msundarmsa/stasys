@@ -131,6 +131,9 @@ void QMLCppBridge::calibrationClicked()
         //Shot *shot = new Shot(i + 1, 10.0, 3 * M_PI / 2, 87.2, 2.3, 1.4);
         //updateView(shot);
     }
+    for (int i = 0; i < 12; i++) {
+        addToBeforeShotTrace({(double)i * ((i + 1) % 2 * -1) * 5, (double)i * (i % 2 * -1) * 5});
+    }
     return;
     if (calibThread == NULL && shootThread == NULL) {
         cv::VideoCapture cap(CAMERA_INDEX);

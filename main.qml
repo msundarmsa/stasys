@@ -526,6 +526,7 @@ Window {
                         id: targetTrace
                         width: parent.width
                         height: parent.height
+                        z: 2
                         property var beforeShotTrace: []
                         property var shotCircles: []
                         property var afterShotTrace: []
@@ -577,6 +578,7 @@ Window {
                                     border.color: '#ffffff'
                                     x: " + point.x + " - width / 2
                                     y: " + point.y + " - height / 2
+                                    z: 1
                                     radius: targetTrace.radius
 
                                     MouseArea {
