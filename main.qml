@@ -585,7 +585,7 @@ Window {
                                         anchors.fill: parent
 
                                         onPressed: {
-                                            if (" + shotCircles.length + " == targetTrace.shotCircles.length) {
+                                            if (" + shotCircles.length + " + 1 == targetTrace.shotCircles.length) {
                                                 // only if shot clicked is the most recent shot
                                                 qmlCppBridge.stopRecording();
                                                 targetTrace.calibrateShot(parent);
