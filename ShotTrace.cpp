@@ -7,7 +7,7 @@ void ShotTrace::reset(){
 }
 
 void ShotTrace::addTracePoint(TracePoint tp) {
-    if (shotPoint.time == -1) {
+    if (shotPoint.time < 0) {
       beforeShotTrace.push_back(tp);
     } else {
       afterShotTrace.push_back(tp);
@@ -15,7 +15,7 @@ void ShotTrace::addTracePoint(TracePoint tp) {
 }
 
 bool ShotTrace::afterShot() {
-    return shotPoint.time != -1;
+    return shotPoint.time >= 0;
 }
 
 std::vector<TracePoint> ShotTrace::getCurrentShotTrace() {

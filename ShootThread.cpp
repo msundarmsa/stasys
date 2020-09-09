@@ -6,7 +6,7 @@
 #include <chrono>
 
 ShootThread::ShootThread(cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
-	this->video = video;
+    this->video = video;
 	this->page = page;
 	this->logFile = logFile;
     this->TRIGGER_DB = TRIGGER_DB;
@@ -71,13 +71,19 @@ void ShootThread::start() {
 
 void ShootThread::run() {
 	cv::Mat frame;
-		
+
     Vector2D preTrace[2] = {
         {-1, -1},
         {-1, -1}
     };
 
     ShotTrace currShotTrace;
+    TracePoint movingAvg[3] = {
+        {{-1, -1}, -1},
+        {{-1, -1}, -1},
+        {{-1, -1}, -1}
+    };
+    int movingAvgIndex = 0;
 
 	uint64_t lStartTime = 0;
 	uint64_t lFrameTime = 0;
@@ -171,6 +177,9 @@ void ShootThread::run() {
                 currShotTrace.reset();
                 preTrace[0] = { -1, -1 };
                 preTrace[1] = { -1, -1 };
+                movingAvg[0] = {{-1, -1}, -1};
+                movingAvg[1] = {{-1, -1}, -1};
+                movingAvg[2] = {{-1, -1}, -1};
                 page.clearTrace(false);
             }
             else {
@@ -181,6 +190,9 @@ void ShootThread::run() {
                     // reset trace if shot has started but trigger has not been pulled for 60s
                     currShotTrace.reset();
                     page.clearTrace(false);
+                    movingAvg[0] = {{-1, -1}, -1};
+                    movingAvg[1] = {{-1, -1}, -1};
+                    movingAvg[2] = {{-1, -1}, -1};
 
                     // but update the start time to the current time
                     lShotStartTime = lFrameTime;
@@ -196,9 +208,12 @@ void ShootThread::run() {
 
                     // reset shot
                     shotStarted = false;
+                    currShotTrace.reset();
                     preTrace[0] = { -1, -1 };
                     preTrace[1] = { -1, -1 };
-                    currShotTrace.reset();
+                    movingAvg[0] = {{-1, -1}, -1};
+                    movingAvg[1] = {{-1, -1}, -1};
+                    movingAvg[2] = {{-1, -1}, -1};
                 }
             }
         }
@@ -262,33 +277,60 @@ void ShootThread::run() {
                     page.clearTrace(true);
 
                     lShotStartTime = lFrameTime;
-                    page.addToBeforeShotTrace(center);
-                    currShotTrace.addTracePoint({ center, 0 });
+                    movingAvgIndex = 0;
+                    movingAvg[movingAvgIndex] = {center, 0};
+                    movingAvgIndex++;
                 }
             }
             else {
-                if (!currShotTrace.afterShot()) {
-                    if (audio_triggered) {
-                        // trigger has just been pulled
-                        audio_triggered = false;
-                        fprintf(logFile, "\tTRIGGER RECEIVED");
+                movingAvg[movingAvgIndex] = {center, timeSinceShotStart};
+                movingAvgIndex++;
 
-                        currShotTrace.setShotPoint({ center, timeSinceShotStart });
+                if (movingAvgIndex == 3) {
+                    Vector2D avgCenter = (movingAvg[0].point + movingAvg[0].point + movingAvg[0].point) / 3;
 
-                        page.addToBeforeShotTrace(center);
-                        page.drawShotCircle(center);
-                        page.addToAfterShotTrace(center);
+                    if (!currShotTrace.afterShot()) {
+                        if (audio_triggered) {
+                            // trigger has just been pulled
+                            audio_triggered = false;
+                            fprintf(logFile, "\tTRIGGER RECEIVED");
+
+                            currShotTrace.addTracePoint({avgCenter, movingAvg[1].time});
+                            // add a dummy value first to be corrected later
+                            currShotTrace.setShotPoint({ {-1, -1}, movingAvg[2].time });
+                        }
+                        else {
+                            // trigger has not been pulled
+                            currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
+                            page.addToBeforeShotTrace(avgCenter);
+                        }
                     }
                     else {
-                        // trigger has not been pulled
-                        currShotTrace.addTracePoint({ center, timeSinceShotStart });
-                        page.addToBeforeShotTrace(center);
+                        // trigger has been pulled 2 frames ago
+                        if (currShotTrace.getAfterShotTrace().size() == 1) {
+                            // trigger was just pulled in the last frame
+                            // calculate velocity and scale by the velocity factor
+                            Vector2D velocity = (currShotTrace.getAfterShotTrace()[0].point - currShotTrace.getBeforeShotTrace()[currShotTrace.getBeforeShotTrace().size() - 1].point) / 2;
+                            Vector2D shotPoint = velocity + avgCenter;
+                            page.addToBeforeShotTrace(shotPoint);
+                            page.drawShotCircle(shotPoint);
+                            page.addToAfterShotTrace(shotPoint);
+
+                            fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
+
+                            // set correct shotpoint on trace
+                            currShotTrace.setShotPoint({ shotPoint, movingAvg[1].time });
+                            currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
+                            page.addToAfterShotTrace(avgCenter);
+                        } else {
+                            currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
+                            page.addToAfterShotTrace(avgCenter);
+                        }
                     }
-                }
-                else {
-                    // trigger has been pulled
-                    currShotTrace.addTracePoint({ center, timeSinceShotStart });
-                    page.addToAfterShotTrace(center);
+
+                    movingAvg[0] = movingAvg[1];
+                    movingAvg[1] = movingAvg[2];
+                    movingAvgIndex = 2;
                 }
             }
         }

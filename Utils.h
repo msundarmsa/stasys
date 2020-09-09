@@ -15,6 +15,10 @@ struct Vector2D {
 		return { x - v.x, y - v.y };
 	}
 
+    Vector2D operator/(const double f) const {
+        return { x / f, y / f };
+    }
+
 	bool operator==(const Vector2D& v) const {
 		return x == v.x && y == v.y;
 	}
