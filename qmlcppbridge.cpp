@@ -125,9 +125,9 @@ void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
 
 void QMLCppBridge::calibrationClicked()
 {
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 12; i++) {
         clearTrace(true);
-        drawShotCircle({(double)i * 5, (double)i * 5});
+        drawShotCircle({(double)i * ((i + 1) % 2 * -1) * 5, (double)i * (i % 2 * -1) * 5});
         //Shot *shot = new Shot(i + 1, 10.0, 3 * M_PI / 2, 87.2, 2.3, 1.4);
         //updateView(shot);
     }
@@ -190,7 +190,6 @@ void QMLCppBridge::clearTrace(bool resetGroupIfNecessary) {
 }
 
 void QMLCppBridge::updateView(Shot* shot) {
-    Vector2D center = shot->getShotPoint().point;
     int sn = shot->getSn();
     double score = shot->getScore();
     double stab = shot->getStab();
@@ -231,7 +230,7 @@ void QMLCppBridge::updateView(Shot* shot) {
     QVariant yt = QVariant::fromValue(ytList);
     QVariant ts = QVariant::fromValue(tList);
 
-    emit uiUpdateView(sn, center.x, center.y, score, stab, desc, aim, xt, yt, ts);
+    emit uiUpdateView(sn, score, stab, desc, aim, xt, yt, ts);
 }
 
 void QMLCppBridge::addToBeforeShotTrace(Vector2D center) {

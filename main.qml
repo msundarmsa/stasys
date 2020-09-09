@@ -229,7 +229,6 @@ Window {
             aimLbl.setAim(aim);
 
             shotLogList.model.append({sn: sn, score: score, stab: stab, desc: desc, aim: aim});
-            shotGroupList.addShot(x, y);
 
             xtYtChart.updateXtYt(xt, yt, ts);
         }
@@ -240,6 +239,7 @@ Window {
 
         onUiDrawShotCircle: {
             targetTrace.drawShotCircle(x, y);
+            shotGroupList.addShot(x, y);
         }
 
         onUiAddToAfterShotTrace: {
@@ -564,7 +564,7 @@ Window {
                         function drawShotCircle(x, y) {
                             let point = transformPoint(x, y);
                             if (shotCircles.length > 0) {
-                                shotCircles[shotCircles.length - 1].color = '#d3d3d3';
+                                shotCircles[shotCircles.length - 1].color = '#a9a9a9';
                             }
 
                             shotCircles.push(Qt.createQmlObject("import QtQuick 2.0;
@@ -906,7 +906,8 @@ Window {
                         function addShot(x, y) {
                             shotCount += 1;
                             if (shotCount != 1 && shotCount % 10 == 1) {
-                                model.append({inPoints: [], outPoints: []});
+                                currentItem.resetLastCircleColor();
+                                model.append({ points: [] });
                             }
                             currentIndex = count - 1
                             currentItem.addShot(x, y);
@@ -921,19 +922,24 @@ Window {
                             height: width
                             anchors.horizontalCenter: parent.horizontalCenter
                             property var factor: (width / 2) / 29.75 // convert mm to px
+                            property var active: true
 
                             function addShot(x, y) {
                                 if (Math.sqrt(x * x + y * y) <= 29.75) {
                                     // within black circle
-                                    inPoints.append({x: x * factor + width / 2, y: height / 2 - y * factor});
+                                    points.append({insideCircle: true, x: x * factor + width / 2, y: height / 2 - y * factor});
                                 } else {
-                                    var angle = Math.atan2(y, x);
-                                    var newX = 29.75 * Math.cos(angle);
-                                    var newY = 29.75 * Math.sin(angle);
-                                    outPoints.append({x: newX * factor + width / 2, y: height / 2 - newY * factor});
+                                    let angle = Math.atan2(y, x);
+                                    let newX = 29.75 * Math.cos(angle);
+                                    let newY = 29.75 * Math.sin(angle);
+                                    points.append({insideCircle: false, x: newX * factor + width / 2, y: height / 2 - newY * factor});
                                 }
 
                                 zoomedShotCanvas.requestPaint();
+                            }
+
+                            function resetLastCircleColor() {
+                                active = false;
                             }
 
                             Canvas {
@@ -948,13 +954,10 @@ Window {
                                     context.strokeStyle = "#ffffff";
                                     context.lineWidth = 3;
 
-                                    context.fillStyle = "#04bfbf";
-                                    for (let i = 0; i < inPoints.count; i++)
-                                        drawShot(context, inPoints.get(i));
-
-                                    context.fillStyle = "#df468e";
-                                    for (let i = 0; i < outPoints.count; i++)
-                                        drawShot(context, outPoints.get(i));
+                                    for (let i = 0; i < points.count; i++) {
+                                        context.fillStyle = (active && i == points.count - 1) ? "#04bfbf" : points.get(i).insideCircle ? "#a9a9a9" : "#df468e";
+                                        drawShot(context, points.get(i));
+                                    }
                                 }
 
                                 function drawShot(context, point) {
@@ -1033,7 +1036,7 @@ Window {
                                     width: parent.height / 2
                                     height: parent.height / 2
                                     radius: parent.height / 4
-                                    color: "#f0f0f2"
+                                    color: "#a9a9a9"
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
                                     anchors.leftMargin: 10
