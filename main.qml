@@ -527,7 +527,7 @@ Window {
                         width: parent.width
                         height: parent.height
                         property var beforeShotTrace: []
-                        property var shotPoints: []
+                        property var shotCircles: []
                         property var afterShotTrace: []
                         property var factor: width / 170
                         property var radius: factor * 2.25
@@ -563,8 +563,11 @@ Window {
 
                         function drawShotCircle(x, y) {
                             let point = transformPoint(x, y);
-                            shotPoints.push(point);
-                            Qt.createQmlObject("import QtQuick 2.0;
+                            if (shotCircles.length > 0) {
+                                shotCircles[shotCircles.length - 1].color = '#d3d3d3';
+                            }
+
+                            shotCircles.push(Qt.createQmlObject("import QtQuick 2.0;
                                 Rectangle {
                                     id: draggableCircle
                                     width: targetTrace.radius * 2
@@ -580,24 +583,23 @@ Window {
                                         anchors.fill: parent
 
                                         onPressed: {
-                                            if (" + shotPoints.length + " == targetTrace.shotPoints.length) {
+                                            if (" + shotCircles.length + " == targetTrace.shotCircles.length) {
                                                 // only if shot clicked is the most recent shot
                                                 qmlCppBridge.stopRecording();
                                                 targetTrace.calibrateShot(parent);
                                             }
                                         }
                                     }
-                                }", parent);
+                                }", parent));
                         }
 
                         function resetTrace(resetGroupIfNecessary) {
                             beforeShotTrace = [];
                             afterShotTrace = [];
 
-                            if (resetGroupIfNecessary && shotPoints.length == 10) {
-                                for (let point of shotPoints) {
-                                    point.destroy();
-                                }
+                            if (resetGroupIfNecessary && shotCircles.length == 10) {
+                                shotCircles.forEach(shotCircle => shotCircle.destroy());
+                                shotCircles = [];
                             }
 
                             targetTrace.requestPaint();
@@ -1010,7 +1012,7 @@ Window {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        spacing: 20
+                        spacing: 10
 
                         onCountChanged: {
                             var newIndex = count - 1
@@ -1019,6 +1021,7 @@ Window {
 
                         delegate: ItemDelegate {
                             width: shotLogList.width - 10
+                            height: shotLogList.height / 10 - shotLogList.spacing
 
                             Rectangle {
                                 height: parent.height
@@ -1027,9 +1030,9 @@ Window {
 
                                 Rectangle {
                                     id: logNumCircle
-                                    width: 20
-                                    height: 20
-                                    radius: 10
+                                    width: parent.height / 2
+                                    height: parent.height / 2
+                                    radius: parent.height / 4
                                     color: "#f0f0f2"
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
@@ -1038,6 +1041,7 @@ Window {
                                     Text {
                                         width: parent.width
                                         height: parent.height
+                                        fontSizeMode: Text.Fit
                                         horizontalAlignment: Text.AlignHCenter
                                         verticalAlignment: Text.AlignVCenter
                                         text: sn
@@ -1048,8 +1052,8 @@ Window {
                                     id: logScoreLbl
                                     text: score.toFixed(1)
                                     color: "#04bfbf"
+                                    font.pointSize: 25
                                     font.family: segoeUILight.name
-                                    font.pointSize: 30
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: logNumCircle.right
                                     anchors.leftMargin: 10
@@ -1092,7 +1096,7 @@ Window {
                                     text: desc.toFixed(1) + "s"
                                     color: "#04bfbf"
                                     font.family: segoeUILight.name
-                                    font.pointSize: 25
+                                    font.pointSize: 20
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: logDescIcon.left
                                     anchors.rightMargin: 10
@@ -1101,7 +1105,7 @@ Window {
                                 Image {
                                     id: logDescIcon
                                     source: "ui/images/desc.svg"
-                                    height: 30
+                                    height: parent.height / 2
                                     width: height
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: logAimLbl.left
@@ -1114,7 +1118,7 @@ Window {
                                     text: aim.toFixed(1) + "s"
                                     color: "#04bfbf"
                                     font.family: segoeUILight.name
-                                    font.pointSize: 25
+                                    font.pointSize: 20
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: logAimIcon.left
                                     anchors.rightMargin: 10
@@ -1123,7 +1127,7 @@ Window {
                                 Image {
                                     id: logAimIcon
                                     source: "ui/images/aim.svg"
-                                    height: 30
+                                    height: parent.height / 2
                                     width: height
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: parent.right

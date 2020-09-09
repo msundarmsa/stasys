@@ -125,6 +125,13 @@ void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
 
 void QMLCppBridge::calibrationClicked()
 {
+    for (int i = 0; i < 11; i++) {
+        clearTrace(true);
+        drawShotCircle({(double)i * 5, (double)i * 5});
+        //Shot *shot = new Shot(i + 1, 10.0, 3 * M_PI / 2, 87.2, 2.3, 1.4);
+        //updateView(shot);
+    }
+    return;
     if (calibThread == NULL && shootThread == NULL) {
         cv::VideoCapture cap(CAMERA_INDEX);
         //cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
