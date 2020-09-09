@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QAudioDeviceInfo>
 #include <cmath>
+#include <algorithm>
 
 #define _USE_MATH_DEFINES
 
@@ -13,7 +14,24 @@ using namespace std::placeholders;
 
 QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
+    std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
+    std::string defaultMic = "Realtek USB2.0 Mic";
     currentMic = sf::SoundRecorder::getDefaultDevice();
+    for (int i = 0; i < micOptions.size(); i++){
+        if (micOptions[i].compare(defaultMic) == 0) {
+            currentMic = defaultMic;
+            break;
+        }
+    }
+
+    const QString defaultCamera = "USB Camera";
+    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    for (int i = 0; i < cameras.size(); i++){
+        if (cameras[i].description().compare(defaultCamera) == 0) {
+            CAMERA_INDEX = i;
+            break;
+        }
+    }
 
     time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     char timestamp[20];
@@ -125,16 +143,6 @@ void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
 
 void QMLCppBridge::calibrationClicked()
 {
-    for (int i = 0; i < 12; i++) {
-        clearTrace(true);
-        drawShotCircle({(double)i * ((i + 1) % 2 * -1) * 5, (double)i * (i % 2 * -1) * 5});
-        //Shot *shot = new Shot(i + 1, 10.0, 3 * M_PI / 2, 87.2, 2.3, 1.4);
-        //updateView(shot);
-    }
-    for (int i = 0; i < 12; i++) {
-        addToBeforeShotTrace({(double)i * ((i + 1) % 2 * -1) * 5, (double)i * (i % 2 * -1) * 5});
-    }
-    return;
     if (calibThread == NULL && shootThread == NULL) {
         cv::VideoCapture cap(CAMERA_INDEX);
         //cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
