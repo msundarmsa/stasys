@@ -152,16 +152,7 @@ void Shot::calcScore()
 {
 	TracePoint shotPoint = shotTrace.getShotPoint();
 	double myScore = 11 - D2P(shotPoint.point, TARGET_CENTER_PT) / 8.0;
-	if (myScore > 10.9)
-	{
-		myScore = 10.9;
-	}
-	else if (myScore < 0.0)
-	{
-		myScore = 0.0;
-	}
-
-	score = (int)myScore;
+    score = myScore > 10.9 ? 10.9 : myScore < 0.0 ? 0.0 : myScore;
 }
 
 void Shot::calcAngle()
