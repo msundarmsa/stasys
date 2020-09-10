@@ -61,5 +61,6 @@ HEADERS += \
     qmlcppbridge.h
 
 DISTFILES += \
+    NavBarButton.qml \
     Toast.qml \
     ToastManager.qml

@@ -2,9 +2,6 @@
 #include "SoundPressureSensor.cpp"
 #include "ShotTrace.h"
 
-#include <thread>
-#include <chrono>
-
 ShootThread::ShootThread(cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
     this->video = video;
 	this->page = page;
@@ -342,7 +339,6 @@ void ShootThread::run() {
         }
 
         fprintf(logFile, "\n");
-        std::this_thread::sleep_for(std::chrono::milliseconds(8));
         frameid++;
 	}
     

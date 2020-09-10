@@ -18,5 +18,6 @@
         <file>ui/images/settings.svg</file>
         <file>ui/images/close_clicked.svg</file>
         <file>ui/images/settings_clicked.svg</file>
+        <file>NavBarButton.qml</file>
     </qresource>
 </RCC>

@@ -18,9 +18,9 @@ Window {
     title: qsTr("STASYS")
     visibility: Qt.WindowFullScreen
     color: "#f0f0f2"
-    FontLoader { id: segoeUILight; source: "ui/fonts/segoe-ui-light.ttf" }
-    FontLoader { id: segoeUISemiBold; source: "ui/fonts/segoe-ui-semibold.ttf" }
-    FontLoader { id: segoeUI; source: "ui/fonts/segoe-ui.ttf" }
+    FontLoader { source: "ui/fonts/segoe-ui-light.ttf" }
+    FontLoader { source: "ui/fonts/segoe-ui-semibold.ttf" }
+    FontLoader { source: "ui/fonts/segoe-ui.ttf" }
 
     SoundEffect {
         id: calibrationDoneSound
@@ -44,6 +44,7 @@ Window {
         onClosed: {
             micChart.reset();
             qmlCppBridge.settingsClosed();
+            settingsBtn.active = false;
         }
 
         ColumnLayout {
@@ -188,12 +189,12 @@ Window {
         id: qmlCppBridge
 
         onUiCalibrationStarted: {
-            calibrateBtn.text = "CALIBRATING";
+            calibrateBtn.active = true;
         }
 
         onUiCalibrationEnded: {
             calibrationDoneSound.play();
-            calibrateBtn.text = "CALIBRATE";
+            calibrateBtn.active = false;
             if (success) {
                 toast.show("Calibration finished successfully!", 3000);
             } else {
@@ -202,11 +203,11 @@ Window {
         }
 
         onUiShootingStarted: {
-            shootBtn.text = "SHOOTING";
+            shootBtn.active = true;
         }
 
         onUiShootingEnded: {
-            shootBtn.text = "SHOOT";
+            shootBtn.active = false;
             targetTrace.resetTrace(false);
             targetTrace.requestPaint();
         }
@@ -267,7 +268,7 @@ Window {
 
     Rectangle {
         id: topBar
-        color: "#4f5859"
+        color: "#26547c"
         width: parent.width
         height: 64
 
@@ -285,40 +286,24 @@ Window {
         Text {
             text: "STASYS"
             color: "white"
-            font.family: segoeUI.name
+            font.family: "Segoe UI"
             font.pointSize: 25
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: logo.right
             anchors.leftMargin: 10
         }
 
-        Image {
+        NavBarButton {
             id: settingsBtn
-            width: 20
-            height: 20
-            fillMode: Image.PreserveAspectFit
-            source: "ui/images/settings.svg"
-            mipmap: true
+            logoSource: "ui/images/settings.svg"
+            pressedLogoSource: "ui/images/settings_clicked.svg"
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider0.right
             anchors.rightMargin: 20
-
-            MouseArea {
-                width: parent.width
-                height: parent.height
-
-                onClicked: {
-                    qmlCppBridge.settingsOpened();
-                    settingsDialog.open();
-                }
-
-                onPressed: {
-                    parent.source = "ui/images/settings_clicked.svg";
-                }
-
-                onReleased: {
-                    parent.source = "ui/images/settings.svg";
-                }
+            onClickedHandler: function (){
+                qmlCppBridge.settingsOpened();
+                settingsDialog.open();
+                active = true;
             }
         }
 
@@ -332,32 +317,14 @@ Window {
             height: parent.height - 30
         }
 
-        Text {
+        NavBarButton {
             id: calibrateBtn
-            text: "CALIBRATE"
-            color: "#ffffff"
-            font.family: segoeUILight.name
-            font.pointSize: 20
+            defaultText: "CALIBRATE"
+            activeText: "CALIBRATING"
+            onClickedHandler: qmlCppBridge.calibrationClicked
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider1.left
             anchors.rightMargin: 20
-
-            MouseArea {
-                width: parent.width
-                height: parent.height
-
-                onClicked: {
-                    qmlCppBridge.calibrationClicked();
-                }
-
-                onPressed: {
-                    parent.color = "#BEBEBE"
-                }
-
-                onReleased: {
-                    parent.color = "#ffffff"
-                }
-            }
         }
 
         Rectangle {
@@ -370,32 +337,14 @@ Window {
             height: parent.height - 30
         }
 
-        Text {
+        NavBarButton {
             id: shootBtn
-            text: "SHOOT"
-            color: "white"
-            font.family: segoeUILight.name
-            font.pointSize: 20
+            defaultText: "SHOOT"
+            activeText: "SHOOTING"
+            onClickedHandler: qmlCppBridge.shootClicked
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider2.left
             anchors.rightMargin: 20
-
-            MouseArea {
-                width: parent.width
-                height: parent.height
-
-                onClicked: {
-                    qmlCppBridge.shootClicked();
-                }
-
-                onPressed: {
-                    parent.color = "#BEBEBE"
-                }
-
-                onReleased: {
-                    parent.color = "#ffffff"
-                }
-            }
         }
 
         Rectangle {
@@ -501,7 +450,7 @@ Window {
 
                         onPaint: {
                             let ctx = getContext("2d");
-                            ctx.strokeStyle = "#04bfbf";
+                            ctx.strokeStyle = "#ef476f";
                             ctx.lineWidth = 2;
                             ctx.setLineDash([1, 1]);
                             ctx.ellipse(0, 0, width, width);
@@ -565,7 +514,7 @@ Window {
                         function drawShotCircle(x, y) {
                             let point = transformPoint(x, y);
                             if (shotCircles.length > 0) {
-                                shotCircles[shotCircles.length - 1].color = '#a9a9a9';
+                                shotCircles[shotCircles.length - 1].color = '#ffd166';
                             }
 
                             shotCircles.push(Qt.createQmlObject("import QtQuick 2.0;
@@ -573,7 +522,7 @@ Window {
                                     id: draggableCircle
                                     width: targetTrace.radius * 2
                                     height: targetTrace.radius * 2
-                                    color: '#04bfbf'
+                                    color: '#ef476f'
                                     border.width: 2
                                     border.color: '#ffffff'
                                     x: " + point.x + " - width / 2
@@ -688,7 +637,8 @@ Window {
 
                     Text {
                         id: stabilityTitle
-                        font.family: segoeUISemiBold.name
+                        font.family: "Segoe UI"
+                        font.weight: Font.DemiBold
                         font.pointSize: 20
                         color: "#4f5859"
                         text: "STABILITY"
@@ -733,7 +683,8 @@ Window {
 
                     Text {
                         id: stabilityVal
-                        font.family: segoeUILight.name
+                        font.family: "Segoe UI"
+                        font.weight: Font.Light
                         font.pointSize: 60
                         anchors.top: stabilityTitle.bottom
                         anchors.topMargin: 0
@@ -765,7 +716,8 @@ Window {
 
                     Text {
                         id: descTitle
-                        font.family: segoeUISemiBold.name
+                        font.family: "Segoe UI"
+                        font.weight: Font.DemiBold
                         font.pointSize: 20
                         color: "#4f5859"
                         text: "DESC TIME"
@@ -787,7 +739,8 @@ Window {
 
                     Text {
                         id: descVal
-                        font.family: segoeUILight.name
+                        font.family: "Segoe UI"
+                        font.weight: Font.Light
                         font.pointSize: 60
                         anchors.top: descTitle.bottom
                         anchors.topMargin: 0
@@ -819,7 +772,8 @@ Window {
 
                     Text {
                         id: aimTitle
-                        font.family: segoeUISemiBold.name
+                        font.family: "Segoe UI"
+                        font.weight: Font.DemiBold
                         font.pointSize: 20
                         color: "#4f5859"
                         text: "AIM TIME"
@@ -842,7 +796,8 @@ Window {
 
                     Text {
                         id: aimVal
-                        font.family: segoeUILight.name
+                        font.family: "Segoe UI"
+                        font.weight: Font.Light
                         font.pointSize: 60
                         anchors.top: aimTitle.bottom
                         anchors.topMargin: 0
@@ -957,7 +912,7 @@ Window {
                                     context.lineWidth = 3;
 
                                     for (let i = 0; i < points.count; i++) {
-                                        context.fillStyle = (active && i == points.count - 1) ? "#04bfbf" : points.get(i).insideCircle ? "#a9a9a9" : "#df468e";
+                                        context.fillStyle = (active && i == points.count - 1) ? "#ef476f" : points.get(i).insideCircle ? "#ffd166" : "#ef476f";
                                         drawShot(context, points.get(i));
                                     }
                                 }
@@ -1058,7 +1013,8 @@ Window {
                                     text: score.toFixed(1)
                                     color: "#04bfbf"
                                     font.pointSize: 25
-                                    font.family: segoeUILight.name
+                                    font.family: "Segoe UI"
+                                    font.weight: Font.Light
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: logNumCircle.right
                                     anchors.leftMargin: 10
@@ -1100,7 +1056,8 @@ Window {
                                     id: logDescLbl
                                     text: desc.toFixed(1) + "s"
                                     color: "#04bfbf"
-                                    font.family: segoeUILight.name
+                                    font.family: "Segoe UI"
+                                    font.weight: Font.Light
                                     font.pointSize: 20
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: logDescIcon.left
@@ -1122,7 +1079,8 @@ Window {
                                     id: logAimLbl
                                     text: aim.toFixed(1) + "s"
                                     color: "#04bfbf"
-                                    font.family: segoeUILight.name
+                                    font.family: "Segoe UI"
+                                    font.weight: Font.Light
                                     font.pointSize: 20
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: logAimIcon.left
