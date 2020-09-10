@@ -652,7 +652,7 @@ Window {
             }
 
             Rectangle {
-                width: parent.width
+                width: targetTrace.width
                 height: 120
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
