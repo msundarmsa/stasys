@@ -113,9 +113,11 @@ class CalibrationThread : public RecordThread {
 				Vector2D avg = averages[0] + averages[1] + averages[2];
 				avg = { avg.x / 3, avg.y / 3 };
 
-				if (D2P(averages[0], avg) < avgRadius &&
-						D2P(averages[1], avg) < avgRadius &&
-						D2P(averages[2], avg) < avgRadius) {
+                double nineRingRadius = 16 * avgRadius / PISTOL_CIRCLE_SIZE;
+
+                if (D2P(averages[0], avg) < nineRingRadius &&
+                        D2P(averages[1], avg) < nineRingRadius &&
+                        D2P(averages[2], avg) < nineRingRadius) {
 					avgCircle->center = avg;
 					avgCircle->radius = avgRadius;
 					return;
@@ -142,7 +144,7 @@ class CalibrationThread : public RecordThread {
 			bool success = false;
 
 			// calibration finishes when a valid average of points within 3s is found
-			while (!stopRecording && avgCircle.radius == -1) {
+            while (!stopRecording && avgCircle.radius <= 0) {
 				// get frame
 				fprintf(logFile, "Frame #%d", frameId);
 				video >> frame;
@@ -159,9 +161,15 @@ class CalibrationThread : public RecordThread {
 
 				lCurrTime = SystemClock::getCurrentTimeMillis();
 
+                double totalTime = SystemClock::getElapsedSeconds(lCurrTime, lStartTime);
+                if (totalTime > 15) {
+                    fprintf(logFile, "\tTimeout!\n");
+                    break;
+                }
+
 				TargetCircle target = findCircle(frame);
 				fprintf(logFile, "\t(%.3f , %.3f) %.3f\n", target.center.x, target.center.y, target.radius);
-				if (target.radius != -1) {
+                if (target.radius > 0) {
 					// circle is found
 					TraceCircle trace = { target, lCurrTime };
 
@@ -203,7 +211,7 @@ class CalibrationThread : public RecordThread {
 						}
 					}
 
-					if (avgCircle.radius != -1.0) {
+                    if (avgCircle.radius > 0) {
 						// a valid average was produced
                         vecX = avgCircle.center.x;
                         vecY = avgCircle.center.y;
@@ -213,7 +221,10 @@ class CalibrationThread : public RecordThread {
 						success = true;
 						break;
 					}
-				}
+                } else {
+                    // circle is not found reset trace
+                    currentTrace.clear();
+                }
 
                 frameId++;
 			}
