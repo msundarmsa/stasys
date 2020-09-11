@@ -8,8 +8,6 @@
         <file>ui/images/close.svg</file>
         <file>ui/images/aim.svg</file>
         <file>ui/images/desc.svg</file>
-        <file>ui/images/zoomedTarget.png</file>
-        <file>ui/images/target.png</file>
         <file>ShotLogListModel.qml</file>
         <file>ShotGroupListModel.qml</file>
         <file>ToastManager.qml</file>
@@ -19,10 +17,7 @@
         <file>ui/images/close_clicked.svg</file>
         <file>ui/images/settings_clicked.svg</file>
         <file>NavBarButton.qml</file>
-        <file>ui/images/new_target.png</file>
         <file>ui/images/settings_pressed.svg</file>
         <file>ShotStat.qml</file>
-        <file>ui/images/target.svg</file>
-        <file>ui/images/new_zoomedTarget.png</file>
     </qresource>
 </RCC>

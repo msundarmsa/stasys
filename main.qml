@@ -29,6 +29,55 @@ Window {
     property var accentColor1: "#FFFFFF"
     property var accentColor2: "#DF2935"
 
+    property var circles: [
+        { radius:311/680, fill:"", border:"#D7EC58" },
+        { radius:279/680, fill:"", border:"#D7EC58" },
+        { radius:247/680, fill:"", border:"#D7EC58" },
+        { radius:43/136, fill:"", border:"#D7EC58" },
+        { radius:183/680, fill:"", border:"#D7EC58" },
+        { radius:151/680, fill:"", border:"#D7EC58" },
+        { radius:7/40, fill:"#D7EC58", border:"" },
+        { radius:87/680, fill:"#D7EC59", border:"#464646" },
+        { radius:11/136, fill:"#D7EC60", border:"#464646" },
+        { radius:23/680, fill:"#D7EC61", border:"#464646" },
+        { radius:1/68, fill:"#D7EC62", border:"#464646" }
+    ]
+
+    property var circleNumbers: [
+        { text: "1", x:   1/2  , y: 127/136, color: "#D7EC58" },
+        { text: "1", x:   1/2  , y:   9/136, color: "#D7EC58" },
+        { text: "1", x: 127/136, y:   1/2  , color: "#D7EC58" },
+        { text: "1", x:   9/136, y:   1/2  , color: "#D7EC58" },
+        { text: "2", x:   1/2  , y: 603/680, color: "#D7EC58" },
+        { text: "2", x:   1/2  , y:  77/680, color: "#D7EC58" },
+        { text: "2", x: 603/680, y:   1/2  , color: "#D7EC58" },
+        { text: "2", x:  77/680, y:   1/2  , color: "#D7EC58" },
+        { text: "3", x:   1/2  , y: 571/680, color: "#D7EC58" },
+        { text: "3", x:   1/2  , y: 109/680, color: "#D7EC58" },
+        { text: "3", x: 571/680, y:   1/2  , color: "#D7EC58" },
+        { text: "3", x: 109/680, y:   1/2  , color: "#D7EC58" },
+        { text: "4", x:   1/2  , y: 539/680, color: "#D7EC58" },
+        { text: "4", x:   1/2  , y: 141/680, color: "#D7EC58" },
+        { text: "4", x: 539/680, y:   1/2  , color: "#D7EC58" },
+        { text: "4", x: 141/680, y:   1/2  , color: "#D7EC58" },
+        { text: "5", x:   1/2  , y: 507/680, color: "#D7EC58" },
+        { text: "5", x:   1/2  , y: 173/680, color: "#D7EC58" },
+        { text: "5", x: 507/680, y:   1/2  , color: "#D7EC58" },
+        { text: "5", x: 173/680, y:   1/2  , color: "#D7EC58" },
+        { text: "6", x:   1/2  , y:  95/136, color: "#D7EC58" },
+        { text: "6", x:   1/2  , y:  41/136, color: "#D7EC58" },
+        { text: "6", x:  95/136, y:   1/2  , color: "#D7EC58" },
+        { text: "6", x:  41/136, y:   1/2  , color: "#D7EC58" },
+        { text: "7", x:   1/2  , y: 443/680, color: "#464646" },
+        { text: "7", x:   1/2  , y: 237/680, color: "#464646" },
+        { text: "7", x: 443/680, y:   1/2  , color: "#464646" },
+        { text: "7", x: 237/680, y:   1/2  , color: "#464646" },
+        { text: "8", x:   1/2  , y: 411/680, color: "#464646" },
+        { text: "8", x:   1/2  , y: 269/680, color: "#464646" },
+        { text: "8", x: 411/680, y:   1/2  , color: "#464646" },
+        { text: "8", x: 269/680, y:   1/2  , color: "#464646" }
+    ]
+
     Component.onCompleted: {
         targetTrace.drawShotCircle(0,0);
         targetTrace.drawShotCircle(10,35);
@@ -459,12 +508,41 @@ Window {
                     border.color: secondaryColor
                     radius: 10
 
-                    Image {
-                        width: parent.width
-                        height: parent.height
-                        source: "ui/images/new_target.png"
-                        mipmap: true
-                        fillMode: Image.PreserveAspectFit
+                    Canvas {
+                        anchors.fill: parent
+
+                        onPaint: {
+                            let ctx = getContext("2d");
+                            for (const circle of circles) {
+                                ctx.fillStyle = circle.fill;
+                                ctx.strokeStyle = circle.border;
+
+                                const radius = circle.radius * width;
+                                const x = width / 2 - radius;
+                                const y = height / 2 - radius;
+
+                                ctx.beginPath();
+                                ctx.ellipse(x, y, radius * 2, radius * 2);
+                                if (circle.fill != "") {
+                                    ctx.fill();
+                                }
+
+                                if (circle.border != "") {
+                                    ctx.stroke();
+                                }
+                            }
+
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "middle";
+                            ctx.font = "normal normal 0 10px 'Segoe UI'";
+                            for (const circleNum of circleNumbers) {
+                                ctx.strokeStyle = circleNum.color;
+                                const x = circleNum.x * width;
+                                const y = circleNum.y * height;
+                                ctx.beginPath();
+                                ctx.strokeText(circleNum.text, x, y);
+                            }
+                        }
                     }
 
                     Canvas {
@@ -817,12 +895,51 @@ Window {
                                 }
                             }
 
-                            Image {
-                                source: "ui/images/new_zoomedTarget.png"
-                                width: parent.width
-                                height: parent.height
-                                mipmap: true
+                            Canvas {
+                                anchors.fill: parent
                                 z: -1
+
+                                onPaint: {
+                                    const ctx = getContext("2d");
+                                    const startCircleIndex = 6;
+                                    const startCircleNumIndex = 24;
+
+                                    const factor = width / (2 * circles[startCircleIndex].radius);
+                                    for (let i = startCircleIndex; i < circles.length; i++) {
+                                        const circle = circles[i];
+                                        ctx.fillStyle = circle.fill;
+                                        ctx.strokeStyle = circle.border;
+
+                                        const radius = circle.radius * factor;
+                                        const x = width / 2 - radius;
+                                        const y = height / 2 - radius;
+
+                                        ctx.beginPath();
+                                        ctx.ellipse(x, y, radius * 2, radius * 2);
+                                        if (circle.fill != "") {
+                                            ctx.fill();
+                                        }
+
+                                        if (circle.border != "") {
+                                            ctx.stroke();
+                                        }
+                                    }
+
+                                    ctx.textAlign = "center";
+                                    ctx.textBaseline = "middle";
+                                    ctx.font = "normal normal 0 10px 'Segoe UI'";
+                                    for (let i = startCircleNumIndex; i < circleNumbers.length; i++) {
+                                        const circleNum = circleNumbers[i];
+                                        ctx.strokeStyle = circleNum.color;
+                                        const deltaX = (circleNum.x - 1/2) * factor;
+                                        const deltaY = (1/2 - circleNum.y) * factor;
+                                        const x = width / 2 + deltaX;
+                                        const y = height / 2 + deltaY;
+
+                                        ctx.beginPath();
+                                        ctx.strokeText(circleNum.text, x, y);
+                                    }
+                                }
                             }
                         }
                     }
