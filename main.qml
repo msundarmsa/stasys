@@ -79,7 +79,7 @@ Window {
     ]
 
     Component.onCompleted: {
-        targetTrace.resetTrace(true);
+        /*targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(0,0);
         shotGroupList.addShot(0,0);
         targetTrace.resetTrace(true);
@@ -102,7 +102,7 @@ Window {
         shotGroupList.addShot(10,-35);
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);*/
     }
 
     SoundEffect {
