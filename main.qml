@@ -26,11 +26,11 @@ Window {
     property var secondaryColor: "#D7EC58"
     property var tertiaryColor: "#FF1493"
     property var quaternaryColor: "#000000"
-    property var accentColor1: "#0f66e9"
+    property var accentColor1: "#FFFFFF"
     property var accentColor2: "#DF2935"
 
     Component.onCompleted: {
-        /*targetTrace.drawShotCircle(0,0);
+        targetTrace.drawShotCircle(0,0);
         targetTrace.drawShotCircle(10,35);
         targetTrace.drawShotCircle(-1,2.5);
         targetTrace.drawShotCircle(-10,35);
@@ -45,9 +45,16 @@ Window {
         shotGroupList.addShot(-45,0);
         shotGroupList.addShot(45,0);
         shotGroupList.addShot(10,-35);
+        shotGroupList.addShot(0,0);
+        shotGroupList.addShot(10,35);
+        shotGroupList.addShot(-1,2.5);
+        shotGroupList.addShot(-10,35);
+        shotGroupList.addShot(-45,0);
+        shotGroupList.addShot(45,0);
+        shotGroupList.addShot(10,-35);
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);*/
+        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
     }
 
     SoundEffect {
@@ -431,7 +438,7 @@ Window {
 
         Rectangle {
             id: leftContent
-            anchors.margins: 20
+            anchors.margins: 10
             anchors.fill: parent
             color: "transparent"
 
@@ -463,8 +470,8 @@ Window {
                     Canvas {
                         id: calibratingCircle
                         visible: false
-                        width: targetTrace.radius * 2 + 5
-                        height: targetTrace.radius * 2 + 5
+                        width: targetTrace.radius * 2 + 6
+                        height: targetTrace.radius * 2 + 6
                         x: 0
                         y: 0
                         z: 100
@@ -520,9 +527,9 @@ Window {
                         }
 
                         function calibrateShot(shot) {
-                            calibrationPoint = {"x": shot.x - 2.5, "y": shot.y - 2.5};
-                            calibratingCircle.x = shot.x - 2.5;
-                            calibratingCircle.y = shot.y - 2.5;
+                            calibrationPoint = {"x": shot.x - 2, "y": shot.y - 2};
+                            calibratingCircle.x = shot.x - 2;
+                            calibratingCircle.y = shot.y - 2;
                             calibratingCircle.visible = true;
                             requestPaint();
                         }
@@ -681,7 +688,7 @@ Window {
 
         Rectangle {
             id: rightContent
-            anchors.margins: 20
+            anchors.margins: 10
             anchors.fill: parent
             color: "transparent"
 
@@ -748,8 +755,8 @@ Window {
                                     let pos = transformPoint(x, y);
                                     points.append({insideCircle: true, x: pos.x, y: pos.y, angle: angle});
                                 } else {
-                                    let newX = 28.75 * Math.cos(angle);
-                                    let newY = 28.75 * Math.sin(angle);
+                                    let newX = 29 * Math.cos(angle);
+                                    let newY = 29 * Math.sin(angle);
                                     let pos = transformPoint(newX, newY);
                                     points.append({insideCircle: false, x: pos.x, y: pos.y, angle: angle});
                                 }
@@ -791,17 +798,13 @@ Window {
                                 }
 
                                 function drawTriangle(context, point) {
-                                    let baseX = 24.75 * Math.cos(point.angle);
-                                    let baseY = 24.75 * Math.sin(point.angle);
-                                    let pos = transformPoint(baseX, baseY);
-
-                                    let deltaAngle = Math.PI / 32;
-                                    let point1X = 24.75 * Math.cos(point.angle + deltaAngle);
-                                    let point1Y = 24.75 * Math.sin(point.angle + deltaAngle);
+                                    let deltaAngle = Math.PI / 64;
+                                    let point1X = 27 * Math.cos(point.angle + deltaAngle);
+                                    let point1Y = 27 * Math.sin(point.angle + deltaAngle);
                                     let point1 = transformPoint(point1X, point1Y);
 
-                                    let point2X = 24.75 * Math.cos(point.angle - deltaAngle);
-                                    let point2Y = 24.75 * Math.sin(point.angle - deltaAngle);
+                                    let point2X = 27 * Math.cos(point.angle - deltaAngle);
+                                    let point2Y = 27 * Math.sin(point.angle - deltaAngle);
                                     let point2 = transformPoint(point2X, point2Y);
 
                                     context.beginPath();
