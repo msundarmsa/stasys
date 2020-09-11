@@ -26,7 +26,7 @@ Window {
     property var secondaryColor: "#D7EC58"
     property var tertiaryColor: "#FF1493"
     property var quaternaryColor: "#000000"
-    property var accentColor1: "#FFFFFF"
+    property var accentColor1: "#10e2e6"
     property var accentColor2: "#DF2935"
 
     property var circles: [
@@ -104,6 +104,13 @@ Window {
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
         qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+
+        targetTrace.addToBeforeShotTrace(0,0);
+        targetTrace.addToBeforeShotTrace(0,10);
+        targetTrace.addToBeforeShotTrace(0,20);
+        targetTrace.addToBeforeShotTrace(10,20);
+        targetTrace.addToBeforeShotTrace(20,20);
+        targetTrace.addToBeforeShotTrace(0,0);
     }
 
     SoundEffect {

@@ -33,26 +33,30 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
         }
     }
 
-    time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    char timestamp[20];
-    std::strftime (timestamp, 20, "%m%d%y_%H%M%S", std::localtime(&currentTime));
-    std::stringstream filename;
-    #ifdef Q_OS_MACX
-        QString currentDir = QCoreApplication::applicationDirPath(); // /<something>/stasys-qt.app/Contents/MacOS
-        int pos = currentDir.lastIndexOf(QChar('/'));
-        currentDir = currentDir.left(pos); // /<something>/stasys-qt.app/Contents
-        pos = currentDir.lastIndexOf(QChar('/'));
-        currentDir = currentDir.left(pos); // /<something>/stasys-qt.app
-        pos = currentDir.lastIndexOf(QChar('/'));
-        currentDir = currentDir.left(pos); // /<something>
-        filename << currentDir.toStdString() << "/";
+    #ifdef QT_QML_DEBUG
+        upDownDetection = false;
+    #else
+        time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        char timestamp[20];
+        std::strftime (timestamp, 20, "%m%d%y_%H%M%S", std::localtime(&currentTime));
+        std::stringstream filename;
+        #ifdef Q_OS_MACX
+            QString currentDir = QCoreApplication::applicationDirPath(); // /<something>/stasys-qt.app/Contents/MacOS
+            int pos = currentDir.lastIndexOf(QChar('/'));
+            currentDir = currentDir.left(pos); // /<something>/stasys-qt.app/Contents
+            pos = currentDir.lastIndexOf(QChar('/'));
+            currentDir = currentDir.left(pos); // /<something>/stasys-qt.app
+            pos = currentDir.lastIndexOf(QChar('/'));
+            currentDir = currentDir.left(pos); // /<something>
+            filename << currentDir.toStdString() << "/";
+        #endif
+        filename << "STASYSLog_" << timestamp << ".txt";
+        logFile = fopen (filename.str().c_str() , "w");
+        if (logFile == NULL) {
+            logFile = stdout;
+            qDebug() << "Could not open log file";
+        }
     #endif
-    filename << "STASYSLog_" << timestamp << ".txt";
-    logFile = fopen (filename.str().c_str() , "w");
-    if (logFile == NULL) {
-        logFile = stdout;
-        qDebug() << "Could not open log file";
-    }
 }
 
 void QMLCppBridge::closingApplication()
