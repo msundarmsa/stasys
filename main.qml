@@ -79,7 +79,7 @@ Window {
     ]
 
     Component.onCompleted: {
-        /*targetTrace.resetTrace(true);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(0,0);
         shotGroupList.addShot(0,0);
         targetTrace.resetTrace(true);
@@ -100,9 +100,21 @@ Window {
         targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(10,-35);
         shotGroupList.addShot(10,-35);
+        targetTrace.resetTrace(true);
+        targetTrace.drawShotCircle(11,-35);
+        shotGroupList.addShot(11,-35);
+        targetTrace.resetTrace(true);
+        targetTrace.drawShotCircle(12,-35);
+        shotGroupList.addShot(12,-35);
+        targetTrace.resetTrace(true);
+        targetTrace.drawShotCircle(13,-35);
+        shotGroupList.addShot(13,-35);
+        targetTrace.resetTrace(true);
+        targetTrace.drawShotCircle(14,-35);
+        shotGroupList.addShot(14,-35);
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);*/
+        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
     }
 
     SoundEffect {
@@ -312,7 +324,7 @@ Window {
             descLbl.stat = desc;
             aimLbl.stat = aim;
 
-            shotLogList.model.append({sn: sn, score: score, stab: stab, desc: desc, aim: aim});
+            shotLogList.model.insert(0, {sn: sn, score: score, stab: stab, desc: desc, aim: aim});
 
             xtYtChart.updateXtYt(xt, yt, ts);
         }
@@ -661,6 +673,7 @@ Window {
                             if (resetGroupIfNecessary && shotCircles.length == 10) {
                                 shotCircles.forEach(shotCircle => shotCircle.destroy());
                                 shotCircles = [];
+                                shotGroupList.currentItem.show();
                             }
 
                             if (resetGroupIfNecessary) {
@@ -776,8 +789,8 @@ Window {
             Rectangle {
                 // zoomed target
                 id: zoomedTargetRect
-                width: parent.width / 3
-                height: parent.height * 2 / 3
+                width: parent.width / 3 - 40
+                height: parent.height
                 anchors.left: parent.left
                 anchors.top: parent.top
                 color: "transparent"
@@ -796,7 +809,7 @@ Window {
 
                     ListView {
                         id: shotGroupList
-                        verticalLayoutDirection: ListView.BottomToTop
+                        verticalLayoutDirection: ListView.TopToBottom
                         model: ShotGroupListModel {}
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -807,9 +820,9 @@ Window {
                         function addShot(x, y) {
                             shotCount += 1;
                             if (shotCount != 1 && shotCount % 10 == 1) {
-                                model.append({ points: [] });
+                                model.insert(0, { points: [] });
                             }
-                            currentIndex = count - 1
+                            currentIndex = 0
                             currentItem.addShot(x, y);
                         }
 
@@ -821,8 +834,14 @@ Window {
                             width: shotGroupList.width - 10
                             height: width
                             anchors.horizontalCenter: parent.horizontalCenter
+                            visible: true
                             property var factor: (width / 2) / 29.75 // convert mm to px
                             property var latestShotIndex: -1
+
+                            function show() {
+                                visible = true;
+                                zoomedShotCanvas.requestPaint();
+                            }
 
                             function transformPoint(x, y) {
                                 return { x: x * factor + width / 2, y: height / 2 - y * factor };
@@ -860,6 +879,7 @@ Window {
 
                                 onPaint: {
                                     var context = getContext("2d");
+                                    context.reset();
                                     context.strokeStyle = "#ffffff";
                                     context.lineWidth = 3;
 
@@ -976,7 +996,7 @@ Window {
 
                     ListView {
                         id: shotLogList
-                        verticalLayoutDirection: ListView.BottomToTop
+                        verticalLayoutDirection: ListView.TopToBottom
                         model: ShotLogListModel {}
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -1116,11 +1136,12 @@ Window {
             Rectangle {
                 // x-t/y-t chart
                 id: chartRect
-                width: parent.width
+                width: shotLogRect.width
                 height: parent.height / 3
                 anchors.bottom: parent.bottom
                 anchors.top: shotLogRect.bottom
                 anchors.topMargin: 20
+                anchors.right: parent.right
                 color: "transparent"
                 border.color: secondaryColor
                 radius: 10
@@ -1136,7 +1157,7 @@ Window {
                     antialiasing: true
                     backgroundColor: "transparent"
                     titleColor: secondaryColor
-                    legend.labelColor: secondaryColor
+                    legend.visible: false
 
                     function updateXtYt(xt, yt, ts) {
                         this.removeAllSeries();
