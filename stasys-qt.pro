@@ -62,5 +62,6 @@ HEADERS += \
 
 DISTFILES += \
     NavBarButton.qml \
+    ShotStat.qml \
     Toast.qml \
     ToastManager.qml

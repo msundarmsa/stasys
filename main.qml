@@ -17,10 +17,38 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.Window
     title: qsTr("STASYS")
     visibility: Qt.WindowFullScreen
-    color: "#f0f0f2"
+    color: primaryColor
     FontLoader { source: "ui/fonts/segoe-ui-light.ttf" }
     FontLoader { source: "ui/fonts/segoe-ui-semibold.ttf" }
     FontLoader { source: "ui/fonts/segoe-ui.ttf" }
+
+    property var primaryColor: "#464646"
+    property var secondaryColor: "#D7EC58"
+    property var tertiaryColor: "#FF1493"
+    property var quaternaryColor: "#000000"
+    property var accentColor1: "#0f66e9"
+    property var accentColor2: "#DF2935"
+
+    Component.onCompleted: {
+        /*targetTrace.drawShotCircle(0,0);
+        targetTrace.drawShotCircle(10,35);
+        targetTrace.drawShotCircle(-1,2.5);
+        targetTrace.drawShotCircle(-10,35);
+        targetTrace.drawShotCircle(-45,0);
+        targetTrace.drawShotCircle(45,0);
+        targetTrace.drawShotCircle(10,-35);
+
+        shotGroupList.addShot(0,0);
+        shotGroupList.addShot(10,35);
+        shotGroupList.addShot(-1,2.5);
+        shotGroupList.addShot(-10,35);
+        shotGroupList.addShot(-45,0);
+        shotGroupList.addShot(45,0);
+        shotGroupList.addShot(10,-35);
+
+        qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
+        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);*/
+    }
 
     SoundEffect {
         id: calibrationDoneSound
@@ -225,9 +253,9 @@ Window {
         }
 
         onUiUpdateView: {
-            stabilityLbl.setStab(stab);
-            descLbl.setDesc(desc);
-            aimLbl.setAim(aim);
+            stabilityLbl.stat = stab;
+            descLbl.stat = desc;
+            aimLbl.stat = aim;
 
             shotLogList.model.append({sn: sn, score: score, stab: stab, desc: desc, aim: aim});
 
@@ -268,7 +296,7 @@ Window {
 
     Rectangle {
         id: topBar
-        color: "#26547c"
+        color: primaryColor
         width: parent.width
         height: 64
 
@@ -296,10 +324,12 @@ Window {
         NavBarButton {
             id: settingsBtn
             logoSource: "ui/images/settings.svg"
-            pressedLogoSource: "ui/images/settings_clicked.svg"
+            pressedLogoSource: "ui/images/settings_pressed.svg"
+            clickedLogoSource: "ui/images/settings_clicked.svg"
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider0.right
             anchors.rightMargin: 20
+            activeColor: secondaryColor
             onClickedHandler: function (){
                 qmlCppBridge.settingsOpened();
                 settingsDialog.open();
@@ -322,6 +352,8 @@ Window {
             defaultText: "CALIBRATE"
             activeText: "CALIBRATING"
             onClickedHandler: qmlCppBridge.calibrationClicked
+            activeColor: secondaryColor
+            activeTextColor: primaryColor
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider1.left
             anchors.rightMargin: 20
@@ -342,6 +374,8 @@ Window {
             defaultText: "SHOOT"
             activeText: "SHOOTING"
             onClickedHandler: qmlCppBridge.shootClicked
+            activeColor: secondaryColor
+            activeTextColor: primaryColor
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: divider2.left
             anchors.rightMargin: 20
@@ -414,18 +448,14 @@ Window {
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
                     clip: true
-                    border.color: "#0000001E"
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 2
-                        verticalOffset: 2
-                        color: "#19000000"
-                    }
+                    color: "transparent"
+                    border.color: secondaryColor
+                    radius: 10
 
                     Image {
                         width: parent.width
                         height: parent.height
-                        source: "ui/images/target.png"
+                        source: "ui/images/new_target.png"
                         mipmap: true
                         fillMode: Image.PreserveAspectFit
                     }
@@ -514,21 +544,21 @@ Window {
                         function drawShotCircle(x, y) {
                             let point = transformPoint(x, y);
                             if (shotCircles.length > 0) {
-                                shotCircles[shotCircles.length - 1].color = '#ffd166';
+                                shotCircles[shotCircles.length - 1].color = quaternaryColor;
                             }
 
                             shotCircles.push(Qt.createQmlObject("import QtQuick 2.0;
                                 Rectangle {
                                     id: draggableCircle
-                                    width: targetTrace.radius * 2
-                                    height: targetTrace.radius * 2
-                                    color: '#ef476f'
-                                    border.width: 2
+                                    width: (targetTrace.radius + border.width) * 2
+                                    height: (targetTrace.radius + border.width) * 2
+                                    color: tertiaryColor
+                                    border.width: 1
                                     border.color: '#ffffff'
                                     x: " + point.x + " - width / 2
                                     y: " + point.y + " - height / 2
                                     z: 1
-                                    radius: targetTrace.radius
+                                    radius: targetTrace.radius + border.width
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -562,7 +592,7 @@ Window {
                             ctx.lineWidth = 2;
 
                             if (calibrationPoint.x != -1 && calibrationPoint.y != -1) {
-                                ctx.strokeStyle = "#04bfbf";
+                                ctx.strokeStyle = tertiaryColor;
                                 ctx.beginPath();
                                 let pointStartX = calibrationPoint.x + 2.5 + radius;
                                 let pointStartY = calibrationPoint.y + 2.5 + radius;
@@ -574,7 +604,7 @@ Window {
                             }
 
                             if (beforeShotTrace.length > 0) {
-                                ctx.strokeStyle = "#8ddf46";
+                                ctx.strokeStyle = accentColor1;
 
                                 ctx.beginPath();
                                 ctx.moveTo(beforeShotTrace[0]["x"], beforeShotTrace[0]["y"]);
@@ -586,7 +616,7 @@ Window {
                             }
 
                             if (afterShotTrace.length > 0) {
-                                ctx.strokeStyle = "#df6f46";
+                                ctx.strokeStyle = accentColor2;
                                 ctx.beginPath();
                                 ctx.moveTo(afterShotTrace[0]["x"], afterShotTrace[0]["y"]);
                                 for (let i = 1; i < afterShotTrace.length; i++) {
@@ -607,204 +637,35 @@ Window {
                 anchors.horizontalCenter: parent.horizontalCenter
                 color: "transparent"
 
-                Rectangle {
+                ShotStat {
                     id: stabilityLbl
-                    width: (parent.width - 40) / 3
-                    height: parent.height
+                    title: "STABILITY"
+                    primaryColor: secondaryColor
+                    dp: 0
+                    suffix: "%"
                     anchors.left: parent.left
-                    color: "#ffffff"
-                    border.color: "#0000001E"
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 2
-                        verticalOffset: 2
-                        color: "#19000000"
-                    }
-
-                    function setStab(stab) {
-                        stab = stab.toFixed(0);
-                        if (stab < 50) {
-                            stabilityPBColor.color = "#DF6F45";
-                        } else if (stab < 70) {
-                            stabilityPBColor.color = "#DADF46";
-                        } else {
-                            stabilityPBColor.color = "#8CDF46";
-                        }
-
-                        stabilityPB.value = stab / 100;
-                        stabilityVal.text = stab + "%";
-                    }
-
-                    Text {
-                        id: stabilityTitle
-                        font.family: "Segoe UI"
-                        font.weight: Font.DemiBold
-                        font.pointSize: 20
-                        color: "#4f5859"
-                        text: "STABILITY"
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-                    }
-
-                    ProgressBar {
-                        id: stabilityPB
-                        value: 0
-
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        anchors.left: stabilityTitle.right
-                        anchors.leftMargin: 10
-                        anchors.verticalCenter: stabilityTitle.verticalCenter
-
-                        background: Rectangle {
-                            implicitWidth: 200
-                            implicitHeight: 6
-                            color: "#e6e6e6"
-                            radius: 3
-                        }
-
-                        contentItem: Item {
-                            implicitWidth: 200
-                            implicitHeight: 4
-
-                            Rectangle {
-                                id: stabilityPBColor
-                                width: stabilityPB.visualPosition * parent.width
-                                height: parent.height
-                                radius: 2
-                                // average color: "#DADF46"
-                                // good color: "#8CDF46"
-                                color: "#DF6F45"
-                            }
-                        }
-                    }
-
-                    Text {
-                        id: stabilityVal
-                        font.family: "Segoe UI"
-                        font.weight: Font.Light
-                        font.pointSize: 60
-                        anchors.top: stabilityTitle.bottom
-                        anchors.topMargin: 0
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "0%"
-                        color: "#04bfbf"
-                    }
                 }
 
-                Rectangle {
+                ShotStat {
                     id: descLbl
-                    width: (parent.width - 40) / 3
-                    height: parent.height
+                    title: "DESC"
+                    primaryColor: secondaryColor
+                    logoSource: "ui/images/desc.svg"
+                    dp: 1
+                    suffix: "s"
                     anchors.left: stabilityLbl.right
                     anchors.leftMargin: 20
-                    color: "#ffffff"
-
-                    function setDesc(desc) {
-                        desc = desc.toFixed(1);
-                        descVal.text = desc + "s";
-                    }
-
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 2
-                        verticalOffset: 2
-                        color: "#19000000"
-                    }
-
-                    Text {
-                        id: descTitle
-                        font.family: "Segoe UI"
-                        font.weight: Font.DemiBold
-                        font.pointSize: 20
-                        color: "#4f5859"
-                        text: "DESC TIME"
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-                    }
-
-                    Image {
-                        source: "ui/images/desc.svg"
-                        height: 25
-                        width: 25
-                        fillMode: Image.PreserveAspectFit
-                        anchors.verticalCenter: descTitle.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                    }
-
-                    Text {
-                        id: descVal
-                        font.family: "Segoe UI"
-                        font.weight: Font.Light
-                        font.pointSize: 60
-                        anchors.top: descTitle.bottom
-                        anchors.topMargin: 0
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "0.0s"
-                        color: "#04bfbf"
-                    }
                 }
 
-                Rectangle {
+                ShotStat {
                     id: aimLbl
-                    width: (parent.width - 40) / 3
-                    height: parent.height
+                    title: "AIM"
+                    primaryColor: secondaryColor
+                    logoSource: "ui/images/aim.svg"
+                    dp: 1
+                    suffix: "s"
                     anchors.left: descLbl.right
                     anchors.leftMargin: 20
-                    color: "#ffffff"
-
-                    function setAim(aim) {
-                        aim = aim.toFixed(1);
-                        aimVal.text = aim + "s";
-                    }
-
-                    layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 2
-                        verticalOffset: 2
-                        color: "#19000000"
-                    }
-
-                    Text {
-                        id: aimTitle
-                        font.family: "Segoe UI"
-                        font.weight: Font.DemiBold
-                        font.pointSize: 20
-                        color: "#4f5859"
-                        text: "AIM TIME"
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                        anchors.top: parent.top
-                        anchors.topMargin: 5
-                    }
-
-                    Image {
-                        source: "ui/images/aim.svg"
-                        height: 25
-                        width: 25
-                        mipmap: true
-                        fillMode: Image.PreserveAspectFit
-                        anchors.verticalCenter: aimTitle.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                    }
-
-                    Text {
-                        id: aimVal
-                        font.family: "Segoe UI"
-                        font.weight: Font.Light
-                        font.pointSize: 60
-                        anchors.top: aimTitle.bottom
-                        anchors.topMargin: 0
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "0.0s"
-                        color: "#04bfbf"
-                    }
                 }
             }
         }
@@ -831,14 +692,9 @@ Window {
                 height: parent.height * 2 / 3
                 anchors.left: parent.left
                 anchors.top: parent.top
-                color: "#ffffff"
-                border.color: "#0000001E"
-                layer.enabled: true
-                layer.effect: DropShadow {
-                    horizontalOffset: 2
-                    verticalOffset: 2
-                    color: "#19000000"
-                }
+                color: "transparent"
+                border.color: secondaryColor
+                radius: 10
 
                 ScrollView {
                     width: parent.width
@@ -848,7 +704,7 @@ Window {
                     clip: true
 
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
                     ListView {
                         id: shotGroupList
@@ -881,15 +737,21 @@ Window {
                             property var factor: (width / 2) / 29.75 // convert mm to px
                             property var active: true
 
+                            function transformPoint(x, y) {
+                                return { x: x * factor + width / 2, y: height / 2 - y * factor };
+                            }
+
                             function addShot(x, y) {
+                                let angle = Math.atan2(y, x);
                                 if (Math.sqrt(x * x + y * y) <= 29.75) {
                                     // within black circle
-                                    points.append({insideCircle: true, x: x * factor + width / 2, y: height / 2 - y * factor});
+                                    let pos = transformPoint(x, y);
+                                    points.append({insideCircle: true, x: pos.x, y: pos.y, angle: angle});
                                 } else {
-                                    let angle = Math.atan2(y, x);
-                                    let newX = 29.75 * Math.cos(angle);
-                                    let newY = 29.75 * Math.sin(angle);
-                                    points.append({insideCircle: false, x: newX * factor + width / 2, y: height / 2 - newY * factor});
+                                    let newX = 28.75 * Math.cos(angle);
+                                    let newY = 28.75 * Math.sin(angle);
+                                    let pos = transformPoint(newX, newY);
+                                    points.append({insideCircle: false, x: pos.x, y: pos.y, angle: angle});
                                 }
 
                                 zoomedShotCanvas.requestPaint();
@@ -912,8 +774,12 @@ Window {
                                     context.lineWidth = 3;
 
                                     for (let i = 0; i < points.count; i++) {
-                                        context.fillStyle = (active && i == points.count - 1) ? "#ef476f" : points.get(i).insideCircle ? "#ffd166" : "#ef476f";
-                                        drawShot(context, points.get(i));
+                                        context.fillStyle = (active && i == points.count - 1) ? tertiaryColor : quaternaryColor;
+                                        if (points.get(i).insideCircle) {
+                                            drawShot(context, points.get(i));
+                                        } else {
+                                            drawTriangle(context, points.get(i));
+                                        }
                                     }
                                 }
 
@@ -923,10 +789,33 @@ Window {
                                     context.stroke();
                                     context.fill();
                                 }
+
+                                function drawTriangle(context, point) {
+                                    let baseX = 24.75 * Math.cos(point.angle);
+                                    let baseY = 24.75 * Math.sin(point.angle);
+                                    let pos = transformPoint(baseX, baseY);
+
+                                    let deltaAngle = Math.PI / 32;
+                                    let point1X = 24.75 * Math.cos(point.angle + deltaAngle);
+                                    let point1Y = 24.75 * Math.sin(point.angle + deltaAngle);
+                                    let point1 = transformPoint(point1X, point1Y);
+
+                                    let point2X = 24.75 * Math.cos(point.angle - deltaAngle);
+                                    let point2Y = 24.75 * Math.sin(point.angle - deltaAngle);
+                                    let point2 = transformPoint(point2X, point2Y);
+
+                                    context.beginPath();
+                                    context.moveTo(point["x"], point["y"]);
+                                    context.lineTo(point1.x, point1.y);
+                                    context.lineTo(point2.x, point2.y);
+                                    context.lineTo(point.x, point.y);
+                                    context.stroke();
+                                    context.fill();
+                                }
                             }
 
                             Image {
-                                source: "ui/images/zoomedTarget.png"
+                                source: "ui/images/new_zoomedTarget.png"
                                 width: parent.width
                                 height: parent.height
                                 mipmap: true
@@ -946,14 +835,9 @@ Window {
                 anchors.top: parent.top
                 anchors.left: zoomedTargetRect.right
                 anchors.leftMargin: 10
-                color: "#ffffff"
-                border.color: "#0000001E"
-                layer.enabled: true
-                layer.effect: DropShadow {
-                    horizontalOffset: 2
-                    verticalOffset: 2
-                    color: "#19000000"
-                }
+                color: "transparent"
+                border.color: secondaryColor
+                radius: 10
 
                 ScrollView {
                     width: parent.width
@@ -963,7 +847,7 @@ Window {
                     clip: true
 
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
                     ListView {
                         id: shotLogList
@@ -986,14 +870,14 @@ Window {
                             Rectangle {
                                 height: parent.height
                                 width: parent.width
-                                color: "#ffffff"
+                                color: "transparent"
 
                                 Rectangle {
                                     id: logNumCircle
                                     width: parent.height / 2
                                     height: parent.height / 2
                                     radius: parent.height / 4
-                                    color: "#a9a9a9"
+                                    color: secondaryColor
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
                                     anchors.leftMargin: 10
@@ -1001,6 +885,7 @@ Window {
                                     Text {
                                         width: parent.width
                                         height: parent.height
+                                        color: primaryColor
                                         fontSizeMode: Text.Fit
                                         horizontalAlignment: Text.AlignHCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -1011,7 +896,7 @@ Window {
                                 Text {
                                     id: logScoreLbl
                                     text: score.toFixed(1)
-                                    color: "#04bfbf"
+                                    color: secondaryColor
                                     font.pointSize: 25
                                     font.family: "Segoe UI"
                                     font.weight: Font.Light
@@ -1055,7 +940,7 @@ Window {
                                 Text {
                                     id: logDescLbl
                                     text: desc.toFixed(1) + "s"
-                                    color: "#04bfbf"
+                                    color: secondaryColor
                                     font.family: "Segoe UI"
                                     font.weight: Font.Light
                                     font.pointSize: 20
@@ -1078,7 +963,7 @@ Window {
                                 Text {
                                     id: logAimLbl
                                     text: aim.toFixed(1) + "s"
-                                    color: "#04bfbf"
+                                    color: secondaryColor
                                     font.family: "Segoe UI"
                                     font.weight: Font.Light
                                     font.pointSize: 20
@@ -1111,14 +996,9 @@ Window {
                 anchors.bottom: parent.bottom
                 anchors.top: shotLogRect.bottom
                 anchors.topMargin: 10
-                color: "#ffffff"
-                border.color: "#0000001E"
-                layer.enabled: true
-                layer.effect: DropShadow {
-                    horizontalOffset: 2
-                    verticalOffset: 2
-                    color: "#19000000"
-                }
+                color: "transparent"
+                border.color: secondaryColor
+                radius: 10
 
                 ChartView {
                     id: xtYtChart
@@ -1129,11 +1009,17 @@ Window {
                     width: parent.width + 24
                     anchors.margins: 0
                     antialiasing: true
+                    backgroundColor: "transparent"
+                    titleColor: secondaryColor
+                    legend.labelColor: secondaryColor
 
                     function updateXtYt(xt, yt, ts) {
                         this.removeAllSeries();
                         var xtSeries = this.createSeries(ChartView.SeriesTypeLine, "X", xAxis, yAxis);
                         var ytSeries = this.createSeries(ChartView.SeriesTypeLine, "Y", xAxis, yAxis);
+
+                        xtSeries.color = accentColor1;
+                        ytSeries.color = accentColor2;
 
                         for (let i = 0; i < ts.length; i++) {
                             xtSeries.append(ts[i], xt[i]);
@@ -1145,24 +1031,30 @@ Window {
                         id: xAxis
                         min: -0.5
                         max: 0.5
+                        labelsColor: secondaryColor
+                        gridLineColor: secondaryColor
                     }
 
                     ValueAxis {
                         id: yAxis
                         min: -29.75
                         max: 29.75
+                        labelsColor: secondaryColor
+                        gridLineColor: secondaryColor
                     }
 
                     LineSeries {
                         name: "X"
                         axisX: xAxis
                         axisY: yAxis
+                        color: accentColor1
                     }
 
                     LineSeries {
                         name: "Y"
                         axisX: xAxis
                         axisY: yAxis
+                        color: accentColor2
                     }
                 }
             }

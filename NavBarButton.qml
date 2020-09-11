@@ -4,7 +4,7 @@ Rectangle {
     width: (logoSource != "" ? logo.width : btnText.width) + 20
     height: (logoSource != "" ? logo.height : btnText.height) + 10
     radius: 5
-    color: active ? "#ef476f" : "transparent"
+    color: active ? activeColor : "transparent"
 
     property var active: false
     property var defaultText: ""
@@ -12,6 +12,9 @@ Rectangle {
     property var onClickedHandler: null
     property var logoSource: ""
     property var pressedLogoSource: ""
+    property var clickedLogoSource: ""
+    property var activeColor: ""
+    property var activeTextColor: ""
 
     Image {
         id: logo
@@ -19,8 +22,10 @@ Rectangle {
         width: logoSource != null ? 20 : 0
         height: logoSource != null ? 20 : 0
         fillMode: Image.PreserveAspectFit
-        source: logoSource
+        source: pressed ? pressedLogoSource : active ? clickedLogoSource : logoSource
         mipmap: true
+
+        property var pressed: false
 
         MouseArea {
             width: parent.width
@@ -33,11 +38,11 @@ Rectangle {
             }
 
             onPressed: {
-                parent.source = pressedLogoSource;
+                parent.pressed = true;
             }
 
             onReleased: {
-                parent.source = logoSource;
+                parent.pressed = false;
             }
         }
     }
@@ -46,10 +51,12 @@ Rectangle {
         id: btnText
         anchors.centerIn: parent
         text: active ? activeText : defaultText
-        color: "#ffffff"
+        color: pressed ? activeColor : active ? activeTextColor : "#ffffff"
         font.family: "Segoe UI"
         font.weight: Font.DemiBold
         font.pointSize: 20
+
+        property var pressed: false
 
         MouseArea {
             anchors.fill: parent
@@ -58,12 +65,11 @@ Rectangle {
                     onClickedHandler();
                 }
             }
-
             onPressed: {
-                parent.color = "#bebebe"
+                parent.pressed = true;
             }
             onReleased: {
-                parent.color = "#ffffff"
+                parent.pressed = false;
             }
         }
     }
