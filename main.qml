@@ -480,13 +480,13 @@ Window {
         anchors.top: topBar.bottom
         anchors.left: parent.left
 
-        width: parent.width / 2
+        width: height - 140
         height: parent.height - topBar.height
         color: "transparent"
 
         Rectangle {
             id: leftContent
-            anchors.margins: 10
+            anchors.margins: 20
             anchors.fill: parent
             color: "transparent"
 
@@ -501,7 +501,6 @@ Window {
                     width: parent.width < parent.height - 20 ? parent.width : parent.height - 20
                     height: width
                     anchors.top: parent.top
-                    anchors.horizontalCenter: parent.horizontalCenter
                     clip: true
                     color: "transparent"
                     border.color: secondaryColor
@@ -724,7 +723,6 @@ Window {
                 width: targetTrace.width
                 height: 120
                 anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 color: "transparent"
 
                 ShotStat {
@@ -765,13 +763,13 @@ Window {
         anchors.top: topBar.bottom
         anchors.right: parent.right
 
-        width: parent.width / 2
+        width: parent.width - leftContent.parent.width + 20
         height: parent.height - topBar.height
         color: "transparent"
 
         Rectangle {
             id: rightContent
-            anchors.margins: 10
+            anchors.margins: 20
             anchors.fill: parent
             color: "transparent"
 
@@ -961,7 +959,7 @@ Window {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.left: zoomedTargetRect.right
-                anchors.leftMargin: 10
+                anchors.leftMargin: 20
                 color: "transparent"
                 border.color: secondaryColor
                 radius: 10
@@ -1022,7 +1020,7 @@ Window {
 
                                 Text {
                                     id: logScoreLbl
-                                    text: score.toFixed(1)
+                                    text: score < 10 ? "  " + score.toFixed(1) : score.toFixed(1)
                                     color: secondaryColor
                                     font.pointSize: 25
                                     font.family: "Segoe UI"
@@ -1122,7 +1120,7 @@ Window {
                 height: parent.height / 3
                 anchors.bottom: parent.bottom
                 anchors.top: shotLogRect.bottom
-                anchors.topMargin: 10
+                anchors.topMargin: 20
                 color: "transparent"
                 border.color: secondaryColor
                 radius: 10
