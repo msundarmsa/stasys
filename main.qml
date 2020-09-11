@@ -79,38 +79,30 @@ Window {
     ]
 
     Component.onCompleted: {
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(0,0);
+        shotGroupList.addShot(0,0);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(10,35);
+        shotGroupList.addShot(10,35);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(-1,2.5);
+        shotGroupList.addShot(-1,2.5);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(-10,35);
+        shotGroupList.addShot(-10,35);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(-45,0);
+        shotGroupList.addShot(-45,0);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(45,0);
+        shotGroupList.addShot(45,0);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(10,-35);
-
-        shotGroupList.addShot(0,0);
-        shotGroupList.addShot(10,35);
-        shotGroupList.addShot(-1,2.5);
-        shotGroupList.addShot(-10,35);
-        shotGroupList.addShot(-45,0);
-        shotGroupList.addShot(45,0);
-        shotGroupList.addShot(10,-35);
-        shotGroupList.addShot(0,0);
-        shotGroupList.addShot(10,35);
-        shotGroupList.addShot(-1,2.5);
-        shotGroupList.addShot(-10,35);
-        shotGroupList.addShot(-45,0);
-        shotGroupList.addShot(45,0);
         shotGroupList.addShot(10,-35);
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
         qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-
-        targetTrace.addToBeforeShotTrace(0,0);
-        targetTrace.addToBeforeShotTrace(0,10);
-        targetTrace.addToBeforeShotTrace(0,20);
-        targetTrace.addToBeforeShotTrace(10,20);
-        targetTrace.addToBeforeShotTrace(20,20);
-        targetTrace.addToBeforeShotTrace(0,0);
     }
 
     SoundEffect {
@@ -635,9 +627,6 @@ Window {
 
                         function drawShotCircle(x, y) {
                             let point = transformPoint(x, y);
-                            if (shotCircles.length > 0) {
-                                shotCircles[shotCircles.length - 1].color = quaternaryColor;
-                            }
 
                             shotCircles.push(Qt.createQmlObject("import QtQuick 2.0;
                                 Rectangle {
@@ -649,7 +638,7 @@ Window {
                                     border.color: '#ffffff'
                                     x: " + point.x + " - width / 2
                                     y: " + point.y + " - height / 2
-                                    z: 1
+                                    z: 3
                                     radius: targetTrace.radius + border.width
 
                                     MouseArea {
@@ -673,6 +662,15 @@ Window {
                             if (resetGroupIfNecessary && shotCircles.length == 10) {
                                 shotCircles.forEach(shotCircle => shotCircle.destroy());
                                 shotCircles = [];
+                            }
+
+                            if (resetGroupIfNecessary) {
+                                if (targetTrace.shotCircles.length > 0) {
+                                    targetTrace.shotCircles[shotCircles.length - 1].color = quaternaryColor;
+                                    targetTrace.shotCircles[shotCircles.length - 1].z = 1;
+                                }
+
+                                shotGroupList.currentItem.resetLastCircleColor();
                             }
 
                             targetTrace.requestPaint();
@@ -811,7 +809,6 @@ Window {
                         function addShot(x, y) {
                             shotCount += 1;
                             if (shotCount != 1 && shotCount % 10 == 1) {
-                                currentItem.resetLastCircleColor();
                                 model.append({ points: [] });
                             }
                             currentIndex = count - 1
@@ -827,7 +824,7 @@ Window {
                             height: width
                             anchors.horizontalCenter: parent.horizontalCenter
                             property var factor: (width / 2) / 29.75 // convert mm to px
-                            property var active: true
+                            property var latestShotIndex: -1
 
                             function transformPoint(x, y) {
                                 return { x: x * factor + width / 2, y: height / 2 - y * factor };
@@ -846,11 +843,14 @@ Window {
                                     points.append({insideCircle: false, x: pos.x, y: pos.y, angle: angle});
                                 }
 
+                                latestShotIndex = points.count - 1;
+
                                 zoomedShotCanvas.requestPaint();
                             }
 
                             function resetLastCircleColor() {
-                                active = false;
+                                latestShotIndex = points.count == 0 ? -1 : points.count + 1;
+                                zoomedShotCanvas.requestPaint();
                             }
 
                             Canvas {
@@ -866,7 +866,7 @@ Window {
                                     context.lineWidth = 3;
 
                                     for (let i = 0; i < points.count; i++) {
-                                        context.fillStyle = (active && i == points.count - 1) ? tertiaryColor : quaternaryColor;
+                                        context.fillStyle = (i == latestShotIndex) ? tertiaryColor : quaternaryColor;
                                         if (points.get(i).insideCircle) {
                                             drawShot(context, points.get(i));
                                         } else {
