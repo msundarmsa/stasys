@@ -831,10 +831,6 @@ Window {
                             shotBuffer.push({x: x, y: y});
                         }
 
-                        onCountChanged: {
-                            currentIndex = count - 1
-                        }
-
                         delegate: ItemDelegate {
                             width: shotGroupList.width - 10
                             height: width
@@ -994,11 +990,6 @@ Window {
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         spacing: 10
-
-                        onCountChanged: {
-                            var newIndex = count - 1
-                            currentIndex = newIndex
-                        }
 
                         delegate: ItemDelegate {
                             width: shotLogList.width - 10
