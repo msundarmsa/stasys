@@ -109,9 +109,9 @@ Window {
         targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(13,-35);
         shotGroupList.addShot(13,-35);
-        targetTrace.resetTrace(true);
+        /*targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(14,-35);
-        shotGroupList.addShot(14,-35);
+        shotGroupList.addShot(14,-35);*/
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
         qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
@@ -673,7 +673,8 @@ Window {
                             if (resetGroupIfNecessary && shotCircles.length == 10) {
                                 shotCircles.forEach(shotCircle => shotCircle.destroy());
                                 shotCircles = [];
-                                shotGroupList.currentItem.show();
+
+                                shotGroupList.showPrevGroup();
                             }
 
                             if (resetGroupIfNecessary) {
@@ -681,8 +682,6 @@ Window {
                                     targetTrace.shotCircles[shotCircles.length - 1].color = quaternaryColor;
                                     targetTrace.shotCircles[shotCircles.length - 1].z = 1;
                                 }
-
-                                shotGroupList.currentItem.resetLastCircleColor();
                             }
 
                             targetTrace.requestPaint();
@@ -810,20 +809,26 @@ Window {
                     ListView {
                         id: shotGroupList
                         verticalLayoutDirection: ListView.TopToBottom
-                        model: ShotGroupListModel {}
+                        model: ListModel {}
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         spacing: 20
                         property var shotCount: 0;
+                        property var shotBuffer: [];
+
+                        function showPrevGroup() {
+                            model.insert(0, { points: [] });
+                            currentIndex = 0;
+                            for (const shot of shotBuffer) {
+                                currentItem.addShot(shot.x, shot.y);
+                            }
+
+                            shotBuffer = [];
+                        }
 
                         function addShot(x, y) {
-                            shotCount += 1;
-                            if (shotCount != 1 && shotCount % 10 == 1) {
-                                model.insert(0, { points: [] });
-                            }
-                            currentIndex = 0
-                            currentItem.addShot(x, y);
+                            shotBuffer.push({x: x, y: y});
                         }
 
                         onCountChanged: {
@@ -836,12 +841,6 @@ Window {
                             anchors.horizontalCenter: parent.horizontalCenter
                             visible: true
                             property var factor: (width / 2) / 29.75 // convert mm to px
-                            property var latestShotIndex: -1
-
-                            function show() {
-                                visible = true;
-                                zoomedShotCanvas.requestPaint();
-                            }
 
                             function transformPoint(x, y) {
                                 return { x: x * factor + width / 2, y: height / 2 - y * factor };
@@ -860,13 +859,6 @@ Window {
                                     points.append({insideCircle: false, x: pos.x, y: pos.y, angle: angle});
                                 }
 
-                                latestShotIndex = points.count - 1;
-
-                                zoomedShotCanvas.requestPaint();
-                            }
-
-                            function resetLastCircleColor() {
-                                latestShotIndex = points.count == 0 ? -1 : points.count + 1;
                                 zoomedShotCanvas.requestPaint();
                             }
 
@@ -884,7 +876,7 @@ Window {
                                     context.lineWidth = 3;
 
                                     for (let i = 0; i < points.count; i++) {
-                                        context.fillStyle = (i == latestShotIndex) ? tertiaryColor : quaternaryColor;
+                                        context.fillStyle = quaternaryColor;
                                         if (points.get(i).insideCircle) {
                                             drawShot(context, points.get(i));
                                         } else {
@@ -997,7 +989,7 @@ Window {
                     ListView {
                         id: shotLogList
                         verticalLayoutDirection: ListView.TopToBottom
-                        model: ShotLogListModel {}
+                        model: ListModel {}
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom

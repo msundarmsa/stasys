@@ -8,8 +8,6 @@
         <file>ui/images/close.svg</file>
         <file>ui/images/aim.svg</file>
         <file>ui/images/desc.svg</file>
-        <file>ShotLogListModel.qml</file>
-        <file>ShotGroupListModel.qml</file>
         <file>ToastManager.qml</file>
         <file>Toast.qml</file>
         <file>ui/sounds/done.wav</file>
