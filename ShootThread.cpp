@@ -284,7 +284,7 @@ void ShootThread::run() {
                 movingAvgIndex++;
 
                 if (movingAvgIndex == 3) {
-                    Vector2D avgCenter = (movingAvg[0].point + movingAvg[0].point + movingAvg[0].point) / 3;
+                    Vector2D avgCenter = (movingAvg[1].point + movingAvg[1].point + movingAvg[1].point) / 3;
 
                     if (!currShotTrace.afterShot()) {
                         if (audio_triggered) {

@@ -78,7 +78,7 @@ Window {
         { text: "8", x: 269/680, y:   1/2  , color: "#464646" }
     ]
 
-    Component.onCompleted: {
+    /*Component.onCompleted: {
         targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(0,0);
         shotGroupList.addShot(0,0);
@@ -109,13 +109,21 @@ Window {
         targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(13,-35);
         shotGroupList.addShot(13,-35);
-        /*targetTrace.resetTrace(true);
+        targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(14,-35);
-        shotGroupList.addShot(14,-35);*/
+        shotGroupList.addShot(14,-35);
 
         qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
         qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-    }
+        qmlCppBridge.uiUpdateView(3, 10.0, 75, 3.6, 5.2, [], [], []);
+        qmlCppBridge.uiUpdateView(4, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(5, 10.0, 75, 3.6, 5.2, [], [], []);
+        qmlCppBridge.uiUpdateView(6, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(7, 10.0, 75, 3.6, 5.2, [], [], []);
+        qmlCppBridge.uiUpdateView(8, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(9, 10.0, 75, 3.6, 5.2, [], [], []);
+        qmlCppBridge.uiUpdateView(10, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+    }*/
 
     SoundEffect {
         id: calibrationDoneSound
@@ -963,7 +971,7 @@ Window {
                 // shot log
                 id: shotLogRect
                 width: parent.width * 2 / 3
-                height: parent.height * 2 / 3
+                height: parent.height * 5 / 9
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.left: zoomedTargetRect.right
@@ -1008,7 +1016,7 @@ Window {
                                     color: secondaryColor
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 10
+                                    anchors.leftMargin: 20
 
                                     Text {
                                         width: parent.width
@@ -1030,7 +1038,7 @@ Window {
                                     font.weight: Font.Light
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: logNumCircle.right
-                                    anchors.leftMargin: 10
+                                    anchors.leftMargin: 20
                                 }
 
                                 ProgressBar {
@@ -1038,9 +1046,9 @@ Window {
                                     value: stab / 100
 
                                     anchors.right: logDescLbl.left
-                                    anchors.rightMargin: 10
+                                    anchors.rightMargin: 30
                                     anchors.left: logScoreLbl.right
-                                    anchors.leftMargin: 10
+                                    anchors.leftMargin: 30
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     background: Rectangle {
@@ -1084,7 +1092,7 @@ Window {
                                     width: height
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: logAimLbl.left
-                                    anchors.rightMargin: 10
+                                    anchors.rightMargin: 20
                                     mipmap: true
                                 }
 
@@ -1107,7 +1115,7 @@ Window {
                                     width: height
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 10
+                                    anchors.rightMargin: 20
                                     mipmap: true
                                 }
                             }
@@ -1120,7 +1128,7 @@ Window {
                 // x-t/y-t chart
                 id: chartRect
                 width: shotLogRect.width
-                height: parent.height / 3
+                height: parent.height * 4 / 9
                 anchors.bottom: parent.bottom
                 anchors.top: shotLogRect.bottom
                 anchors.topMargin: 20
@@ -1129,18 +1137,64 @@ Window {
                 border.color: secondaryColor
                 radius: 10
 
+                Rectangle {
+                    x: parent.width - 40
+                    y: (parent.height - height) / 2 - 20
+                    height: textX.height + 5 + textY.height
+                    color: "transparent"
+
+                    Rectangle {
+                        id: xColor
+                        height: textX.height - 7.5
+                        width: height
+                        color: accentColor1
+                        anchors.left: parent.left
+                        anchors.verticalCenter: textX.verticalCenter
+                    }
+
+                    Text {
+                        id: textX
+                        text: "X"
+                        color: secondaryColor
+                        anchors.top: parent.top
+                        anchors.left: xColor.right
+                        anchors.leftMargin: 5
+                    }
+
+                    Rectangle {
+                        id: yColor
+                        height: textX.height - 7.5
+                        width: height
+                        color: accentColor2
+                        anchors.left: parent.left
+                        anchors.verticalCenter: textY.verticalCenter
+                    }
+
+                    Text {
+                        id: textY
+                        text: "Y"
+                        color: secondaryColor
+                        anchors.top: textX.bottom
+                        anchors.topMargin: 5
+                        anchors.left: yColor.right
+                        anchors.leftMargin: 5
+                    }
+                }
+
                 ChartView {
                     id: xtYtChart
                     title: ""
                     x: -12
                     y: -12
                     height: parent.height + 24
-                    width: parent.width + 24
+                    width: parent.width + 6
                     anchors.margins: 0
                     antialiasing: true
                     backgroundColor: "transparent"
                     titleColor: secondaryColor
                     legend.visible: false
+                    legend.labelColor: secondaryColor
+                    legend.alignment: "AlignRight"
 
                     function updateXtYt(xt, yt, ts) {
                         this.removeAllSeries();
@@ -1160,14 +1214,16 @@ Window {
                         id: xAxis
                         min: -0.5
                         max: 0.5
+                        titleText: "<font color='" + secondaryColor + "'>time (s)</font>"
                         labelsColor: secondaryColor
                         gridLineColor: secondaryColor
                     }
 
                     ValueAxis {
                         id: yAxis
-                        min: -29.75
-                        max: 29.75
+                        min: -40
+                        max: 40
+                        titleText: "<font color='" + secondaryColor + "'>displacement (mm)</font>"
                         labelsColor: secondaryColor
                         gridLineColor: secondaryColor
                     }
