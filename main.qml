@@ -1232,6 +1232,7 @@ Window {
                         min: -0.5
                         max: 0.5
                         titleText: "<font color='" + secondaryColor + "'>time (s)</font>"
+                        color: secondaryColor
                         labelsColor: secondaryColor
                         gridLineColor: secondaryColor
                     }
@@ -1241,6 +1242,7 @@ Window {
                         min: -40
                         max: 40
                         titleText: "<font color='" + secondaryColor + "'>displacement (mm)</font>"
+                        color: secondaryColor
                         labelsColor: secondaryColor
                         gridLineColor: secondaryColor
                     }

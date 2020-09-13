@@ -14,27 +14,7 @@ using namespace std::placeholders;
 
 QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
-    std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
-    std::string defaultMic = "Realtek USB2.0 Mic";
-    currentMic = sf::SoundRecorder::getDefaultDevice();
-    for (int i = 0; i < micOptions.size(); i++){
-        if (micOptions[i].compare(defaultMic) == 0) {
-            currentMic = defaultMic;
-            break;
-        }
-    }
-
-    const QString defaultCamera = "USB Camera";
-    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    for (int i = 0; i < cameras.size(); i++){
-        if (cameras[i].description().compare(defaultCamera) == 0) {
-            CAMERA_INDEX = i;
-            break;
-        }
-    }
-
     shots.clear();
-
     #ifdef QT_QML_DEBUG
         upDownDetection = false;
     #else
@@ -59,6 +39,27 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
             qDebug() << "Could not open log file";
         }
     #endif
+
+    std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
+    std::string defaultMic = "Realtek USB2.0 Mic";
+    currentMic = sf::SoundRecorder::getDefaultDevice();
+    for (int i = 0; i < micOptions.size(); i++){
+        if (micOptions[i].compare(defaultMic) == 0) {
+            currentMic = defaultMic;
+            break;
+        }
+    }
+
+    const QString defaultCamera = "USB Camera";
+    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    for (int i = 0; i < cameras.size(); i++){
+        int compare = cameras[i].description().compare(defaultCamera);
+        fprintf(logFile, "%s vs %s = %s\n", cameras[i].description().toStdString().c_str(), defaultCamera.toStdString().c_str(), compare == 0 ? "equal" : compare < 0 ? "less than" : "greater than");
+        if (cameras[i].description().compare(defaultCamera) == 0) {
+            CAMERA_INDEX = i;
+            break;
+        }
+    }
 }
 
 void QMLCppBridge::closingApplication()

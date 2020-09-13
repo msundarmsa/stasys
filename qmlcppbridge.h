@@ -42,7 +42,7 @@ private:
     std::string currentMic = "";
     float micThreshold = 0.0;
     int CAMERA_INDEX = 1;
-    float TRIGGER_DB = 65.0;
+    float TRIGGER_DB = 45.0;
     double RATIO1 = 1; // px from camera to mm
     Vector2D adjustmentVec = {0, 0};
     Vector2D fineAdjustment = {0, 0};
