@@ -17,5 +17,13 @@
         <file>NavBarButton.qml</file>
         <file>ui/images/settings_pressed.svg</file>
         <file>ShotStat.qml</file>
+        <file>ui/images/arrow_bottom_left.svg</file>
+        <file>ui/images/arrow_bottom_right.svg</file>
+        <file>ui/images/arrow_bottom.svg</file>
+        <file>ui/images/arrow_left.svg</file>
+        <file>ui/images/arrow_right.svg</file>
+        <file>ui/images/arrow_top_left.svg</file>
+        <file>ui/images/arrow_top_right.svg</file>
+        <file>ui/images/arrow_top.svg</file>
     </qresource>
 </RCC>

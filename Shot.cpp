@@ -136,9 +136,9 @@ void Shot::calcStabDescAim()
     if (entered10RingIdx != -1)
 	{
         double total10Ring = beforeShotTrace.size() - entered10RingIdx + 1.0;
-        stab = round((num10Ring / (total10Ring)) * 100.0);
-        desc = round(entered10RingTime - firstFrameTime);
-        aim = round(lastFrameTime - entered10RingTime);
+        stab = (num10Ring / (total10Ring)) * 100.0;
+        desc = entered10RingTime - firstFrameTime;
+        aim = lastFrameTime - entered10RingTime;
 	}
 	else
 	{

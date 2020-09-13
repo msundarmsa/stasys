@@ -33,6 +33,8 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
         }
     }
 
+    shots.clear();
+
     #ifdef QT_QML_DEBUG
         upDownDetection = false;
     #else
@@ -184,7 +186,7 @@ void QMLCppBridge::shootClicked()
         auto addToAfterShotTracePtr = std::bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
-        shootThread = new ShootThread(cap, currentMic, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
+        shootThread = new ShootThread(shots.size(), cap, currentMic, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {
@@ -212,11 +214,13 @@ void QMLCppBridge::clearTrace(bool resetGroupIfNecessary) {
 }
 
 void QMLCppBridge::updateView(Shot* shot) {
+    shots.push_back(shot);
     int sn = shot->getSn();
     double score = shot->getScore();
     double stab = shot->getStab();
     double desc = shot->getDesc();
     double aim = shot->getAim();
+    const char *angle = toString(shot->getAngle());
 
     int frames = 0.5 * FPS;
     QList<double> xtList = {};
@@ -252,7 +256,7 @@ void QMLCppBridge::updateView(Shot* shot) {
     QVariant yt = QVariant::fromValue(ytList);
     QVariant ts = QVariant::fromValue(tList);
 
-    emit uiUpdateView(sn, score, stab, desc, aim, xt, yt, ts);
+    emit uiUpdateView(sn, score, stab, desc, aim, QString(angle), xt, yt, ts);
 }
 
 void QMLCppBridge::addToBeforeShotTrace(Vector2D center) {

@@ -47,6 +47,7 @@ private:
     Vector2D adjustmentVec = {0, 0};
     Vector2D fineAdjustment = {0, 0};
     bool upDownDetection = true;
+    std::vector<Shot*> shots;
 
 signals:
     void uiCalibrationStarted();
@@ -56,7 +57,7 @@ signals:
     void uiShowToast(QString message);
     void uiRemovePreviousCalibCircle();
     void uiClearTrace(bool resetGroupIfNecessary);
-    void uiUpdateView(int sn, double score, double stab, double desc, double aim, QVariant xt, QVariant yt, QVariant ts);
+    void uiUpdateView(int sn, double score, double stab, double desc, double aim, QString angle, QVariant xt, QVariant yt, QVariant ts);
     void uiAddToBeforeShotTrace(double x, double y);
     void uiDrawShotCircle(double x, double y);
     void uiAddToAfterShotTrace(double x, double y);

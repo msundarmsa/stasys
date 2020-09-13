@@ -113,16 +113,16 @@ Window {
         targetTrace.drawShotCircle(14,-35);
         shotGroupList.addShot(14,-35);
 
-        qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(3, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(4, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(5, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(6, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(7, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(8, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(9, 10.0, 75, 3.6, 5.2, [], [], []);
-        qmlCppBridge.uiUpdateView(10, 9.5, 82.5, 2, 6, [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, "top", [], [], []);
+        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 20, 60, "top_right", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(3, 10.0, 75, 3.6, 5.2, "right", [], [], []);
+        qmlCppBridge.uiUpdateView(4, 9.5, 82.5, 2, 6, "bottom_right", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(5, 10.0, 75, 3.6, 5.2, "bottom", [], [], []);
+        qmlCppBridge.uiUpdateView(6, 9.5, 82.5, 2, 6, "bottom_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(7, 10.0, 75, 3.6, 5.2, "left", [], [], []);
+        qmlCppBridge.uiUpdateView(8, 9.5, 82.5, 2, 6, "top_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        qmlCppBridge.uiUpdateView(9, 10.0, 75, 3.6, 5.2, "top", [], [], []);
+        qmlCppBridge.uiUpdateView(10, 9.5, 82.5, 2, 6, "top", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
     }*/
 
     SoundEffect {
@@ -332,7 +332,7 @@ Window {
             descLbl.stat = desc;
             aimLbl.stat = aim;
 
-            shotLogList.model.insert(0, {sn: sn, score: score, stab: stab, desc: desc, aim: aim});
+            shotLogList.model.insert(0, {sn: sn, score: score, stab: stab, desc: desc, aim: aim, angle: angle});
 
             xtYtChart.updateXtYt(xt, yt, ts);
         }
@@ -1031,7 +1031,9 @@ Window {
 
                                 Text {
                                     id: logScoreLbl
-                                    text: score < 10 ? "  " + score.toFixed(1) : score.toFixed(1)
+                                    width: 40
+                                    horizontalAlignment: Text.AlignHCenter
+                                    text: score.toFixed(1)
                                     color: secondaryColor
                                     font.pointSize: 25
                                     font.family: "Segoe UI"
@@ -1041,13 +1043,24 @@ Window {
                                     anchors.leftMargin: 20
                                 }
 
+                                Image {
+                                    id: logAngle
+                                    source: "ui/images/arrow_" + angle + ".svg"
+                                    height: parent.height
+                                    width: height
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: logScoreLbl.right
+                                    anchors.leftMargin: 20
+                                    mipmap: true
+                                }
+
                                 ProgressBar {
                                     id: logStab
                                     value: stab / 100
 
                                     anchors.right: logDescLbl.left
                                     anchors.rightMargin: 30
-                                    anchors.left: logScoreLbl.right
+                                    anchors.left: logAngle.right
                                     anchors.leftMargin: 30
                                     anchors.verticalCenter: parent.verticalCenter
 
@@ -1075,6 +1088,8 @@ Window {
 
                                 Text {
                                     id: logDescLbl
+                                    width: 40
+                                    horizontalAlignment: Text.AlignHCenter
                                     text: desc.toFixed(1) + "s"
                                     color: secondaryColor
                                     font.family: "Segoe UI"
@@ -1098,6 +1113,8 @@ Window {
 
                                 Text {
                                     id: logAimLbl
+                                    width: 40
+                                    horizontalAlignment: Text.AlignHCenter
                                     text: aim.toFixed(1) + "s"
                                     color: secondaryColor
                                     font.family: "Segoe UI"

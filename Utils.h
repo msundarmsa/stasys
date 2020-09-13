@@ -59,6 +59,21 @@ enum ANGLE {
 	TOP_LEFT
 };
 
+inline const char* toString(ANGLE angle)
+{
+    switch (angle)
+    {
+        case TOP: return "top";
+        case TOP_RIGHT: return "top_right";
+        case RIGHT: return "right";
+        case BOTTOM_RIGHT: return "bottom_right";
+        case BOTTOM: return "bottom";
+        case BOTTOM_LEFT: return "bottom_left";
+        case LEFT: return "left";
+        case TOP_LEFT: return "top_left";
+    }
+}
+
 #define D2P(p1, p2) sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
 
 //radius of pistol black circle in mm

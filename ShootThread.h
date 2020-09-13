@@ -24,7 +24,7 @@ private:
     Vector2D fineAdjustment;
     bool upDownDetection;
 public:
-    ShootThread(cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
+    ShootThread(int startSn, cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
 	void audio_trigger();
 	void start();
 	void stop();
