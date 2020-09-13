@@ -196,10 +196,10 @@ void ShootThread::run() {
                     lShotStartTime = lFrameTime;
                 }
                 else if (currShotTrace.afterShot() && relativeFrameTime >=
-                    currShotTrace.getShotPoint().time + 2.0)
+                    currShotTrace.getShotPoint().time + 1.0)
                 {
                     
-                    // 2s after trigger is pulled, shot is finished. create new object for this shot
+                    // 1s after trigger is pulled, shot is finished. create new object for this shot
                     // and draw the x-t and y-t graph
                     Shot* shot = new Shot(++sn, currShotTrace);
                     page.updateView(shot);
@@ -258,6 +258,8 @@ void ShootThread::run() {
                         preTrace[0] = preTrace[1];
                         preTrace[1] = center;
 
+                        // shot is started if the aim went past the edge (preTrace[0].y > TARGET_SIZE / 2)
+                        // and came back down after that (preTrace[1].y < TARGET_SIZE / 2)
                         shotStarted = (preTrace[0].y > TARGET_SIZE / 2 && preTrace[1].y < TARGET_SIZE / 2);
                     }
                 } else {
@@ -265,8 +267,6 @@ void ShootThread::run() {
                     shotStarted = true;
                 }
 
-                // shot is started if the aim went past the edge (preTrace[0].y < 0)
-                // and came back down after that (preTrace[1].y > 0)
                 if (shotStarted) {
                     // new shot started
 
