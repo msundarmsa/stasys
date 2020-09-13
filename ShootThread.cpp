@@ -138,6 +138,7 @@ void ShootThread::run() {
 	while (!stopRecording && (frameid == 0 || !frame.empty())) {
 		fprintf(logFile, "Frame #%d", frameid);
 		video >> frame;
+        lFrameTime = SystemClock::getCurrentTimeMillis();
 
         if (frame.empty()) {
             // if camera becomes disconnected, exit
@@ -145,8 +146,11 @@ void ShootThread::run() {
             break;
         }
 
+        fprintf(logFile, "\t");
+        fprintf(logFile, "%" PRIu64 "", lFrameTime);
+
 		if (frameid == 0) {
-            lStartTime = SystemClock::getCurrentTimeMillis();
+            lStartTime = lFrameTime;
         }
 
         #ifdef QT_QML_DEBUG
@@ -156,7 +160,6 @@ void ShootThread::run() {
             }
         #endif
 
-        lFrameTime = SystemClock::getCurrentTimeMillis();
         double timeSinceShotStart = SystemClock::getElapsedSeconds(lFrameTime, lShotStartTime);
 
         if (shotStarted) {
@@ -293,7 +296,7 @@ void ShootThread::run() {
                                 // trigger was just pulled 2 frames ago
                                 // first frame after shot has been smoothed (current avgCenter)
                                 // calculate velocity and scale by the velocity factor
-                                Vector2D velocity = (avgCenter - currShotTrace.getBeforeShotTrace()[currShotTrace.getBeforeShotTrace().size() - 1].point) / 2;
+                                Vector2D velocity = (avgCenter - currShotTrace.getBeforeShotTrace()[currShotTrace.getBeforeShotTrace().size() - 1].point) * 0.7;
                                 Vector2D shotPoint = velocity + currShotTrace.getShotPoint().point;
                                 page.addToBeforeShotTrace(shotPoint);
                                 page.drawShotCircle(shotPoint);
