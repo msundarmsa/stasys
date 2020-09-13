@@ -3,7 +3,7 @@
 void ShotTrace::reset(){
     beforeShotTrace.clear();
     afterShotTrace.clear();
-    shotPoint  = {{ -1, -1 }, -1};
+    shotPoint = {{ 0, 0 }, -1};
 }
 
 void ShotTrace::addTracePoint(TracePoint tp) {
@@ -14,8 +14,16 @@ void ShotTrace::addTracePoint(TracePoint tp) {
     }
 }
 
+void ShotTrace::setTriggerPulled() {
+    shotPoint.time = 0;
+}
+
 bool ShotTrace::afterShot() {
     return shotPoint.time >= 0;
+}
+
+bool ShotTrace::isShotPointSet() {
+    return shotPoint.time > 0;
 }
 
 std::vector<TracePoint> ShotTrace::getCurrentShotTrace() {

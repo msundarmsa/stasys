@@ -45,11 +45,6 @@ Shot::Shot(TracePoint shotPoint)
 	calcAngle();
 }
 
-static double roundTo1DP(double num)
-{
-	return round(num * 10.0) / 10.0;
-}
-
 double Shot::getScore()
 {
 	return score;

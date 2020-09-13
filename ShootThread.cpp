@@ -70,17 +70,11 @@ void ShootThread::start() {
 void ShootThread::run() {
 	cv::Mat frame;
 
-    Vector2D preTrace[2] = {
-        {-1, -1},
-        {-1, -1}
-    };
+    Vector2D preTrace[2];
+    int preTraceIndex = 0;
 
     ShotTrace currShotTrace;
-    TracePoint movingAvg[3] = {
-        {{-1, -1}, -1},
-        {{-1, -1}, -1},
-        {{-1, -1}, -1}
-    };
+    TracePoint movingAvg[3];
     int movingAvgIndex = 0;
 
 	uint64_t lStartTime = 0;
@@ -169,15 +163,12 @@ void ShootThread::run() {
             // shot has started i.e. the aim has went past the top edge and came back down
             double timeSinceCircleDetected = SystemClock::getElapsedSeconds(lFrameTime, lLastCircleDetectedFrameTime);
             if (timeSinceCircleDetected > 2.0) {
-                // reset if shot has started but aim is not within the target/cannot be found
+                // reset shot if shot has started but aim is not within the target/cannot be found
                 // for 2s
                 shotStarted = false;
                 currShotTrace.reset();
-                preTrace[0] = { -1, -1 };
-                preTrace[1] = { -1, -1 };
-                movingAvg[0] = {{-1, -1}, -1};
-                movingAvg[1] = {{-1, -1}, -1};
-                movingAvg[2] = {{-1, -1}, -1};
+                preTraceIndex = 0;
+                movingAvgIndex = 0;
                 page.clearTrace(false);
             }
             else {
@@ -188,17 +179,13 @@ void ShootThread::run() {
                     // reset trace if shot has started but trigger has not been pulled for 60s
                     currShotTrace.reset();
                     page.clearTrace(false);
-                    movingAvg[0] = {{-1, -1}, -1};
-                    movingAvg[1] = {{-1, -1}, -1};
-                    movingAvg[2] = {{-1, -1}, -1};
 
                     // but update the start time to the current time
                     lShotStartTime = lFrameTime;
                 }
-                else if (currShotTrace.afterShot() && relativeFrameTime >=
+                else if (currShotTrace.isShotPointSet() && relativeFrameTime >=
                     currShotTrace.getShotPoint().time + 1.0)
                 {
-                    
                     // 1s after trigger is pulled, shot is finished. create new object for this shot
                     // and draw the x-t and y-t graph
                     Shot* shot = new Shot(++sn, currShotTrace);
@@ -207,11 +194,8 @@ void ShootThread::run() {
                     // reset shot
                     shotStarted = false;
                     currShotTrace.reset();
-                    preTrace[0] = { -1, -1 };
-                    preTrace[1] = { -1, -1 };
-                    movingAvg[0] = {{-1, -1}, -1};
-                    movingAvg[1] = {{-1, -1}, -1};
-                    movingAvg[2] = {{-1, -1}, -1};
+                    preTraceIndex = 0;
+                    movingAvgIndex = 0;
                 }
             }
         }
@@ -237,13 +221,13 @@ void ShootThread::run() {
         if (circle.radius != -1) {
             // aim i.e. black circle was found
 			// flip & rotate the x, y to fit camera
-            double xShift = (round(circle.center.y) - roi.height / 2) * RATIO1 + fineAdjustment.x;
-            double yShift = (-round(circle.center.x) + roi.width / 2) * RATIO1 + fineAdjustment.y;
+            double xShift = (circle.center.y - roi.height / 2) * RATIO1 + fineAdjustment.x;
+            double yShift = (-circle.center.x + roi.width / 2) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
             fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
 
-            if (center.x >= -roi.width / 2 && center.x <= roi.width / 2 &&
-                center.y >= -roi.width / 2 && center.y <= roi.width / 2) {
+            if (center.x >= -TARGET_SIZE / 2 && center.x <= TARGET_SIZE / 2 &&
+                center.y >= -TARGET_SIZE / 2 && center.y <= TARGET_SIZE / 2) {
                 // aim is found and within the target
                 lLastCircleDetectedFrameTime = lFrameTime;
             }
@@ -251,13 +235,10 @@ void ShootThread::run() {
             if (!shotStarted) {
                 if (upDownDetection) {
                     // if up/down detection is enabled, detect aim going up and down
-                    if (preTrace[1].x == -1) {
-                        preTrace[1] = center;
-                    }
-                    else {
-                        preTrace[0] = preTrace[1];
-                        preTrace[1] = center;
+                    preTrace[preTraceIndex] = center;
+                    preTraceIndex++;
 
+                    if (preTraceIndex == 2) {
                         // shot is started if the aim went past the edge (preTrace[0].y > TARGET_SIZE / 2)
                         // and came back down after that (preTrace[1].y < TARGET_SIZE / 2)
                         shotStarted = (preTrace[0].y > TARGET_SIZE / 2 && preTrace[1].y < TARGET_SIZE / 2);
@@ -275,51 +256,56 @@ void ShootThread::run() {
                     page.clearTrace(true);
 
                     lShotStartTime = lFrameTime;
-                    movingAvgIndex = 0;
-                    movingAvg[movingAvgIndex] = {center, 0};
-                    movingAvgIndex++;
+                    preTraceIndex = 0;
+                    movingAvg[0] = {center, 0};
+                    movingAvgIndex = 1;
+                } else if (upDownDetection) {
+                    // move pretrace window down
+                    preTrace[0] = preTrace[1];
+                    preTraceIndex = 1;
                 }
-            }
-            else {
+            } else {
                 movingAvg[movingAvgIndex] = {center, timeSinceShotStart};
                 movingAvgIndex++;
 
                 if (movingAvgIndex == 3) {
-                    Vector2D avgCenter = (movingAvg[1].point + movingAvg[1].point + movingAvg[1].point) / 3;
+                    Vector2D avgCenter = (movingAvg[0].point + movingAvg[1].point + movingAvg[2].point) / 3;
+                    fprintf(logFile, "\t[%.3f, %.3f]", avgCenter.x, avgCenter.y);
 
                     if (!currShotTrace.afterShot()) {
+                        currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
+                        page.addToBeforeShotTrace(avgCenter);
+
                         if (audio_triggered) {
                             // trigger has just been pulled
                             audio_triggered = false;
                             fprintf(logFile, "\tTRIGGER RECEIVED");
-
-                            currShotTrace.addTracePoint({avgCenter, movingAvg[1].time});
-                            // add a dummy value first to be corrected later
-                            currShotTrace.setShotPoint({ {-1, -1}, movingAvg[2].time });
+                            currShotTrace.setTriggerPulled();
                         }
-                        else {
-                            // trigger has not been pulled
-                            currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
-                            page.addToBeforeShotTrace(avgCenter);
-                        }
-                    }
-                    else {
-                        // trigger has been pulled 2 frames ago
-                        if (currShotTrace.getAfterShotTrace().size() == 1) {
-                            // trigger was just pulled in the last frame
-                            // calculate velocity and scale by the velocity factor
-                            Vector2D velocity = (currShotTrace.getAfterShotTrace()[0].point - currShotTrace.getBeforeShotTrace()[currShotTrace.getBeforeShotTrace().size() - 1].point) / 2;
-                            Vector2D shotPoint = velocity + avgCenter;
-                            page.addToBeforeShotTrace(shotPoint);
-                            page.drawShotCircle(shotPoint);
-                            page.addToAfterShotTrace(shotPoint);
+                    } else {
+                        if (currShotTrace.getAfterShotTrace().size() == 0) {
+                            if (!currShotTrace.isShotPointSet()) {
+                                // trigger has been pulled 1 frame ago
+                                // shot point has not been set
+                                // set average center as shot point first
+                                currShotTrace.setShotPoint({ avgCenter, movingAvg[1].time });
+                            } else {
+                                // trigger was just pulled 2 frames ago
+                                // first frame after shot has been smoothed (current avgCenter)
+                                // calculate velocity and scale by the velocity factor
+                                Vector2D velocity = (avgCenter - currShotTrace.getBeforeShotTrace()[currShotTrace.getBeforeShotTrace().size() - 1].point) / 2;
+                                Vector2D shotPoint = velocity + currShotTrace.getShotPoint().point;
+                                page.addToBeforeShotTrace(shotPoint);
+                                page.drawShotCircle(shotPoint);
+                                page.addToAfterShotTrace(shotPoint);
 
-                            fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
+                                fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
 
-                            // set correct shotpoint on trace
-                            currShotTrace.setShotPoint({ shotPoint, movingAvg[1].time });
-                            currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
-                            page.addToAfterShotTrace(avgCenter);
+                                // set correct shotpoint on trace
+                                currShotTrace.setShotPoint({ shotPoint, currShotTrace.getShotPoint().time });
+                                currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
+                                page.addToAfterShotTrace(avgCenter);
+                            }
                         } else {
                             currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
                             page.addToAfterShotTrace(avgCenter);
