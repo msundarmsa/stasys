@@ -90,7 +90,7 @@ class CalibrationThread : public RecordThread {
 
 			for (int i = 1; i < currentTrace.size(); i++) {
 				TraceCircle currTP = currentTrace.at(i);
-				double time_interval = SystemClock::getElapsedSeconds(currTP.time, currStartTP.time);
+				double time_interval = SystemClock::getElapsedMillis(currTP.time, currStartTP.time);
 				if (time_interval > 1) {
 					currAvgIndex++;
 					if (currAvgIndex > 2) {
@@ -161,8 +161,8 @@ class CalibrationThread : public RecordThread {
 
 				lCurrTime = SystemClock::getCurrentTimeMillis();
 
-                double totalTime = SystemClock::getElapsedSeconds(lCurrTime, lStartTime);
-                if (totalTime > 15) {
+                double totalTime = SystemClock::getElapsedMillis(lCurrTime, lStartTime);
+                if (totalTime > 15000) {
                     fprintf(logFile, "\tTimeout!\n");
                     break;
                 }
@@ -176,22 +176,22 @@ class CalibrationThread : public RecordThread {
 					double totalTraceTime = 0;
 
 					if (currentTrace.size() > 0) {
-						totalTraceTime = SystemClock::getElapsedSeconds(lCurrTime, currentTrace.at(0).time);
+						totalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace.at(0).time);
 					}
 
 					currentTrace.push_back(trace);
-					if ((totalTraceTime >= 3) && (totalTraceTime <= 3.05)) {
+                    if ((totalTraceTime >= 3000) && (totalTraceTime <= 3050)) {
 						// we have 3s worth of data
 						// see if this produces a valid average
 						findAvgCircle(&avgCircle);
 					}
-					else if (totalTraceTime > 3.05) {
+                    else if (totalTraceTime > 3050) {
 						// we have more than 3s worth of data
 						// remove first element from vector until the vector only
 						// contains 3s worth of data
 						while (currentTrace.size() > 0)
 						{
-							double currTotalTraceTime = SystemClock::getElapsedSeconds(lCurrTime, currentTrace.at(0).time);
+							double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace.at(0).time);
 							if (currTotalTraceTime > 3.05 && currentTrace.size() > 0)
 							{
 								currentTrace.erase(currentTrace.begin(), currentTrace.begin() + 1);
@@ -204,8 +204,8 @@ class CalibrationThread : public RecordThread {
 
 						// if after removing, we now have 3s worth of data
 						// see if this produces a valid average
-						double currTotalTraceTime = SystemClock::getElapsedSeconds(lCurrTime, currentTrace.at(0).time);
-						if ((currTotalTraceTime >= 3) && (currTotalTraceTime <= 3.05))
+						double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace.at(0).time);
+                        if ((currTotalTraceTime >= 3000) && (currTotalTraceTime <= 3050))
 						{
 							findAvgCircle(&avgCircle);
 						}

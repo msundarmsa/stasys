@@ -1,6 +1,7 @@
 #include "ShootThread.h"
 #include "SoundPressureSensor.cpp"
 #include "ShotTrace.h"
+#include "spline.h"
 
 ShootThread::ShootThread(int startSn, cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
     this->sn = startSn;
@@ -59,8 +60,8 @@ TargetCircle ShootThread::findCircle(cv::Mat frame)
 	return resultCircle;
 }
 
-void ShootThread::audio_trigger() {
-	audio_triggered = true;
+void ShootThread::audio_trigger(uint64_t trigger_time) {
+    this->lTriggerTime = trigger_time;
 }
 
 void ShootThread::start() {
@@ -74,8 +75,6 @@ void ShootThread::run() {
     int preTraceIndex = 0;
 
     ShotTrace currShotTrace;
-    TracePoint movingAvg[3];
-    int movingAvgIndex = 0;
 
 	uint64_t lStartTime = 0;
 	uint64_t lFrameTime = 0;
@@ -136,7 +135,6 @@ void ShootThread::run() {
     #endif
 
 	while (!stopRecording && (frameid == 0 || !frame.empty())) {
-		fprintf(logFile, "Frame #%d", frameid);
 		video >> frame;
         lFrameTime = SystemClock::getCurrentTimeMillis();
 
@@ -146,7 +144,6 @@ void ShootThread::run() {
             break;
         }
 
-        fprintf(logFile, "\t");
         fprintf(logFile, "%" PRIu64 "", lFrameTime);
 
 		if (frameid == 0) {
@@ -155,29 +152,26 @@ void ShootThread::run() {
 
         #ifdef QT_QML_DEBUG
             if (sensor == NULL && testTriggerIndex < 30 && frameid == testTriggers[testTriggerIndex]) {
-                audio_triggered = true;
+                lTriggerTime = lFrameTime;
                 testTriggerIndex++;
             }
         #endif
 
-        double timeSinceShotStart = SystemClock::getElapsedSeconds(lFrameTime, lShotStartTime);
+        double millisSinceShotStart = SystemClock::getElapsedMillis(lFrameTime, lShotStartTime);
 
         if (shotStarted) {
             // shot has started i.e. the aim has went past the top edge and came back down
-            double timeSinceCircleDetected = SystemClock::getElapsedSeconds(lFrameTime, lLastCircleDetectedFrameTime);
-            if (timeSinceCircleDetected > 2.0) {
+            double millisSinceCircleDetected = SystemClock::getElapsedMillis(lFrameTime, lLastCircleDetectedFrameTime);
+            if (millisSinceCircleDetected > 2000) {
                 // reset shot if shot has started but aim is not within the target/cannot be found
                 // for 2s
                 shotStarted = false;
                 currShotTrace.reset();
                 preTraceIndex = 0;
-                movingAvgIndex = 0;
                 page.clearTrace(false);
             }
             else {
-                double relativeFrameTime = timeSinceShotStart;
-
-                if (relativeFrameTime > 60)
+                if (millisSinceShotStart > 60000)
                 {
                     // reset trace if shot has started but trigger has not been pulled for 60s
                     currShotTrace.reset();
@@ -186,8 +180,8 @@ void ShootThread::run() {
                     // but update the start time to the current time
                     lShotStartTime = lFrameTime;
                 }
-                else if (currShotTrace.isShotPointSet() && relativeFrameTime >=
-                    currShotTrace.getShotPoint().time + 1.0)
+                else if (currShotTrace.isShotPointSet() && millisSinceShotStart >=
+                    currShotTrace.getShotPoint().time + 1000)
                 {
                     // 1s after trigger is pulled, shot is finished. create new object for this shot
                     // and draw the x-t and y-t graph
@@ -198,7 +192,6 @@ void ShootThread::run() {
                     shotStarted = false;
                     currShotTrace.reset();
                     preTraceIndex = 0;
-                    movingAvgIndex = 0;
                 }
             }
         }
@@ -260,64 +253,75 @@ void ShootThread::run() {
 
                     lShotStartTime = lFrameTime;
                     preTraceIndex = 0;
-                    movingAvg[0] = {center, 0};
-                    movingAvgIndex = 1;
                 } else if (upDownDetection) {
                     // move pretrace window down
                     preTrace[0] = preTrace[1];
                     preTraceIndex = 1;
                 }
             } else {
-                movingAvg[movingAvgIndex] = {center, timeSinceShotStart};
-                movingAvgIndex++;
-
-                if (movingAvgIndex == 3) {
-                    Vector2D avgCenter = (movingAvg[0].point + movingAvg[1].point + movingAvg[2].point) / 3;
-                    fprintf(logFile, "\t[%.3f, %.3f]", avgCenter.x, avgCenter.y);
-
-                    if (!currShotTrace.afterShot()) {
-                        currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
-                        page.addToBeforeShotTrace(avgCenter);
-
-                        if (audio_triggered) {
-                            // trigger has just been pulled
-                            audio_triggered = false;
-                            fprintf(logFile, "\tTRIGGER RECEIVED");
+                if (!currShotTrace.afterShot()) {
+                    if (lTriggerTime != 0) {
+                        // trigger has just been pulled
+                        if (lTriggerTime > lFrameTime) {
+                            // trigger was after frame was taken
+                            // add current position to before trace
+                            currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                            page.addToBeforeShotTrace(center);
                             currShotTrace.setTriggerPulled();
-                        }
-                    } else {
-                        if (currShotTrace.getAfterShotTrace().size() == 0) {
-                            if (!currShotTrace.isShotPointSet()) {
-                                // trigger has been pulled 1 frame ago
-                                // shot point has not been set
-                                // set average center as shot point first
-                                currShotTrace.setShotPoint({ avgCenter, movingAvg[1].time });
-                            } else {
-                                // trigger was just pulled 2 frames ago
-                                // first frame after shot has been smoothed (current avgCenter)
-                                // calculate velocity and scale by the velocity factor
-                                Vector2D velocity = (avgCenter - currShotTrace.getBeforeShotTrace()[currShotTrace.getBeforeShotTrace().size() - 1].point) * 0.7;
-                                Vector2D shotPoint = velocity + currShotTrace.getShotPoint().point;
-                                page.addToBeforeShotTrace(shotPoint);
-                                page.drawShotCircle(shotPoint);
-                                page.addToAfterShotTrace(shotPoint);
-
-                                fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
-
-                                // set correct shotpoint on trace
-                                currShotTrace.setShotPoint({ shotPoint, currShotTrace.getShotPoint().time });
-                                currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
-                                page.addToAfterShotTrace(avgCenter);
-                            }
                         } else {
-                            currShotTrace.addTracePoint({ avgCenter, movingAvg[1].time });
-                            page.addToAfterShotTrace(avgCenter);
+                            // trigger was before frame was taken
+                            // add current position to after trace
+                            currShotTrace.setTriggerPulled();
+                            currShotTrace.addTracePoint({ center, millisSinceShotStart });
                         }
+                        fprintf(logFile, "\tTRIGGER RECEIVED AT %llu", lTriggerTime);
+                    } else {
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                        page.addToBeforeShotTrace(center);
                     }
+                } else {
+                    if (currShotTrace.getAfterShotTrace().size() < 2) {
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                    } else if (currShotTrace.getAfterShotTrace().size() == 2) {
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
 
-                    movingAvg[0] = movingAvg[1];
-                    movingAvg[1] = movingAvg[2];
-                    movingAvgIndex = 2;
+                        // use spline to calculate actual shot point
+                        std::vector<double> X, Y, T;
+                        std::vector<TracePoint> beforeShotTrace = currShotTrace.getBeforeShotTrace();
+                        std::vector<TracePoint> afterShotTrace = currShotTrace.getAfterShotTrace();
+                        for (int i = beforeShotTrace.size() - 3; i < beforeShotTrace.size(); i++) {
+                            X.push_back(beforeShotTrace[i].point.x);
+                            Y.push_back(beforeShotTrace[i].point.y);
+                            T.push_back(beforeShotTrace[i].time);
+                        }
+
+                        for (int i = 0; i < 3; i++) {
+                            X.push_back(afterShotTrace[i].point.x);
+                            Y.push_back(afterShotTrace[i].point.y);
+                            T.push_back(afterShotTrace[i].time);
+                        }
+
+                        tk::spline sx, sy;
+                        sx.set_points(T, X);
+                        sy.set_points(T, Y);
+
+                        double trigger_time = SystemClock::getElapsedMillis(lTriggerTime, lShotStartTime);
+
+                        Vector2D interpPoint = { sx(trigger_time), sy(trigger_time) };
+                        Vector2D velocity = { sx.deriv(1, trigger_time), sy.deriv(1, trigger_time) };
+                        Vector2D shotPoint = interpPoint + velocity * 0.7 * 2 / FPS * 1000;
+
+                        fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
+                        currShotTrace.setShotPoint({ shotPoint, trigger_time });
+                        page.addToBeforeShotTrace(shotPoint);
+                        page.drawShotCircle(shotPoint);
+                        page.addToAfterShotTrace(shotPoint);
+
+                        lTriggerTime = 0;
+                    } else {
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                        page.addToAfterShotTrace(center);
+                    }
                 }
             }
         }
@@ -325,7 +329,7 @@ void ShootThread::run() {
         if (!shotStarted) {
             // eitherways reset triggered value
             // if shot has not been started
-            audio_triggered = false;
+            lTriggerTime = 0;
         }
 
         fprintf(logFile, "\n");

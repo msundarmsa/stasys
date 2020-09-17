@@ -239,7 +239,7 @@ void QMLCppBridge::updateView(Shot* shot) {
             int pos = beforeTrace.size() - i;
             xtList.append(beforeTrace[pos].point.x);
             ytList.append(beforeTrace[pos].point.y);
-            tList.append(-(double)i / (double)FPS);
+            tList.append((beforeTrace[pos].time - shotPoint.time) / 1000);
         }
 
         xtList.append(shotPoint.point.x);
@@ -249,7 +249,7 @@ void QMLCppBridge::updateView(Shot* shot) {
         for (int i = 0; i < frames; i++) {
             xtList.append(afterTrace[i].point.x);
             ytList.append(afterTrace[i].point.y);
-            tList.append((double)(i + 1) / (double)FPS);
+            tList.append((afterTrace[i].time - shotPoint.time) / 1000);
         }
     }
 

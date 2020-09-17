@@ -58,7 +58,8 @@ HEADERS += \
     ShotTrace.h \
     SystemClock.h \
     Utils.h \
-    qmlcppbridge.h
+    qmlcppbridge.h \
+    spline.h
 
 DISTFILES += \
     NavBarButton.qml \

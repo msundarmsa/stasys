@@ -38,7 +38,7 @@ private:
         sos = sqrtf(sos / sampleCount);
         float dB = 20 * log10f(sos);
 
-        double interval = SystemClock::getElapsedSeconds(curr_time, last_trigger_time);
+        double interval = SystemClock::getElapsedMillis(curr_time, last_trigger_time);
         //cout << interval << endl;
         if ((interval > SILENCE_DURATION || last_trigger_time == 0) && !ready2Trigger) {
             ready2Trigger = true;
@@ -48,7 +48,7 @@ private:
 
         if (dB > TRIGGER_DB) {
             if (interval > SILENCE_DURATION || last_trigger_time == 0) {
-                sThread->audio_trigger();
+                sThread->audio_trigger(curr_time);
                 ready2Trigger = false;
             }
 
