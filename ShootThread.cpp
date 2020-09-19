@@ -84,12 +84,16 @@ void ShootThread::run() {
     int frameid = 0;
 
     bool shotStarted = false;
-		
-    fprintf(logFile, "RATIO1 (mm / px) %.3f\n", RATIO1);
-    fprintf(logFile, "Adjustment Vec (px, px): (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
-    fprintf(logFile, "Fine Adjustment Vec (mm, mm): (%.3f, %.3f)\n", fineAdjustment.x, fineAdjustment.y);
-    fprintf(logFile, "Up/Down Detection: (%s)\n", upDownDetection ? "true" : "false");
-    fprintf(logFile, "TRIGGER: (%.3f)\n", TRIGGER_DB);
+
+    #ifdef QT_QML_DEBUG
+        fprintf(logFile, "RATIO1 (mm / px) %.3f\n", RATIO1);
+        fprintf(logFile, "Adjustment Vec (px, px): (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
+        fprintf(logFile, "Fine Adjustment Vec (mm, mm): (%.3f, %.3f)\n", fineAdjustment.x, fineAdjustment.y);
+        fprintf(logFile, "Up/Down Detection: (%s)\n", upDownDetection ? "true" : "false");
+        fprintf(logFile, "TRIGGER: (%.3f)\n", TRIGGER_DB);
+    #else
+        fprintf(logFile, "params,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%.3f\n", RATIO1, adjustmentVec.x, adjustmentVec.y, fineAdjustment.x, fineAdjustment.y, upDownDetection, TRIGGER_DB);
+    #endif
 
     page.removePreviousCalibCircle();
 
@@ -213,14 +217,22 @@ void ShootThread::run() {
 		frame = frame(roi);
 
         TargetCircle circle = findCircle(frame);
-        fprintf(logFile, "\t[%s]", (shotStarted ? "true" : "false"));
+        #ifdef QT_QML_DEBUG
+            fprintf(logFile, "\t[%s]", (shotStarted ? "true" : "false"));
+        #else
+            fprintf(logFile, ",%d", shotStarted);
+        #endif
         if (circle.radius != -1) {
             // aim i.e. black circle was found
 			// flip & rotate the x, y to fit camera
             double xShift = (circle.center.y - roi.height / 2) * RATIO1 + fineAdjustment.x;
             double yShift = (-circle.center.x + roi.width / 2) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
-            fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
+            #ifdef QT_QML_DEBUG
+                fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
+            #else
+                fprintf(logFile, ",%.3f,%.3f", center.x, center.y);
+            #endif
 
             if (center.x >= -TARGET_SIZE / 2 && center.x <= TARGET_SIZE / 2 &&
                 center.y >= -TARGET_SIZE / 2 && center.y <= TARGET_SIZE / 2) {
@@ -274,7 +286,12 @@ void ShootThread::run() {
                             currShotTrace.setTriggerPulled();
                             currShotTrace.addTracePoint({ center, millisSinceShotStart });
                         }
-                        fprintf(logFile, "\tTRIGGER RECEIVED AT %llu", lTriggerTime);
+
+                        #ifdef QT_QML_DEBUG
+                            fprintf(logFile, "\tTRIGGER RECEIVED AT %llu", lTriggerTime);
+                        #else
+                            fprintf(logFile, ",%llu", lTriggerTime);
+                        #endif
                     } else {
                         currShotTrace.addTracePoint({ center, millisSinceShotStart });
                         page.addToBeforeShotTrace(center);
@@ -311,7 +328,11 @@ void ShootThread::run() {
                         Vector2D velocity = { sx.deriv(1, trigger_time), sy.deriv(1, trigger_time) };
                         Vector2D shotPoint = interpPoint + velocity * VELOCITY_FACTOR;
 
-                        fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
+                        #ifdef QT_QML_DEBUG
+                            fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
+                        #else
+                            fprintf(logFile, ",%.3f,%.3f", shotPoint.x, shotPoint.y);
+                        #endif
                         currShotTrace.setShotPoint({ shotPoint, trigger_time });
                         page.addToBeforeShotTrace(shotPoint);
                         page.drawShotCircle(shotPoint);

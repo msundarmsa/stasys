@@ -54,8 +54,7 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
     const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
     for (int i = 0; i < cameras.size(); i++){
         int compare = cameras[i].description().compare(defaultCamera);
-        fprintf(logFile, "%s vs %s = %s\n", cameras[i].description().toStdString().c_str(), defaultCamera.toStdString().c_str(), compare == 0 ? "equal" : compare < 0 ? "less than" : "greater than");
-        if (cameras[i].description().compare(defaultCamera) == 0) {
+        if (compare == 0) {
             CAMERA_INDEX = i;
             break;
         }
