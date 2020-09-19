@@ -91,5 +91,8 @@ inline const char* toString(ANGLE angle)
 #define TARGET_CENTER (TARGET_SIZE / 2) 
 #define TARGET_CENTER_PT Vector2D{ 0.0, 0.0 }
 
-#define SILENCE_DURATION 5
+#define SILENCE_DURATION 5000
 #define FPS 120
+
+#define VELOCITY_FACTOR 17.34
+#define TIME_OFFSET 1.349

@@ -305,11 +305,11 @@ void ShootThread::run() {
                         sx.set_points(T, X);
                         sy.set_points(T, Y);
 
-                        double trigger_time = SystemClock::getElapsedMillis(lTriggerTime, lShotStartTime);
+                        double trigger_time = SystemClock::getElapsedMillis(lTriggerTime, lShotStartTime) + TIME_OFFSET;
 
                         Vector2D interpPoint = { sx(trigger_time), sy(trigger_time) };
                         Vector2D velocity = { sx.deriv(1, trigger_time), sy.deriv(1, trigger_time) };
-                        Vector2D shotPoint = interpPoint + velocity * 0.7 * 2 / FPS * 1000;
+                        Vector2D shotPoint = interpPoint + velocity * VELOCITY_FACTOR;
 
                         fprintf(logFile, "\t{%.3f , %.3f}", shotPoint.x, shotPoint.y);
                         currShotTrace.setShotPoint({ shotPoint, trigger_time });
