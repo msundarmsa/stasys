@@ -21,6 +21,8 @@ public:
     void drawShotCircle(Vector2D center);
     void addToAfterShotTrace(Vector2D center);
     void updateSamples(float dB);
+    void selectDefaultCamera();
+    void selectDefaultMic();
 
     Q_INVOKABLE void calibrationClicked();
     Q_INVOKABLE void shootClicked();
@@ -41,7 +43,7 @@ private:
     MicThread *micThread = NULL;
     std::string currentMic = "";
     float micThreshold = 0.0;
-    int CAMERA_INDEX = 1;
+    int CAMERA_INDEX = -1;
     float TRIGGER_DB = 45.0;
     double RATIO1 = 1; // px from camera to mm
     Vector2D adjustmentVec = {0, 0};

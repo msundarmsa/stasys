@@ -39,24 +39,35 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
             qDebug() << "Could not open log file";
         }
     #endif
+}
 
-    std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
-    std::string defaultMic = "Realtek USB2.0 Mic";
-    currentMic = sf::SoundRecorder::getDefaultDevice();
-    for (int i = 0; i < micOptions.size(); i++){
-        if (micOptions[i].compare(defaultMic) == 0) {
-            currentMic = defaultMic;
-            break;
+void QMLCppBridge::selectDefaultMic()
+{
+    if (currentMic.compare("") == 0) {
+        std::string defaultMic = "Realtek USB2.0 Mic";
+        std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
+        currentMic = sf::SoundRecorder::getDefaultDevice();
+        for (int i = 0; i < micOptions.size(); i++){
+            if (micOptions[i].compare(defaultMic) == 0) {
+                currentMic = defaultMic;
+                break;
+            }
         }
     }
+}
 
-    const QString defaultCamera = "USB Camera";
-    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    for (int i = 0; i < cameras.size(); i++){
-        int compare = cameras[i].description().compare(defaultCamera);
-        if (compare == 0) {
-            CAMERA_INDEX = i;
-            break;
+void QMLCppBridge::selectDefaultCamera()
+{
+    if (CAMERA_INDEX == -1) {
+        const QString qDefaultCamera = "USB Camera";
+        const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+        CAMERA_INDEX = 0;
+        for (int i = 0; i < cameras.size(); i++){
+            int compare = cameras[i].description().compare(qDefaultCamera);
+            if (compare == 0) {
+                CAMERA_INDEX = i;
+                break;
+            }
         }
     }
 }
@@ -70,6 +81,9 @@ void QMLCppBridge::closingApplication()
 
 void QMLCppBridge::settingsOpened()
 {
+    selectDefaultCamera();
+    selectDefaultMic();
+
     std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
     QStringList micOptions = {QString::fromStdString(currentMic)};
     for (int i = 0; i < availableDevices.size(); i++) {
@@ -149,6 +163,9 @@ void QMLCppBridge::adjustCalibration(double deltaX, double deltaY)
 
 void QMLCppBridge::calibrationClicked()
 {
+    selectDefaultCamera();
+    selectDefaultMic();
+
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
             cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
@@ -170,6 +187,9 @@ void QMLCppBridge::calibrationClicked()
 
 void QMLCppBridge::shootClicked()
 {
+    selectDefaultCamera();
+    selectDefaultMic();
+
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
             cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
