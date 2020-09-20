@@ -31,11 +31,20 @@ struct Vector2D {
 struct TracePoint {
 	Vector2D point;
 	double time;
+    double radius;
 };
 
 struct TargetCircle {
 	Vector2D center;
 	double radius;
+
+    TargetCircle operator+(const TargetCircle& tc) const {
+        return { center + tc.center, radius + tc.radius };
+    }
+
+    TargetCircle operator/(const double f) const {
+        return { center / f, radius / f };
+    }
 };
 
 struct TraceCircle {

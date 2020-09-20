@@ -12,16 +12,11 @@ class ShootThread : public RecordThread {
 private:
 	cv::VideoCapture video;
     ShootController page;
-    uint64_t lTriggerTime = 0;
 	int sn = 0;
-	cv::SimpleBlobDetector::Params params;
-	cv::Ptr<cv::SimpleBlobDetector> detector;
-    SoundPressureSensor* sensor = NULL;
 	bool stopRecording = false;
-    float TRIGGER_DB;
-    double RATIO1; // px from camera to mm
-    Vector2D adjustmentVec;
-    Vector2D fineAdjustment;
+    double RATIO1; // px from camera to mm = 0.846 for clamped test
+    Vector2D adjustmentVec; // = {642.381, 371.826} for clamped test
+    Vector2D fineAdjustment; // = {0, 0} for clamped test
     bool upDownDetection;
 public:
     ShootThread(int startSn, cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
@@ -31,7 +26,6 @@ public:
 	bool isRunning();
 
 private:
-	TargetCircle findCircle(cv::Mat frame);
 	FILE* logFile;
 	void run();
 };

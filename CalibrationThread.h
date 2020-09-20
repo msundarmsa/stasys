@@ -4,57 +4,25 @@
 #include "SystemClock.h"
 #include "RecordThread.h"
 #include "Utils.h"
+#include "SoundPressureSensor.cpp"
+#include "ShotTrace.h"
+#include <numeric>
+
+using namespace std;
+using namespace cv;
 
 class CalibrationThread : public RecordThread {
 	private:
-		cv::VideoCapture video;
-		std::vector<TraceCircle> currentTrace;
-        std::function<void(bool, double, double, double)> calibrationFinished;
-		cv::SimpleBlobDetector::Params params;
-		cv::Ptr<cv::SimpleBlobDetector> detector;
+        VideoCapture video;
+        vector<TraceCircle> currentTrace;
+        function<void(bool, double, double, double)> calibrationFinished;
 		bool stopRecording = false;
 		FILE *logFile;
 	public:
-        CalibrationThread(cv::VideoCapture video, std::function<void(bool, double, double, double)> calibrationFinished, FILE* logFile) {
+        CalibrationThread(VideoCapture video, function<void(bool, double, double, double)> calibrationFinished, FILE* logFile) : RecordThread(-1, "") {
 			this->video = video;
             this->calibrationFinished = calibrationFinished;
 			this->logFile = logFile;
-
-			params.minThreshold = 100;
-			params.maxThreshold = 200;
-
-			params.filterByArea = true;
-			params.minArea = 450;
-
-			params.filterByCircularity = true;
-			params.minCircularity = 0.85;
-
-			params.filterByInertia = true;
-			params.minInertiaRatio = 0.85;
-
-			detector = cv::SimpleBlobDetector::create(params);
-		}
-
-		TargetCircle findCircle(cv::Mat frame)
-		{
-			TargetCircle resultCircle;
-			resultCircle.center = Vector2D { -1.0, -1.0 };
-			resultCircle.radius = (double)-1.0;
-
-			cv::Mat grayFrame;
-			std::vector<cv::KeyPoint> keypoints;
-
-			cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY);
-			//Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2 );
-			detector->detect(grayFrame, keypoints);
-
-			if (keypoints.size() == 1) {
-				resultCircle.center.x = keypoints[0].pt.x;
-				resultCircle.center.y = keypoints[0].pt.y;
-				resultCircle.radius = keypoints[0].size / 2;
-			}
-
-			return resultCircle;
 		}
 
 		void stop()
@@ -68,7 +36,7 @@ class CalibrationThread : public RecordThread {
 		}
 
 		void start() {
-			recordThread = new std::thread(&CalibrationThread::run, this);
+            recordThread = new thread(&CalibrationThread::run, this);
 		}
 
 		bool isRunning()
@@ -77,162 +45,183 @@ class CalibrationThread : public RecordThread {
 		}
 
 	private:
-		void findAvgCircle(TargetCircle* avgCircle) {
-            TraceCircle currStartTP = currentTrace[0];
-			Vector2D averages[] = {
-				currStartTP.circle.center,
-				{ 0, 0 },
-				{ 0, 0 }
-			};
-			int avgCount[] = { 1, 0, 0 };
-			int currAvgIndex = 0;
-			double avgRadius = currStartTP.circle.radius;
+        void run() {
+            Mat frame;
 
-            for (size_t i = 1; i < currentTrace.size(); i++) {
-                TraceCircle currTP = currentTrace[i];
-				double time_interval = SystemClock::getElapsedMillis(currTP.time, currStartTP.time);
-				if (time_interval > 1) {
-					currAvgIndex++;
-					if (currAvgIndex > 2) {
-						currAvgIndex = 2;
-					}
-				}
+            ShotTrace currShotTrace;
 
-				avgRadius += currTP.circle.radius;
-				averages[currAvgIndex] = averages[currAvgIndex] + currTP.circle.center;
-				avgCount[currAvgIndex]++;
-			}
+            uint64_t lStartTime = 0;
+            uint64_t lFrameTime = 0;
+            uint64_t lShotStartTime = 0;
+            uint64_t lLastCircleDetectedFrameTime = 0;
 
-			if (avgCount[0] > 0 && avgCount[1] > 0 && avgCount[2] > 0) {
-				avgRadius = avgRadius / currentTrace.size();
+            int frameid = 0;
 
-				for (int i = 0; i < 3; i++) {
-					averages[i] = { averages[i].x / avgCount[i], averages[i].y / avgCount[i] };
-				}
+            bool shotStarted = false;
 
-				Vector2D avg = averages[0] + averages[1] + averages[2];
-				avg = { avg.x / 3, avg.y / 3 };
+            if (sensor != NULL) {
+                sensor->start();
+            }
 
-                double nineRingRadius = 16 * avgRadius / PISTOL_CIRCLE_SIZE;
+            #ifdef QT_QML_DEBUG
+                int testTrigger = 312;
+            #endif
 
-                if (D2P(averages[0], avg) < nineRingRadius &&
-                        D2P(averages[1], avg) < nineRingRadius &&
-                        D2P(averages[2], avg) < nineRingRadius) {
-					avgCircle->center = avg;
-					avgCircle->radius = avgRadius;
-					return;
-				}
-			}
+            while (!stopRecording) {
+                video >> frame;
+                lFrameTime = SystemClock::getCurrentTimeMillis();
 
-			avgCircle->radius = -1;
-		}
-
-		void run() {
-			cv::Mat frame;
-
-			uint64_t lStartTime;
-			uint64_t lCurrTime;
-
-			TargetCircle avgCircle;
-			avgCircle.radius = -1;
-
-			int frameId = 0;
-
-			double vecX = 0.0;
-			double vecY = 0.0;
-
-			bool success = false;
-
-			// calibration finishes when a valid average of points within 3s is found
-            while (!stopRecording && avgCircle.radius <= 0) {
-				// get frame
-				fprintf(logFile, "Frame #%d", frameId);
-				video >> frame;
-
-				if (frameId == 0) {
-					lStartTime = SystemClock::getCurrentTimeMillis();
-				}
-
-				if (frame.empty()) {
-					// if camera becomes disconnected, exit
-					fprintf(logFile, "\tDropped frame!\n");
-					break;
-				}
-
-				lCurrTime = SystemClock::getCurrentTimeMillis();
-
-                double totalTime = SystemClock::getElapsedMillis(lCurrTime, lStartTime);
-                if (totalTime > 15000) {
-                    fprintf(logFile, "\tTimeout!\n");
+                if (frame.empty()) {
+                    // if camera becomes disconnected, exit
+                    fprintf(logFile, "\tDropped frame!\n");
                     break;
                 }
 
-				TargetCircle target = findCircle(frame);
-				fprintf(logFile, "\t(%.3f , %.3f) %.3f\n", target.center.x, target.center.y, target.radius);
-                if (target.radius > 0) {
-					// circle is found
-					TraceCircle trace = { target, lCurrTime };
+                #ifdef QT_QML_DEBUG
+                    fprintf(logFile, "C\t%" PRIu64 "", lFrameTime);
+                #else
+                    fprintf(logFile, "C,%" PRIu64 "", lFrameTime);
+                #endif
 
-					double totalTraceTime = 0;
-
-					if (currentTrace.size() > 0) {
-                        totalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace[0].time);
-					}
-
-					currentTrace.push_back(trace);
-                    if ((totalTraceTime >= 3000) && (totalTraceTime <= 3050)) {
-						// we have 3s worth of data
-						// see if this produces a valid average
-						findAvgCircle(&avgCircle);
-					}
-                    else if (totalTraceTime > 3050) {
-						// we have more than 3s worth of data
-						// remove first element from vector until the vector only
-						// contains 3s worth of data
-						while (currentTrace.size() > 0)
-						{
-                            double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace[0].time);
-							if (currTotalTraceTime > 3.05 && currentTrace.size() > 0)
-							{
-								currentTrace.erase(currentTrace.begin(), currentTrace.begin() + 1);
-							}
-							else
-							{
-								break;
-							}
-						}
-
-						// if after removing, we now have 3s worth of data
-						// see if this produces a valid average
-                        double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace[0].time);
-                        if ((currTotalTraceTime >= 3000) && (currTotalTraceTime <= 3050))
-						{
-							findAvgCircle(&avgCircle);
-						}
-					}
-
-                    if (avgCircle.radius > 0) {
-						// a valid average was produced
-                        vecX = avgCircle.center.x;
-                        vecY = avgCircle.center.y;
-
-                        // break
-						stopRecording = true;
-						success = true;
-						break;
-					}
-                } else {
-                    // circle is not found reset trace
-                    currentTrace.clear();
+                if (frameid == 0) {
+                    lStartTime = lFrameTime;
                 }
 
-                frameId++;
-			}
+                #ifdef QT_QML_DEBUG
+                    if (sensor == NULL && frameid == testTrigger) {
+                        lTriggerTime = lFrameTime;
+                    }
+                #endif
 
-            // release video
+                double totalMillis = SystemClock::getElapsedMillis(lFrameTime, lStartTime);
+                if (totalMillis > 30000) {
+                    // if it has been more than 30s, calibration has failed
+                    calibrationFinished(false, -1, -1, -1);
+                }
+
+                double millisSinceShotStart = SystemClock::getElapsedMillis(lFrameTime, lShotStartTime);
+
+                if (shotStarted) {
+                    // shot has started i.e. the aim has went past the top edge and came back down
+                    double millisSinceCircleDetected = SystemClock::getElapsedMillis(lFrameTime, lLastCircleDetectedFrameTime);
+                    if (millisSinceCircleDetected > 2000) {
+                        // reset shot if shot has started but aim is not within the target/cannot be found
+                        // for 2s
+                        shotStarted = false;
+                        currShotTrace.reset();
+                    } else if (millisSinceShotStart > 60000 && !currShotTrace.isShotPointSet()) {
+                        // reset trace if shot has started but trigger has not been pulled for 60s
+                        currShotTrace.reset();
+
+                        // but update the start time to the current time
+                        lShotStartTime = lFrameTime;
+                    }
+                }
+
+                TargetCircle circle = findCircle(frame);
+                #ifdef QT_QML_DEBUG
+                    fprintf(logFile, "\t[%s]", (shotStarted ? "true" : "false"));
+                #else
+                    fprintf(logFile, ",%d", shotStarted);
+                #endif
+                if (circle.radius != -1) {
+                    // aim i.e. black circle was found
+                    lLastCircleDetectedFrameTime = lFrameTime;
+                    Vector2D center = { circle.center.x, circle.center.y };
+                    #ifdef QT_QML_DEBUG
+                        fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
+                    #else
+                        fprintf(logFile, ",%.3f,%.3f", center.x, center.y);
+                    #endif
+
+                    if (center.x >= -TARGET_SIZE / 2 && center.x <= TARGET_SIZE / 2 &&
+                        center.y >= -TARGET_SIZE / 2 && center.y <= TARGET_SIZE / 2) {
+                        // aim is found and within the target
+                        lLastCircleDetectedFrameTime = lFrameTime;
+                    }
+
+                    if (!shotStarted) {
+                        // new shot started
+                        shotStarted = true;
+
+                        // reset traces
+                        currShotTrace.reset();
+
+                        lShotStartTime = lFrameTime;
+                    } else {
+                        if (lTriggerTime != 0) {
+                            // trigger has just been pulled
+                            #ifdef QT_QML_DEBUG
+                                fprintf(logFile, "\tTRIGGER RECEIVED AT %llu", lTriggerTime);
+                            #else
+                                fprintf(logFile, ",%llu", lTriggerTime);
+                            #endif
+
+                            vector<TracePoint> beforeShotTrace = currShotTrace.getBeforeShotTrace();
+                            vector<TracePoint> points;
+                            TargetCircle bestAvgCircle = {{0, 0}, -1};
+                            double bestVariance = -1;
+
+                            for (size_t i = 0; i < beforeShotTrace.size(); i++) {
+                                TracePoint currTP = beforeShotTrace[i];
+                                if (points.size() == 0) {
+                                    points.push_back(currTP);
+                                } else {
+                                    double duration = currTP.time - points[0].time;
+                                    if ((duration > 1000 && duration < 1050) || (i == beforeShotTrace.size() - 1 && duration > 500)) {
+                                        // there has been 1s worth of data
+                                        // or 500ms of data and this is the last data point
+                                        TargetCircle avgCircle = {{0, 0}, 0};
+                                        for (size_t i = 0; i < points.size(); i++) {
+                                            avgCircle = avgCircle + TargetCircle{points[i].point, points[i].radius};
+                                        }
+                                        avgCircle = avgCircle / points.size();
+
+                                        double variance = 0;
+                                        for (size_t i = 0; i < points.size(); i++) {
+                                            variance += sqrt(D2P(avgCircle.center, points[i].point));
+                                        }
+                                        variance /= points.size();
+
+                                        if (bestVariance == -1 || variance < bestVariance) {
+                                            bestVariance = variance;
+                                            bestAvgCircle = avgCircle;
+                                        }
+
+                                        points.clear();
+                                    } else {
+                                        points.push_back(currTP);
+                                    }
+                                }
+                            }
+
+                            if (bestVariance > 0) {
+                                calibrationFinished(true, bestAvgCircle.center.x, bestAvgCircle.center.y, bestAvgCircle.radius);
+                            } else {
+                                calibrationFinished(false, -1, -1, -1);
+                            }
+
+                            stopRecording = true;
+                        } else {
+                            currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
+                        }
+                    }
+                }
+
+                if (!shotStarted) {
+                    // eitherways reset triggered value
+                    // if shot has not been started
+                    lTriggerTime = 0;
+                }
+
+                fprintf(logFile, "\n");
+                frameid++;
+            }
+
             video.release();
-
-			// callback result
-            this->calibrationFinished(success, vecX, vecY, avgCircle.radius);
-		}
+            stopRecording = true;
+            if (sensor != NULL) {
+                sensor->stop();
+            }
+        }
 };

@@ -6,65 +6,15 @@
 using namespace std;
 using namespace cv;
 
-ShootThread::ShootThread(int startSn, VideoCapture video, string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
+ShootThread::ShootThread(int startSn, VideoCapture video, string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) : RecordThread(TRIGGER_DB, mic) {
     this->sn = startSn;
     this->video = video;
 	this->page = page;
 	this->logFile = logFile;
-    this->TRIGGER_DB = TRIGGER_DB;
     this->RATIO1 = RATIO1;
     this->adjustmentVec = adjustmentVec;
     this->fineAdjustment = fineAdjustment;
     this->upDownDetection = upDownDetection;
-
-    params.minThreshold = 100;
-    params.maxThreshold = 200;
-
-	params.filterByArea = true;
-	params.minArea = 450;
-
-	params.filterByCircularity = true;
-	params.minCircularity = 0.85;
-
-	params.filterByInertia = true;
-	params.minInertiaRatio = 0.85;
-
-    detector = SimpleBlobDetector::create(params);
-        
-    if (TRIGGER_DB > 0) {
-        sensor = new SoundPressureSensor(this, TRIGGER_DB);
-        if (!sensor->setDevice(mic))
-        {
-            fprintf(logFile, "No Audio Input Device!\n");
-            sensor = NULL;
-        }
-    }
-}
-
-TargetCircle ShootThread::findCircle(Mat frame)
-{
-	TargetCircle resultCircle;
-	resultCircle.center = Vector2D{ -1.0, -1.0 };
-	resultCircle.radius = (double)-1.0;
-
-    Mat grayFrame;
-    vector<KeyPoint> keypoints;
-
-    cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
-	//Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2 );
-	detector->detect(grayFrame, keypoints);
-
-	if (keypoints.size() == 1) {
-		resultCircle.center.x = keypoints[0].pt.x;
-		resultCircle.center.y = keypoints[0].pt.y;
-		resultCircle.radius = keypoints[0].size / 2;
-	}
-
-	return resultCircle;
-}
-
-void ShootThread::audio_trigger(uint64_t trigger_time) {
-    this->lTriggerTime = trigger_time;
 }
 
 void ShootThread::start() {
@@ -93,9 +43,8 @@ void ShootThread::run() {
         fprintf(logFile, "Adjustment Vec (px, px): (%.3f, %.3f)\n", adjustmentVec.x, adjustmentVec.y);
         fprintf(logFile, "Fine Adjustment Vec (mm, mm): (%.3f, %.3f)\n", fineAdjustment.x, fineAdjustment.y);
         fprintf(logFile, "Up/Down Detection: (%s)\n", upDownDetection ? "true" : "false");
-        fprintf(logFile, "TRIGGER: (%.3f)\n", TRIGGER_DB);
     #else
-        fprintf(logFile, "params,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%.3f\n", RATIO1, adjustmentVec.x, adjustmentVec.y, fineAdjustment.x, fineAdjustment.y, upDownDetection, TRIGGER_DB);
+        fprintf(logFile, "params,%.3f,%.3f,%.3f,%.3f,%.3f,%d\n", RATIO1, adjustmentVec.x, adjustmentVec.y, fineAdjustment.x, fineAdjustment.y, upDownDetection);
     #endif
 
     page.removePreviousCalibCircle();
@@ -141,7 +90,7 @@ void ShootThread::run() {
         int testTriggerIndex = 0;
     #endif
 
-	while (!stopRecording && (frameid == 0 || !frame.empty())) {
+    while (!stopRecording) {
 		video >> frame;
         lFrameTime = SystemClock::getCurrentTimeMillis();
 
@@ -177,7 +126,7 @@ void ShootThread::run() {
                 page.clearTrace(false);
             }
             else {
-                if (millisSinceShotStart > 60000)
+                if (millisSinceShotStart > 60000 && !currShotTrace.isShotPointSet())
                 {
                     // reset trace if shot has started but trigger has not been pulled for 60s
                     currShotTrace.reset();
@@ -278,14 +227,14 @@ void ShootThread::run() {
                         if (lTriggerTime > lFrameTime) {
                             // trigger was after frame was taken
                             // add current position to before trace
-                            currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                            currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
                             page.addToBeforeShotTrace(center);
                             currShotTrace.setTriggerPulled();
                         } else {
                             // trigger was before frame was taken
                             // add current position to after trace
                             currShotTrace.setTriggerPulled();
-                            currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                            currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
                         }
 
                         #ifdef QT_QML_DEBUG
@@ -294,14 +243,14 @@ void ShootThread::run() {
                             fprintf(logFile, ",%llu", lTriggerTime);
                         #endif
                     } else {
-                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
                         page.addToBeforeShotTrace(center);
                     }
                 } else {
                     if (currShotTrace.getAfterShotTrace().size() < 2) {
-                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
                     } else if (currShotTrace.getAfterShotTrace().size() == 2) {
-                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
 
                         // use spline to calculate actual shot point
                         vector<double> X, Y, T;
@@ -334,14 +283,14 @@ void ShootThread::run() {
                         #else
                             fprintf(logFile, ",%.3f,%.3f", shotPoint.x, shotPoint.y);
                         #endif
-                        currShotTrace.setShotPoint({ shotPoint, trigger_time });
+                        currShotTrace.setShotPoint({ shotPoint, trigger_time, circle.radius });
                         page.addToBeforeShotTrace(shotPoint);
                         page.drawShotCircle(shotPoint);
                         page.addToAfterShotTrace(shotPoint);
 
                         lTriggerTime = 0;
                     } else {
-                        currShotTrace.addTracePoint({ center, millisSinceShotStart });
+                        currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
                         page.addToAfterShotTrace(center);
                     }
                 }

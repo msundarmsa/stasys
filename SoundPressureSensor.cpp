@@ -1,22 +1,23 @@
 #pragma once
 
-#include "ShootThread.h"
+#include "RecordThread.h"
 #include <SFML/Audio.hpp>
 #include "SystemClock.h"
+#include "Utils.h"
 
 using namespace sf;
 
 class SoundPressureSensor : public SoundRecorder
 {
 private:
-    ShootThread* sThread;
+    RecordThread* rThread;
     uint64_t last_trigger_time = 0;
     bool ready2Trigger = false;
     double TRIGGER_DB = 0;
 
 public:
-    SoundPressureSensor(ShootThread* sThread, double TRIGGER_DB) {
-        this->sThread = sThread;
+    SoundPressureSensor(RecordThread* rThread, double TRIGGER_DB) {
+        this->rThread = rThread;
         this->TRIGGER_DB = TRIGGER_DB;
     }
 
@@ -50,7 +51,7 @@ private:
 
         if (dB > TRIGGER_DB) {
             if (interval > SILENCE_DURATION || last_trigger_time == 0) {
-                sThread->audio_trigger(curr_time);
+                rThread->audio_trigger(curr_time);
                 ready2Trigger = false;
             }
 
