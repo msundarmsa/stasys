@@ -47,7 +47,7 @@ void QMLCppBridge::selectDefaultMic()
         std::string defaultMic = "Realtek USB2.0 Mic";
         std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
         currentMic = sf::SoundRecorder::getDefaultDevice();
-        for (int i = 0; i < micOptions.size(); i++){
+        for (size_t i = 0; i < micOptions.size(); i++){
             if (micOptions[i].compare(defaultMic) == 0) {
                 currentMic = defaultMic;
                 break;
@@ -86,7 +86,7 @@ void QMLCppBridge::settingsOpened()
 
     std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
     QStringList micOptions = {QString::fromStdString(currentMic)};
-    for (int i = 0; i < availableDevices.size(); i++) {
+    for (size_t i = 0; i < availableDevices.size(); i++) {
         if (availableDevices[i].compare(currentMic) != 0) {
             micOptions.append(QString::fromStdString(availableDevices[i]));
         }
@@ -242,7 +242,7 @@ void QMLCppBridge::updateView(Shot* shot) {
     double aim = shot->getAim();
     const char *angle = toString(shot->getAngle());
 
-    int frames = 0.5 * FPS;
+    size_t frames = 0.5 * FPS;
     QList<double> xtList = {};
     QList<double> ytList = {};
     QList<double> tList = {};
@@ -265,7 +265,7 @@ void QMLCppBridge::updateView(Shot* shot) {
         ytList.append(shotPoint.point.y);
         tList.append(0);
 
-        for (int i = 0; i < frames; i++) {
+        for (size_t i = 0; i < frames; i++) {
             xtList.append(afterTrace[i].point.x);
             ytList.append(afterTrace[i].point.y);
             tList.append((afterTrace[i].time - shotPoint.time) / 1000);

@@ -306,7 +306,7 @@ void ShootThread::run() {
                         std::vector<double> X, Y, T;
                         std::vector<TracePoint> beforeShotTrace = currShotTrace.getBeforeShotTrace();
                         std::vector<TracePoint> afterShotTrace = currShotTrace.getAfterShotTrace();
-                        for (int i = beforeShotTrace.size() - 3; i < beforeShotTrace.size(); i++) {
+                        for (size_t i = beforeShotTrace.size() - 3; i < beforeShotTrace.size(); i++) {
                             X.push_back(beforeShotTrace[i].point.x);
                             Y.push_back(beforeShotTrace[i].point.y);
                             T.push_back(beforeShotTrace[i].time);

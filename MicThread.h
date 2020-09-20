@@ -24,7 +24,7 @@ private:
     virtual bool onProcessSamples(const sf::Int16* samples, size_t sampleCount)
     {
         float sos = 0.0;
-        for (int i = 0; i < sampleCount; i++) {
+        for (size_t i = 0; i < sampleCount; i++) {
             float currentSample = (float)*samples++;
             sos += currentSample * currentSample;
         }

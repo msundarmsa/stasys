@@ -12,6 +12,6 @@ public:
 	virtual bool isRunning();
 	void join();
 private:
-	void run();
+    void run();
 };
 

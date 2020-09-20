@@ -30,7 +30,7 @@ private:
         uint64_t curr_time = SystemClock::getCurrentTimeMillis();
 
         float sos = 0.0;
-        for (int i = 0; i < sampleCount; i++) {
+        for (size_t i = 0; i < sampleCount; i++) {
             float currentSample = (float)*samples++;
             sos += currentSample * currentSample;
         }

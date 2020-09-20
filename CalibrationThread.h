@@ -88,7 +88,7 @@ class CalibrationThread : public RecordThread {
 			int currAvgIndex = 0;
 			double avgRadius = currStartTP.circle.radius;
 
-			for (int i = 1; i < currentTrace.size(); i++) {
+            for (size_t i = 1; i < currentTrace.size(); i++) {
 				TraceCircle currTP = currentTrace.at(i);
 				double time_interval = SystemClock::getElapsedMillis(currTP.time, currStartTP.time);
 				if (time_interval > 1) {
