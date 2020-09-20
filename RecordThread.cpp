@@ -1,8 +1,10 @@
 #include "RecordThread.h"
 
+using namespace std;
+
 void RecordThread::start()
 {
-    recordThread = new std::thread(&RecordThread::run, this);
+    recordThread = new thread(&RecordThread::run, this);
 }
 
 void RecordThread::stop()

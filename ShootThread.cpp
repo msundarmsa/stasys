@@ -3,7 +3,10 @@
 #include "ShotTrace.h"
 #include "spline.h"
 
-ShootThread::ShootThread(int startSn, cv::VideoCapture video, std::string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
+using namespace std;
+using namespace cv;
+
+ShootThread::ShootThread(int startSn, VideoCapture video, string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) {
     this->sn = startSn;
     this->video = video;
 	this->page = page;
@@ -26,7 +29,7 @@ ShootThread::ShootThread(int startSn, cv::VideoCapture video, std::string mic, b
 	params.filterByInertia = true;
 	params.minInertiaRatio = 0.85;
 
-	detector = cv::SimpleBlobDetector::create(params);
+    detector = SimpleBlobDetector::create(params);
         
     if (TRIGGER_DB > 0) {
         sensor = new SoundPressureSensor(this, TRIGGER_DB);
@@ -38,16 +41,16 @@ ShootThread::ShootThread(int startSn, cv::VideoCapture video, std::string mic, b
     }
 }
 
-TargetCircle ShootThread::findCircle(cv::Mat frame)
+TargetCircle ShootThread::findCircle(Mat frame)
 {
 	TargetCircle resultCircle;
 	resultCircle.center = Vector2D{ -1.0, -1.0 };
 	resultCircle.radius = (double)-1.0;
 
-	cv::Mat grayFrame;
-	std::vector<cv::KeyPoint> keypoints;
+    Mat grayFrame;
+    vector<KeyPoint> keypoints;
 
-	cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY);
+    cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
 	//Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2 );
 	detector->detect(grayFrame, keypoints);
 
@@ -65,11 +68,11 @@ void ShootThread::audio_trigger(uint64_t trigger_time) {
 }
 
 void ShootThread::start() {
-    recordThread = new std::thread(&ShootThread::run, this);
+    recordThread = new thread(&ShootThread::run, this);
 }
 
 void ShootThread::run() {
-	cv::Mat frame;
+    Mat frame;
 
     Vector2D preTrace[2];
     int preTraceIndex = 0;
@@ -199,7 +202,7 @@ void ShootThread::run() {
         }
 
         // clip 1.75x size of card around aim center
-        cv::Rect roi;
+        Rect roi;
         roi.width = 1.75 * TARGET_SIZE / RATIO1;
         roi.height = roi.width;
 
@@ -301,9 +304,9 @@ void ShootThread::run() {
                         currShotTrace.addTracePoint({ center, millisSinceShotStart });
 
                         // use spline to calculate actual shot point
-                        std::vector<double> X, Y, T;
-                        std::vector<TracePoint> beforeShotTrace = currShotTrace.getBeforeShotTrace();
-                        std::vector<TracePoint> afterShotTrace = currShotTrace.getAfterShotTrace();
+                        vector<double> X, Y, T;
+                        vector<TracePoint> beforeShotTrace = currShotTrace.getBeforeShotTrace();
+                        vector<TracePoint> afterShotTrace = currShotTrace.getAfterShotTrace();
                         for (size_t i = beforeShotTrace.size() - 3; i < beforeShotTrace.size(); i++) {
                             X.push_back(beforeShotTrace[i].point.x);
                             Y.push_back(beforeShotTrace[i].point.y);

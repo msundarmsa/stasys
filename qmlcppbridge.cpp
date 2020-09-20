@@ -10,7 +10,10 @@
 
 #define _USE_MATH_DEFINES
 
-using namespace std::placeholders;
+using namespace std;
+using namespace placeholders;
+using namespace cv;
+using namespace sf;
 
 QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
@@ -18,10 +21,10 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
     #ifdef QT_QML_DEBUG
         upDownDetection = false;
     #else
-        time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        time_t currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
         char timestamp[20];
-        std::strftime (timestamp, 20, "%m%d%y_%H%M%S", std::localtime(&currentTime));
-        std::stringstream filename;
+        strftime (timestamp, 20, "%m%d%y_%H%M%S", localtime(&currentTime));
+        stringstream filename;
         #ifdef Q_OS_MACX
             QString currentDir = QCoreApplication::applicationDirPath(); // /<something>/stasys-qt.app/Contents/MacOS
             int pos = currentDir.lastIndexOf(QChar('/'));
@@ -44,9 +47,9 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 void QMLCppBridge::selectDefaultMic()
 {
     if (currentMic.compare("") == 0) {
-        std::string defaultMic = "Realtek USB2.0 Mic";
-        std::vector<std::string> micOptions = sf::SoundRecorder::getAvailableDevices();
-        currentMic = sf::SoundRecorder::getDefaultDevice();
+        string defaultMic = "Realtek USB2.0 Mic";
+        vector<string> micOptions = SoundRecorder::getAvailableDevices();
+        currentMic = SoundRecorder::getDefaultDevice();
         for (size_t i = 0; i < micOptions.size(); i++){
             if (micOptions[i].compare(defaultMic) == 0) {
                 currentMic = defaultMic;
@@ -84,7 +87,7 @@ void QMLCppBridge::settingsOpened()
     selectDefaultCamera();
     selectDefaultMic();
 
-    std::vector<std::string> availableDevices = sf::SoundRecorder::getAvailableDevices();
+    vector<string> availableDevices = SoundRecorder::getAvailableDevices();
     QStringList micOptions = {QString::fromStdString(currentMic)};
     for (size_t i = 0; i < availableDevices.size(); i++) {
         if (availableDevices[i].compare(currentMic) != 0) {
@@ -100,7 +103,7 @@ void QMLCppBridge::settingsOpened()
         }
     }
 
-    auto updateSamplesPtr = std::bind(&QMLCppBridge::updateSamples, this, _1);
+    auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
     micThread = new MicThread(updateSamplesPtr);
     micThread->setDevice(availableDevices[0]);
     micThread->start();
@@ -168,12 +171,12 @@ void QMLCppBridge::calibrationClicked()
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
-            cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
+            VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
         #else
-            cv::VideoCapture cap(CAMERA_INDEX);
+            VideoCapture cap(CAMERA_INDEX);
         #endif
 
-        auto calibrationFinishedPtr = std::bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
+        auto calibrationFinishedPtr = bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
         calibThread = new CalibrationThread(cap, calibrationFinishedPtr, logFile);
         calibThread->start();
         emit uiCalibrationStarted();
@@ -192,18 +195,18 @@ void QMLCppBridge::shootClicked()
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
-            cv::VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
+            VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
             TRIGGER_DB = -1;
         #else
-            cv::VideoCapture cap(CAMERA_INDEX);
+            VideoCapture cap(CAMERA_INDEX);
         #endif
 
-        auto removePreviousCalibCirclePtr = std::bind(&QMLCppBridge::removePreviousCalibCircle, this);
-        auto clearTracePtr = std::bind(&QMLCppBridge::clearTrace, this, _1);
-        auto updateViewPtr = std::bind(&QMLCppBridge::updateView, this, _1);
-        auto addToBeforeShotTracePtr = std::bind(&QMLCppBridge::addToBeforeShotTrace, this, _1);
-        auto drawShotCirclePtr = std::bind(&QMLCppBridge::drawShotCircle, this, _1);
-        auto addToAfterShotTracePtr = std::bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
+        auto removePreviousCalibCirclePtr = bind(&QMLCppBridge::removePreviousCalibCircle, this);
+        auto clearTracePtr = bind(&QMLCppBridge::clearTrace, this, _1);
+        auto updateViewPtr = bind(&QMLCppBridge::updateView, this, _1);
+        auto addToBeforeShotTracePtr = bind(&QMLCppBridge::addToBeforeShotTrace, this, _1);
+        auto drawShotCirclePtr = bind(&QMLCppBridge::drawShotCircle, this, _1);
+        auto addToAfterShotTracePtr = bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
         shootThread = new ShootThread(shots.size(), cap, currentMic, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
@@ -248,9 +251,9 @@ void QMLCppBridge::updateView(Shot* shot) {
     QList<double> tList = {};
 
     ShotTrace shotTrace = shot->getShotTrace();
-    std::vector<TracePoint> beforeTrace = shotTrace.getBeforeShotTrace();
+    vector<TracePoint> beforeTrace = shotTrace.getBeforeShotTrace();
     TracePoint shotPoint = shotTrace.getShotPoint();
-    std::vector<TracePoint> afterTrace = shotTrace.getAfterShotTrace();
+    vector<TracePoint> afterTrace = shotTrace.getAfterShotTrace();
 
     if (beforeTrace.size() > frames && afterTrace.size() > frames) {
         // only plot xt/yt graph if beforeTrace and afterTrace are valid

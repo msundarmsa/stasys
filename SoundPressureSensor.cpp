@@ -4,7 +4,9 @@
 #include <SFML/Audio.hpp>
 #include "SystemClock.h"
 
-class SoundPressureSensor : public sf::SoundRecorder
+using namespace sf;
+
+class SoundPressureSensor : public SoundRecorder
 {
 private:
     ShootThread* sThread;
@@ -21,11 +23,11 @@ public:
 private:
     virtual bool onStart() // optional
     {
-        setProcessingInterval(sf::milliseconds(1));
+        setProcessingInterval(milliseconds(1));
         return true;
     }
 
-    virtual bool onProcessSamples(const sf::Int16* samples, size_t sampleCount)
+    virtual bool onProcessSamples(const Int16* samples, size_t sampleCount)
     {
         uint64_t curr_time = SystemClock::getCurrentTimeMillis();
 

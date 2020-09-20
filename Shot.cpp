@@ -1,6 +1,8 @@
 #include "Shot.h"
 #include <vector>
 
+using namespace std;
+
 Shot::Shot(int sn, double score, double angle_val, double stab, double desc, double aim)
 {
 	// set object parameters
@@ -107,7 +109,7 @@ void Shot::calcStabDescAim()
     int entered10RingIdx = -1;
     double entered10RingTime = -1;
     int num10Ring = 0;
-	std::vector<TracePoint> beforeShotTrace = shotTrace.getBeforeShotTrace();
+    vector<TracePoint> beforeShotTrace = shotTrace.getBeforeShotTrace();
     double firstFrameTime = beforeShotTrace[0].time;
     double lastFrameTime = beforeShotTrace.back().time;
 
