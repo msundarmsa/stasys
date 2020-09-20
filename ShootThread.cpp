@@ -171,7 +171,6 @@ void ShootThread::run() {
                 // for 2s
                 shotStarted = false;
                 currShotTrace.reset();
-                preTraceIndex = 0;
                 page.clearTrace(false);
             }
             else {
@@ -195,7 +194,6 @@ void ShootThread::run() {
                     // reset shot
                     shotStarted = false;
                     currShotTrace.reset();
-                    preTraceIndex = 0;
                 }
             }
         }
