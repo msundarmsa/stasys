@@ -108,12 +108,12 @@ void Shot::calcStabDescAim()
     double entered10RingTime = -1;
     int num10Ring = 0;
 	std::vector<TracePoint> beforeShotTrace = shotTrace.getBeforeShotTrace();
-	double firstFrameTime = beforeShotTrace.at(0).time;
-	double lastFrameTime = beforeShotTrace.at(beforeShotTrace.size() - 1).time;
+    double firstFrameTime = beforeShotTrace[0].time;
+    double lastFrameTime = beforeShotTrace.back().time;
 
-	for (int i = 0; i < beforeShotTrace.size(); i++)
+    for (size_t i = 0; i < beforeShotTrace.size(); i++)
 	{
-		TracePoint currTP = beforeShotTrace.at(i);
+        TracePoint currTP = beforeShotTrace[i];
 		double currDist = D2P(currTP.point, TARGET_CENTER_PT);
 
         if (currDist <= 8.0)

@@ -78,7 +78,7 @@ class CalibrationThread : public RecordThread {
 
 	private:
 		void findAvgCircle(TargetCircle* avgCircle) {
-			TraceCircle currStartTP = currentTrace.at(0);
+            TraceCircle currStartTP = currentTrace[0];
 			Vector2D averages[] = {
 				currStartTP.circle.center,
 				{ 0, 0 },
@@ -89,7 +89,7 @@ class CalibrationThread : public RecordThread {
 			double avgRadius = currStartTP.circle.radius;
 
             for (size_t i = 1; i < currentTrace.size(); i++) {
-				TraceCircle currTP = currentTrace.at(i);
+                TraceCircle currTP = currentTrace[i];
 				double time_interval = SystemClock::getElapsedMillis(currTP.time, currStartTP.time);
 				if (time_interval > 1) {
 					currAvgIndex++;
@@ -176,7 +176,7 @@ class CalibrationThread : public RecordThread {
 					double totalTraceTime = 0;
 
 					if (currentTrace.size() > 0) {
-						totalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace.at(0).time);
+                        totalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace[0].time);
 					}
 
 					currentTrace.push_back(trace);
@@ -191,7 +191,7 @@ class CalibrationThread : public RecordThread {
 						// contains 3s worth of data
 						while (currentTrace.size() > 0)
 						{
-							double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace.at(0).time);
+                            double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace[0].time);
 							if (currTotalTraceTime > 3.05 && currentTrace.size() > 0)
 							{
 								currentTrace.erase(currentTrace.begin(), currentTrace.begin() + 1);
@@ -204,7 +204,7 @@ class CalibrationThread : public RecordThread {
 
 						// if after removing, we now have 3s worth of data
 						// see if this produces a valid average
-						double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace.at(0).time);
+                        double currTotalTraceTime = SystemClock::getElapsedMillis(lCurrTime, currentTrace[0].time);
                         if ((currTotalTraceTime >= 3000) && (currTotalTraceTime <= 3050))
 						{
 							findAvgCircle(&avgCircle);
