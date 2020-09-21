@@ -201,7 +201,7 @@ class CalibrationThread : public RecordThread {
                                 calibrationFinished(false, -1, -1, -1);
                             }
 
-                            stopRecording = true;
+                            return;
                         } else {
                             currShotTrace.addTracePoint({ center, millisSinceShotStart, circle.radius });
                         }
@@ -223,5 +223,7 @@ class CalibrationThread : public RecordThread {
             if (sensor != NULL) {
                 sensor->stop();
             }
+
+            calibrationFinished(false, -1, -1, -1);
         }
 };
