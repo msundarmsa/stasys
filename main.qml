@@ -416,6 +416,10 @@ Window {
         onUiUpdateSamples: {
             micChart.updateMicChart(dB);
         }
+
+        onUiCameraMicError: {
+            cameraMicError.open();
+        }
     }
 
     ToastManager {

@@ -42,14 +42,18 @@ private:
     ShootThread* shootThread = NULL;
     MicThread *micThread = NULL;
     std::string currentMic = "";
+    std::string selectedMic = "";
     float micThreshold = 0.0;
     int CAMERA_INDEX = -1;
+    int SELECTED_CAMERA_INDEX = -1;
     float TRIGGER_DB = 45.0;
     double RATIO1 = 1; // px from camera to mm
     Vector2D adjustmentVec = {0, 0};
     Vector2D fineAdjustment = {0, 0};
     bool upDownDetection = true;
     std::vector<Shot*> shots;
+    const string defaultMic = "Realtek USB2.0 Mic";
+    const QString qDefaultCamera = "USB Camera";
 
 signals:
     void uiCalibrationStarted();
@@ -65,6 +69,7 @@ signals:
     void uiAddToAfterShotTrace(double x, double y);
     void uiSettingsOpened(QStringList micOptions, QString defaultMic, double TRIGGER_DB, QStringList cameraOptions, int defaultCamera, bool upDownDetection);
     void uiUpdateSamples(float dB);
+    void uiCameraMicError();
 };
 
 #endif // QMLCPPBRIDGE_H

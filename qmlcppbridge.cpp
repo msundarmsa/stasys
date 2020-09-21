@@ -46,8 +46,7 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 
 void QMLCppBridge::selectDefaultMic()
 {
-    if (currentMic.compare("") == 0) {
-        string defaultMic = "Realtek USB2.0 Mic";
+    if (selectedMic.compare("") == 0) {
         vector<string> micOptions = SoundRecorder::getAvailableDevices();
         currentMic = SoundRecorder::getDefaultDevice();
         for (size_t i = 0; i < micOptions.size(); i++){
@@ -56,13 +55,14 @@ void QMLCppBridge::selectDefaultMic()
                 break;
             }
         }
+    } else {
+        currentMic = selectedMic;
     }
 }
 
 void QMLCppBridge::selectDefaultCamera()
 {
-    if (CAMERA_INDEX == -1) {
-        const QString qDefaultCamera = "USB Camera";
+    if (SELECTED_CAMERA_INDEX == -1) {
         const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
         CAMERA_INDEX = 0;
         for (int i = 0; i < cameras.size(); i++){
@@ -72,6 +72,8 @@ void QMLCppBridge::selectDefaultCamera()
                 break;
             }
         }
+    } else {
+        CAMERA_INDEX = SELECTED_CAMERA_INDEX;
     }
 }
 
@@ -105,7 +107,7 @@ void QMLCppBridge::settingsOpened()
 
     auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
     micThread = new MicThread(updateSamplesPtr);
-    micThread->setDevice(availableDevices[0]);
+    micThread->setDevice(currentMic);
     micThread->start();
     emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX, upDownDetection);
 }
@@ -124,9 +126,9 @@ void QMLCppBridge::updateSamples(float dB)
 
 void QMLCppBridge::micChanged(QString newMic)
 {
-    currentMic = newMic.toStdString();
+    selectedMic = newMic.toStdString();
     micThread->stop();
-    micThread->setDevice(currentMic);
+    micThread->setDevice(selectedMic);
     micThread->start();
 }
 
@@ -137,7 +139,7 @@ void QMLCppBridge::micThresholdChanged(float newThreshold)
 
 void QMLCppBridge::cameraChanged(int camera)
 {
-    CAMERA_INDEX = camera;
+    SELECTED_CAMERA_INDEX = camera;
 }
 
 void QMLCppBridge::upDownDetectionChanged(bool upDownDetection)
@@ -169,6 +171,12 @@ void QMLCppBridge::calibrationClicked()
     selectDefaultCamera();
     selectDefaultMic();
 
+    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    if (currentMic.compare(defaultMic) != 0 || cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0) {
+        emit uiCameraMicError();
+        return;
+    }
+
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
             VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
@@ -192,6 +200,12 @@ void QMLCppBridge::shootClicked()
 {
     selectDefaultCamera();
     selectDefaultMic();
+
+    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+    if (currentMic.compare(defaultMic) != 0 || cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0) {
+        emit uiCameraMicError();
+        return;
+    }
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
