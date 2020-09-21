@@ -78,7 +78,8 @@ Window {
         { text: "8", x: 269/680, y:   1/2  , color: "#464646" }
     ]
 
-    /*Component.onCompleted: {
+    Component.onCompleted: {
+        /*cameraMicError.open();
         targetTrace.resetTrace(true);
         targetTrace.drawShotCircle(0,0);
         shotGroupList.addShot(0,0);
@@ -122,12 +123,64 @@ Window {
         qmlCppBridge.uiUpdateView(7, 10.0, 75, 3.6, 5.2, "left", [], [], []);
         qmlCppBridge.uiUpdateView(8, 9.5, 82.5, 2, 6, "top_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
         qmlCppBridge.uiUpdateView(9, 10.0, 75, 3.6, 5.2, "top", [], [], []);
-        qmlCppBridge.uiUpdateView(10, 9.5, 82.5, 2, 6, "top", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-    }*/
+        qmlCppBridge.uiUpdateView(10, 9.5, 82.5, 2, 6, "top", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);*/
+    }
 
     SoundEffect {
         id: calibrationDoneSound
         source: "ui/sounds/done.wav"
+    }
+
+    Popup {
+        id: cameraMicError
+        x: (window.width - width) / 2
+        y: (window.height - height) / 2
+        height: errorContent.height + 40
+        width: errorContent.width + 40
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        background: Rectangle {
+            anchors.fill: parent
+            color: primaryColor
+            border.color: secondaryColor
+            radius: 10
+        }
+
+        ColumnLayout {
+            id: errorContent
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 20
+
+            Image {
+                id: webcamImg
+                Layout.preferredHeight: 50
+                Layout.preferredWidth: 50
+                mipmap: true
+                Layout.alignment: Qt.AlignCenter
+                source: "ui/images/webcam.svg"
+            }
+
+            Text {
+                id: errorText
+                Layout.alignment: Qt.AlignCenter
+                font.family: "Segoe UI"
+                font.pointSize: 20
+                horizontalAlignment: Text.AlignHCenter
+                text: "STASYS Camera was not detected.\nPlease plug the camera in and try again."
+                color: secondaryColor
+            }
+
+            NavBarButton {
+                defaultText: "OK"
+                activeText: "OK"
+                onClickedHandler: cameraMicError.close
+                activeColor: secondaryColor
+                activeTextColor: primaryColor
+                Layout.alignment: Qt.AlignCenter
+            }
+        }
     }
 
     Popup {

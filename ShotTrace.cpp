@@ -3,7 +3,7 @@
 void ShotTrace::reset(){
     beforeShotTrace.clear();
     afterShotTrace.clear();
-    shotPoint = {{ 0, 0 }, -1};
+    shotPoint = {{ 0, 0 }, -1, -1};
 }
 
 void ShotTrace::addTracePoint(TracePoint tp) {

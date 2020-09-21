@@ -25,5 +25,6 @@
         <file>ui/images/arrow_top_left.svg</file>
         <file>ui/images/arrow_top_right.svg</file>
         <file>ui/images/arrow_top.svg</file>
+        <file>ui/images/webcam.svg</file>
     </qresource>
 </RCC>

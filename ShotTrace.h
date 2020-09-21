@@ -6,7 +6,7 @@
 class ShotTrace {
     private:
         std::vector<TracePoint> beforeShotTrace;
-        TracePoint shotPoint = {{0, 0}, -1};
+        TracePoint shotPoint = {{0, 0}, -1, -1};
         std::vector<TracePoint> afterShotTrace;
     public:
         void reset();
