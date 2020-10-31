@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 		thread.join();
 		cout << "Processing ended!" << endl;
 	} else {
-		ShootThread thread(cap, "", true, -1, PISTOL_CIRCLE_SIZE / radius, adjustmentVec, {0, 0}, controller, log_file);
+		ShootThread thread(0, cap, "", true, -1, PISTOL_CIRCLE_SIZE / radius, adjustmentVec, {0, 0}, controller, log_file);
 		cout << "Processing started..." << endl;
 		thread.start();
 		thread.join();
