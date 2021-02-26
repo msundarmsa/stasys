@@ -15,7 +15,7 @@ Window {
     id: window
     visible: true
     flags: Qt.FramelessWindowHint | Qt.Window
-    title: qsTr("STASYS")
+    title: qsTr("STASYS v1.0.0a")
     visibility: Qt.WindowFullScreen
     color: primaryColor
     FontLoader { source: "ui/fonts/segoe-ui-light.ttf" }

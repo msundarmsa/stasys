@@ -13,18 +13,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += /usr/local/Cellar/opencv/4.4.0_1/include/opencv4/
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_core.dylib
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_highgui.dylib
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_imgcodecs.dylib
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_imgproc.dylib
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_features2d.dylib
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_calib3d.dylib
-LIBS += /usr/local/Cellar/opencv/4.4.0_1/lib/libopencv_videoio.dylib
+INCLUDEPATH += /usr/local/Cellar/opencv/4.5.1_2/include/opencv4/
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_core.dylib
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_highgui.dylib
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_imgcodecs.dylib
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_imgproc.dylib
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_features2d.dylib
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_calib3d.dylib
+LIBS += /usr/local/Cellar/opencv/4.5.1_2/lib/libopencv_videoio.dylib
 
-INCLUDEPATH += /usr/local/Cellar/sfml/2.5.1/include/
-LIBS += /usr/local/Cellar/sfml/2.5.1/lib/libsfml-audio.dylib
-LIBS += /usr/local/Cellar/sfml/2.5.1/lib/libsfml-system.dylib
+INCLUDEPATH += /usr/local/Cellar/sfml/2.5.1_1/include/
+LIBS += /usr/local/Cellar/sfml/2.5.1_1/lib/libsfml-audio.dylib
+LIBS += /usr/local/Cellar/sfml/2.5.1_1/lib/libsfml-system.dylib
 
 SOURCES += \
         RecordThread.cpp \

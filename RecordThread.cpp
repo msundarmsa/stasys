@@ -7,8 +7,8 @@ using namespace cv;
 RecordThread::RecordThread(float TRIGGER_DB, string mic)
 {
     SimpleBlobDetector::Params params;
-    params.minThreshold = 100;
-    params.maxThreshold = 200;
+    params.minThreshold = 30;
+    params.maxThreshold = 80;
 
     params.filterByArea = true;
     params.minArea = 450;
@@ -38,7 +38,7 @@ TargetCircle RecordThread::findCircle(Mat frame)
     vector<KeyPoint> keypoints;
 
     cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
-    //Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2 );
+    //cv::GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2 );
     detector->detect(grayFrame, keypoints);
 
     if (keypoints.size() == 1) {
