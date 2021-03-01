@@ -68,6 +68,7 @@ signals:
     void uiDrawShotCircle(double x, double y);
     void uiAddToAfterShotTrace(double x, double y);
     void uiSettingsOpened(QStringList micOptions, QString defaultMic, double TRIGGER_DB, QStringList cameraOptions, int defaultCamera, bool upDownDetection);
+    void uiSettingsClosed();
     void uiUpdateSamples(float dB);
     void uiCameraMicError();
 };

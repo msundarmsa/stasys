@@ -117,6 +117,7 @@ void QMLCppBridge::settingsClosed()
     micThread->stop();
     delete micThread;
     micThread = NULL;
+    emit uiSettingsClosed();
 }
 
 void QMLCppBridge::updateSamples(float dB)

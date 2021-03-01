@@ -33,6 +33,9 @@ SOURCES += \
         ShotTrace.cpp \
         SoundPressureSensor.cpp \
         SystemClock.cpp \
+        cvcamview/BetterVideoCapture.cpp \
+        cvcamview/CVCamera.cpp \
+        cvcamview/CameraThread.cpp \
         main.cpp \
         qmlcppbridge.cpp
 
@@ -58,6 +61,11 @@ HEADERS += \
     ShotTrace.h \
     SystemClock.h \
     Utils.h \
+    cvcamview/BetterVideoCapture.h \
+    cvcamview/CVCamera.h \
+    cvcamview/CameraActivity.hpp \
+    cvcamview/CameraProperties.h \
+    cvcamview/CameraThread.h \
     qmlcppbridge.h \
     spline.h
 

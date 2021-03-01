@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QQmlContext>
 #include "qmlcppbridge.h"
+#include "cvcamview/CVCamera.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     qmlRegisterType<QMLCppBridge>("com.mrmmsmsa", 1, 0, "QMLCppBridge");
     qmlRegisterType(QUrl("qrc:/ToastManager.qml"), "com.mrmmsmsa", 1, 0, "ToastManager");
+    qmlRegisterType<CVCamera>("com.mrmmsmsa", 1, 0, "CVCamera");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));

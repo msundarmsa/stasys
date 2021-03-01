@@ -187,7 +187,7 @@ Window {
         id: settingsDialog
         x: (window.width - width) / 2
         y: (window.height - height) / 2
-        height: 500
+        height: 750
         width: 500
         modal: true
         focus: true
@@ -338,6 +338,20 @@ Window {
                     }
                 }
             }
+
+            CVCamera {
+                id: cameraFeed
+                device: -1
+                size: "200x200"
+            }
+
+            VideoOutput {
+                Layout.preferredWidth: 200
+                Layout.preferredHeight: 200
+                id: output
+                source: cameraFeed
+            }
+
         }
     }
 
@@ -411,6 +425,12 @@ Window {
             settingsDialog.cameraOptions = cameraOptions;
             settingsDialog.defaultCamera = defaultCamera;
             upDownDetectionCheckBox.checked = upDownDetection;
+
+            cameraFeed.device = defaultCamera;
+        }
+
+        onUiSettingsClosed: {
+            cameraFeed.device = -1;
         }
 
         onUiUpdateSamples: {
