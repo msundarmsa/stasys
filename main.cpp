@@ -2,7 +2,7 @@
 #include <QApplication>
 #include <QQmlContext>
 #include "qmlcppbridge.h"
-#include "cvcamview/CVCamera.h"
+#include "cvcamera.h"
 
 int main(int argc, char *argv[])
 {

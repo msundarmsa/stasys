@@ -339,19 +339,19 @@ Window {
                 }
             }
 
-            CVCamera {
-                id: cameraFeed
-                device: -1
-                size: "200x200"
-            }
+            RowLayout {
+                height: 200
 
-            VideoOutput {
-                Layout.preferredWidth: 200
-                Layout.preferredHeight: 200
-                id: output
-                source: cameraFeed
-            }
+                CVCamera {
+                    id: cameraFeed
+                    device: -1
+                }
 
+                VideoOutput {
+                    id: output
+                    source: cameraFeed
+                }
+            }
         }
     }
 
