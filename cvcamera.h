@@ -17,6 +17,7 @@ class CVCamera : public QObject, public QQmlParserStatus
     Q_OBJECT
     Q_PROPERTY(QAbstractVideoSurface* videoSurface READ videoSurface WRITE setVideoSurface NOTIFY videoSurfaceChanged)
     Q_PROPERTY(int device READ device WRITE setDevice)
+    Q_PROPERTY(bool detectCircles READ detectCircles WRITE setDetectCircles)
 
     Q_INTERFACES(QQmlParserStatus)
 
@@ -28,6 +29,9 @@ public:
 
     int device() const;
     void setDevice(int device);
+
+    bool detectCircles() const;
+    void setDetectCircles(bool detectCircles);
 
     void classBegin() override;
     void componentComplete() override;
@@ -52,6 +56,8 @@ private:
     qreal m_height = -1;
     std::thread *cameraThread;
     bool m_completed = false;
+    bool m_detectCircles = false;
+    cv::Ptr<cv::SimpleBlobDetector> detector;
 };
 
 #endif // CVCAMERA_H

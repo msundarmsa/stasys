@@ -90,19 +90,15 @@ void QMLCppBridge::settingsOpened()
     selectDefaultMic();
 
     vector<string> availableDevices = SoundRecorder::getAvailableDevices();
-    QStringList micOptions = {QString::fromStdString(currentMic)};
+    QStringList micOptions = {};
     for (size_t i = 0; i < availableDevices.size(); i++) {
-        if (availableDevices[i].compare(currentMic) != 0) {
-            micOptions.append(QString::fromStdString(availableDevices[i]));
-        }
+        micOptions.append(QString::fromStdString(availableDevices[i]));
     }
 
     const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    QStringList cameraOptions = {cameras[CAMERA_INDEX].description()};
+    QStringList cameraOptions = {};
     for (int i = 0; i < cameras.size(); i++){
-        if (i != CAMERA_INDEX) {
-            cameraOptions.append(cameras[i].description());
-        }
+        cameraOptions.append(cameras[i].description());
     }
 
     auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
@@ -173,7 +169,10 @@ void QMLCppBridge::calibrationClicked()
     selectDefaultMic();
 
     const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    if (currentMic.compare(defaultMic) != 0 || cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0) {
+    if ((selectedMic.compare("") == 0 && currentMic.compare(defaultMic) != 0) ||
+        (SELECTED_CAMERA_INDEX == -1 && cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0)) {
+        // settings not changed through Settings Dialog
+        // and default settings do not exist
         emit uiCameraMicError();
         return;
     }
@@ -203,7 +202,10 @@ void QMLCppBridge::shootClicked()
     selectDefaultMic();
 
     const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    if (currentMic.compare(defaultMic) != 0 || cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0) {
+    if ((selectedMic.compare("") == 0 && currentMic.compare(defaultMic) != 0) ||
+        (SELECTED_CAMERA_INDEX == -1 && cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0)) {
+        // settings not changed through Settings Dialog
+        // and default settings do not exist
         emit uiCameraMicError();
         return;
     }

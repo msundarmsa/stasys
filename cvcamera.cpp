@@ -7,8 +7,10 @@
 #include <QScreen>
 #include <QTimer>
 #include <QVideoSurfaceFormat>
+#include <vector>
 
 using namespace cv;
+using namespace std;
 
 CVCamera::CVCamera(QObject* parent)
     : QObject(parent)
@@ -16,6 +18,21 @@ CVCamera::CVCamera(QObject* parent)
 {
     m_timer->setInterval(50);
     connect(m_timer, &QTimer::timeout, this, &CVCamera::presentFrame);
+
+    SimpleBlobDetector::Params params;
+    params.minThreshold = 30;
+    params.maxThreshold = 80;
+
+    params.filterByArea = true;
+    params.minArea = 450;
+
+    params.filterByCircularity = true;
+    params.minCircularity = 0.85;
+
+    params.filterByInertia = true;
+    params.minInertiaRatio = 0.85;
+
+    detector = SimpleBlobDetector::create(params);
 }
 
 QAbstractVideoSurface* CVCamera::videoSurface() const
@@ -25,7 +42,6 @@ QAbstractVideoSurface* CVCamera::videoSurface() const
 
 void CVCamera::setVideoSurface(QAbstractVideoSurface* videoSurface)
 {
-    qDebug() << "setVideoSurface" << videoSurface << parent();
     if (m_videoSurface == videoSurface)
         return;
 
@@ -65,6 +81,16 @@ void CVCamera::setDevice(int device)
     }
 }
 
+bool CVCamera::detectCircles() const
+{
+    return m_detectCircles;
+}
+
+void CVCamera::setDetectCircles(bool detectCircles)
+{
+    this->m_detectCircles = detectCircles;
+}
+
 void CVCamera::classBegin()
 {
 }
@@ -80,7 +106,7 @@ void CVCamera::componentComplete()
 void CVCamera::parentSizeChanged()
 {
     m_completed = true;
-    if (!m_parentItem->width() == 0)
+    if (m_parentItem->width() != 0)
         startSurface();
 }
 
@@ -93,6 +119,26 @@ QImage CVCamera::grabFrame()
     if (video.isOpened()){
         Mat frame;
         video >> frame;
+        Mat grayFrame;
+
+        if (m_detectCircles) {
+            vector<KeyPoint> keypoints;
+            if (frame.channels() == 3) {
+                cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
+            } else {
+                grayFrame = frame;
+            }
+
+            GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 0);
+            detector->detect(grayFrame, keypoints);
+
+            if (keypoints.size() >= 1) {
+                for (auto &kp : keypoints) {
+                    circle(frame, kp.pt, kp.size / 2, Scalar(0, 0, 255), FILLED);
+                }
+            }
+        }
+
         img = QImage((uchar*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_BGR888);
     } else {
         QColor colors[3] = {QColor("red"), QColor("green"), QColor("blue")};

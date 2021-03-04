@@ -319,7 +319,25 @@ Window {
 
                     onCurrentIndexChanged: {
                         qmlCppBridge.cameraChanged(currentIndex);
+                        if (cameraFeed.device > -1) {
+                            cameraFeed.device = currentIndex;
+                        }
                     }
+                }
+            }
+
+            RowLayout {
+                height: 200
+
+                CVCamera {
+                    id: cameraFeed
+                    device: -1
+                    detectCircles: false
+                }
+
+                VideoOutput {
+                    id: output
+                    source: cameraFeed
                 }
             }
 
@@ -340,16 +358,18 @@ Window {
             }
 
             RowLayout {
-                height: 200
-
-                CVCamera {
-                    id: cameraFeed
-                    device: -1
+                width: parent.width
+                Text {
+                    text: "Show detected circles: "
                 }
 
-                VideoOutput {
-                    id: output
-                    source: cameraFeed
+                CheckBox {
+                    checked: false
+
+                    onCheckedChanged: {
+                        cameraFeed.detectCircles = checked;
+
+                    }
                 }
             }
         }
@@ -464,7 +484,7 @@ Window {
         }
 
         Text {
-            text: "STASYS v1.0.0a"
+            text: "STASYS v1.0.1a"
             color: "white"
             font.family: "Segoe UI"
             font.pointSize: 25
