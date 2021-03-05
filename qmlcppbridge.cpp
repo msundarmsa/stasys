@@ -1,12 +1,12 @@
 #include "qmlcppbridge.h"
 #include <opencv2/opencv.hpp>
-#include <SFML/Audio.hpp>
 #include <QCameraInfo>
 #include <time.h>
 #include <QCoreApplication>
 #include <QAudioDeviceInfo>
 #include <cmath>
 #include <algorithm>
+#include <portaudio.h>
 
 #define _USE_MATH_DEFINES
 
@@ -42,19 +42,58 @@ QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
             qDebug() << "Could not open log file";
         }
     #endif
+
+    int err = Pa_Initialize();
+    if (err != paNoError) {
+        emit uiShowToast("ERROR: Audio processing library could not be loaded!");
+    }
+}
+
+vector<PAInput> QMLCppBridge::getAudioList() {
+    vector<PAInput> micOptions;
+    Pa_Terminate();
+
+    int err = Pa_Initialize();
+    if (err != paNoError) {
+        emit uiShowToast("ERROR: Audio processing library could not be loaded!");
+        return micOptions;
+    }
+
+    int num_devices = Pa_GetDeviceCount();
+    for (int i = 0; i < num_devices; i++) {
+        const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(i);
+        if (deviceInfo->maxInputChannels > 0) {
+            string curr_name = deviceInfo->name;
+            micOptions.push_back({curr_name, i});
+        }
+    }
+
+    return micOptions;
+}
+
+PAInput QMLCppBridge::getPAInput(string device_name, bool select_default_first) {
+    // find and select device_name from audio list
+    // if select_default_first tag is set, select first if device_name
+    // does not exist, else return -1
+    vector<PAInput> micOptions = getAudioList();
+
+    PAInput selected_input = {"", -1};
+    for (auto &input : micOptions) {
+        if (input.name.compare(device_name) == 0) {
+            selected_input = input;
+            break;
+        } else if (selected_input.paIndex == -1 && select_default_first) {
+            selected_input = input;
+        }
+    }
+
+    return selected_input;
 }
 
 void QMLCppBridge::selectDefaultMic()
 {
     if (selectedMic.compare("") == 0) {
-        vector<string> micOptions = SoundRecorder::getAvailableDevices();
-        currentMic = SoundRecorder::getDefaultDevice();
-        for (size_t i = 0; i < micOptions.size(); i++){
-            if (micOptions[i].compare(defaultMic) == 0) {
-                currentMic = defaultMic;
-                break;
-            }
-        }
+        currentMic = getPAInput(defaultMic, true).name;
     } else {
         currentMic = selectedMic;
     }
@@ -89,10 +128,10 @@ void QMLCppBridge::settingsOpened()
     selectDefaultCamera();
     selectDefaultMic();
 
-    vector<string> availableDevices = SoundRecorder::getAvailableDevices();
     QStringList micOptions = {};
-    for (size_t i = 0; i < availableDevices.size(); i++) {
-        micOptions.append(QString::fromStdString(availableDevices[i]));
+    vector<PAInput> audioList = getAudioList();
+    for (auto &audio : audioList) {
+        micOptions.append(QString::fromStdString(audio.name));
     }
 
     const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
@@ -101,10 +140,16 @@ void QMLCppBridge::settingsOpened()
         cameraOptions.append(cameras[i].description());
     }
 
-    auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
-    micThread = new MicThread(updateSamplesPtr);
-    micThread->setDevice(currentMic);
-    micThread->start();
+    int device_index = getPAInput(currentMic, false).paIndex;
+
+    if (device_index == -1) {
+        emit uiShowToast("Device disconnected. Please reopen settings dialog and try again");
+    } else {
+        auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
+        micThread = new MicThread(updateSamplesPtr, getPAInput(currentMic, false).paIndex);
+        micThread->start();
+    }
+
     emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX, upDownDetection);
 }
 
@@ -125,7 +170,9 @@ void QMLCppBridge::micChanged(QString newMic)
 {
     selectedMic = newMic.toStdString();
     micThread->stop();
-    micThread->setDevice(selectedMic);
+    delete micThread;
+    auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
+    micThread = new MicThread(updateSamplesPtr, getPAInput(selectedMic, false).paIndex);
     micThread->start();
 }
 

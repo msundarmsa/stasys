@@ -8,6 +8,11 @@
 #include "ShootThread.h"
 #include "MicThread.h"
 
+typedef struct PAInput {
+    string name;
+    int paIndex;
+} PAInput;
+
 class QMLCppBridge : public QObject
 {
     Q_OBJECT
@@ -23,6 +28,8 @@ public:
     void updateSamples(float dB);
     void selectDefaultCamera();
     void selectDefaultMic();
+    PAInput getPAInput(string device_name, bool select_default_first);
+    vector<PAInput> getAudioList();
 
     Q_INVOKABLE void calibrationClicked();
     Q_INVOKABLE void shootClicked();

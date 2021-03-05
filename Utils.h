@@ -105,3 +105,8 @@ inline const char* toString(ANGLE angle)
 
 #define VELOCITY_FACTOR 17.34
 #define TIME_OFFSET 1.349
+
+#define PA_SAMPLE_TYPE  paFloat32
+typedef float SAMPLE;
+#define FRAMES_PER_BUFFER (256)
+#define SAMPLE_RATE  (44100)
