@@ -26,10 +26,6 @@ INCLUDEPATH += /usr/local/Cellar/sfml/2.5.1_1/include/
 LIBS += /usr/local/Cellar/sfml/2.5.1_1/lib/libsfml-audio.dylib
 LIBS += /usr/local/Cellar/sfml/2.5.1_1/lib/libsfml-system.dylib
 
-INCLUDEPATH += /usr/local/Cellar/sfml/2.5.1_1/include/
-LIBS += /usr/local/Cellar/sfml/2.5.1_1/lib/libsfml-audio.dylib
-LIBS += /usr/local/Cellar/sfml/2.5.1_1/lib/libsfml-system.dylib
-
 INCLUDEPATH += /usr/local/Cellar/portaudio/HEAD-b14e866/include/
 LIBS += /usr/local/Cellar/portaudio/HEAD-b14e866/lib/libportaudio.dylib
 LIBS += /usr/local/Cellar/portaudio/HEAD-b14e866/lib/libportaudiocpp.dylib

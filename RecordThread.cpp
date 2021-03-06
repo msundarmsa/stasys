@@ -4,7 +4,7 @@
 using namespace std;
 using namespace cv;
 
-RecordThread::RecordThread(float TRIGGER_DB, string mic)
+RecordThread::RecordThread(float TRIGGER_DB, int mic_index)
 {
     SimpleBlobDetector::Params params;
     params.minThreshold = 30;
@@ -22,11 +22,7 @@ RecordThread::RecordThread(float TRIGGER_DB, string mic)
     detector = SimpleBlobDetector::create(params);
 
     if (TRIGGER_DB > 0) {
-        sensor = new SoundPressureSensor(this, TRIGGER_DB);
-        if (!sensor->setDevice(mic))
-        {
-            sensor = NULL;
-        }
+        sensor = new SoundPressureSensor(this, TRIGGER_DB, mic_index);
     }
 }
 

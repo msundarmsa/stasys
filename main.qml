@@ -484,7 +484,7 @@ Window {
         }
 
         Text {
-            text: "STASYS v1.0.2a"
+            text: "STASYS v1.0.3a"
             color: "white"
             font.family: "Segoe UI"
             font.pointSize: 25

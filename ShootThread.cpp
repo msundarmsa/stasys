@@ -6,7 +6,7 @@
 using namespace std;
 using namespace cv;
 
-ShootThread::ShootThread(int startSn, VideoCapture video, string mic, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) : RecordThread(TRIGGER_DB, mic) {
+ShootThread::ShootThread(int startSn, VideoCapture video, int mic_index, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile) : RecordThread(TRIGGER_DB, mic_index) {
     this->sn = startSn;
     this->video = video;
 	this->page = page;

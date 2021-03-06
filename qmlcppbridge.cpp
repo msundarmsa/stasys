@@ -13,7 +13,6 @@
 using namespace std;
 using namespace placeholders;
 using namespace cv;
-using namespace sf;
 
 QMLCppBridge::QMLCppBridge(QObject *parent) : QObject(parent)
 {
@@ -232,7 +231,8 @@ void QMLCppBridge::calibrationClicked()
         #endif
 
         auto calibrationFinishedPtr = bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
-        calibThread = new CalibrationThread(cap, calibrationFinishedPtr, logFile);
+        int mic_index = getPAInput(currentMic, false).paIndex;
+        calibThread = new CalibrationThread(cap, mic_index, TRIGGER_DB, calibrationFinishedPtr, logFile);
         calibThread->start();
         emit uiCalibrationStarted();
     } else if (calibThread != NULL) {
@@ -273,7 +273,8 @@ void QMLCppBridge::shootClicked()
         auto addToAfterShotTracePtr = bind(&QMLCppBridge::addToAfterShotTrace, this, _1);
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
-        shootThread = new ShootThread(shots.size(), cap, currentMic, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
+        int mic_index = getPAInput(currentMic, false).paIndex;
+        shootThread = new ShootThread(shots.size(), cap, mic_index, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {

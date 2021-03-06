@@ -15,7 +15,7 @@ protected:
     TargetCircle findCircle(cv::Mat frame);
     cv::Ptr<cv::SimpleBlobDetector> detector;
 public:
-    RecordThread(float TRIGGER_DB, std::string mic);
+    RecordThread(float TRIGGER_DB, int mic_index);
 	virtual void start();
 	virtual void stop();
 	virtual bool isRunning();
