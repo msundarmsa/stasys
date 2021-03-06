@@ -305,6 +305,10 @@ void ShootThread::run() {
 
         fprintf(logFile, "\n");
         frameid++;
+
+        #ifdef QT_QML_DEBUG
+            this_thread::sleep_for(chrono::milliseconds(8));
+        #endif
 	}
     
     video.release();
