@@ -35,9 +35,6 @@ public:
     void stop() {
         if (!stopRecording) {
             stopRecording = true;
-            if (micThread->joinable()) {
-                micThread->join();
-            }
         }
     }
 

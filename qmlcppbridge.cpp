@@ -226,18 +226,20 @@ void QMLCppBridge::calibrationClicked()
     selectDefaultCamera();
     selectDefaultMic();
 
-    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    if ((selectedMic.compare("") == 0 && currentMic.compare(defaultMic) != 0) ||
-        (SELECTED_CAMERA_INDEX == -1 && cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0)) {
-        // settings not changed through Settings Dialog
-        // and default settings do not exist
-        emit uiCameraMicError();
-        return;
-    }
+    #ifndef QT_QML_DEBUG
+        const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+        if ((selectedMic.compare("") == 0 && currentMic.compare(defaultMic) != 0) ||
+            (SELECTED_CAMERA_INDEX == -1 && cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0)) {
+            // settings not changed through Settings Dialog
+            // and default settings do not exist
+            emit uiCameraMicError();
+            return;
+        }
+    #endif
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
-            VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
+            VideoCapture cap("/Users/msundarmsa/stasys/calibration.mp4");
         #else
             VideoCapture cap(CAMERA_INDEX);
         #endif
@@ -260,18 +262,20 @@ void QMLCppBridge::shootClicked()
     selectDefaultCamera();
     selectDefaultMic();
 
-    const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-    if ((selectedMic.compare("") == 0 && currentMic.compare(defaultMic) != 0) ||
-        (SELECTED_CAMERA_INDEX == -1 && cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0)) {
-        // settings not changed through Settings Dialog
-        // and default settings do not exist
-        emit uiCameraMicError();
-        return;
-    }
+    #ifndef QT_QML_DEBUG
+        const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
+        if ((selectedMic.compare("") == 0 && currentMic.compare(defaultMic) != 0) ||
+            (SELECTED_CAMERA_INDEX == -1 && cameras[CAMERA_INDEX].description().compare(qDefaultCamera) != 0)) {
+            // settings not changed through Settings Dialog
+            // and default settings do not exist
+            emit uiCameraMicError();
+            return;
+        }
+    #endif
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
-            VideoCapture cap("/Users/msundarmsa/stasys/300820/1/shot.mp4");
+            VideoCapture cap("/Users/msundarmsa/stasys/calibration.mp4");
             TRIGGER_DB = -1;
         #else
             VideoCapture cap(CAMERA_INDEX);

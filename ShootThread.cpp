@@ -318,9 +318,6 @@ void ShootThread::stop()
 {
     if (!stopRecording) {
         stopRecording = true;
-        if (recordThread->joinable()) {
-            recordThread->join();
-        }
     }
 }
 

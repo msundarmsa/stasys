@@ -29,9 +29,6 @@ class CalibrationThread : public RecordThread {
 		{
 			if (!stopRecording) {
 				stopRecording = true;
-				if (recordThread->joinable()) {
-					recordThread->join();
-				}
 			}
 		}
 
