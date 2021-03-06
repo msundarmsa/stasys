@@ -42,6 +42,8 @@ public:
     Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void adjustCalibration(double deltaX, double deltaY);
     Q_INVOKABLE void closingApplication();
+    Q_INVOKABLE void minThresholdChanged(float newThreshold);
+    Q_INVOKABLE void maxThresholdChanged(float newThreshold);
 
 private:
     FILE* logFile = stdout;
@@ -61,6 +63,8 @@ private:
     std::vector<Shot*> shots;
     const string defaultMic = "Realtek USB2.0 Mic";
     const QString qDefaultCamera = "USB Camera";
+    int minThreshold = 30;
+    int maxThreshold = 80;
 
 signals:
     void uiCalibrationStarted();
@@ -74,7 +78,7 @@ signals:
     void uiAddToBeforeShotTrace(double x, double y);
     void uiDrawShotCircle(double x, double y);
     void uiAddToAfterShotTrace(double x, double y);
-    void uiSettingsOpened(QStringList micOptions, QString defaultMic, double TRIGGER_DB, QStringList cameraOptions, int defaultCamera, bool upDownDetection);
+    void uiSettingsOpened(QStringList micOptions, QString defaultMic, double TRIGGER_DB, QStringList cameraOptions, int defaultCamera, bool upDownDetection, double minThreshold, double maxThreshold);
     void uiSettingsClosed();
     void uiUpdateSamples(float dB);
     void uiCameraMicError();

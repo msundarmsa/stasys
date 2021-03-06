@@ -4,11 +4,11 @@
 using namespace std;
 using namespace cv;
 
-RecordThread::RecordThread(float TRIGGER_DB, int mic_index)
+RecordThread::RecordThread(float TRIGGER_DB, int mic_index, int minThreshold, int maxThreshold)
 {
     SimpleBlobDetector::Params params;
-    params.minThreshold = 30;
-    params.maxThreshold = 80;
+    params.minThreshold = minThreshold;
+    params.maxThreshold = maxThreshold;
 
     params.filterByArea = true;
     params.minArea = 450;

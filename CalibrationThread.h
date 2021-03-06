@@ -19,7 +19,7 @@ class CalibrationThread : public RecordThread {
 		bool stopRecording = false;
 		FILE *logFile;
 	public:
-        CalibrationThread(VideoCapture video, int mic_index, float TRIGGER_DB, function<void(bool, double, double, double)> calibrationFinished, FILE* logFile) : RecordThread(TRIGGER_DB, mic_index) {
+        CalibrationThread(VideoCapture video, int mic_index, float TRIGGER_DB, int minThreshold, int maxThreshold, function<void(bool, double, double, double)> calibrationFinished, FILE* logFile) : RecordThread(TRIGGER_DB, mic_index, minThreshold, maxThreshold) {
 			this->video = video;
             this->calibrationFinished = calibrationFinished;
 			this->logFile = logFile;

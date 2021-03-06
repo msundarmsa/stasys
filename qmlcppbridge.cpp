@@ -149,7 +149,7 @@ void QMLCppBridge::settingsOpened()
         micThread->start();
     }
 
-    emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX, upDownDetection);
+    emit uiSettingsOpened(micOptions, QString::fromStdString(currentMic), TRIGGER_DB, cameraOptions, CAMERA_INDEX, upDownDetection, minThreshold, maxThreshold);
 }
 
 void QMLCppBridge::settingsClosed()
@@ -180,6 +180,16 @@ void QMLCppBridge::micThresholdChanged(float newThreshold)
     TRIGGER_DB = newThreshold;
 }
 
+void QMLCppBridge::minThresholdChanged(float newThreshold)
+{
+    minThreshold = newThreshold;
+}
+
+void QMLCppBridge::maxThresholdChanged(float newThreshold)
+{
+    maxThreshold = newThreshold;
+}
+
 void QMLCppBridge::cameraChanged(int camera)
 {
     SELECTED_CAMERA_INDEX = camera;
@@ -194,11 +204,13 @@ void QMLCppBridge::stopRecording()
 {
     if (calibThread != NULL) {
         calibThread->stop();
+        calibThread = NULL;
         emit uiCalibrationEnded(false);
     }
 
     if (shootThread != NULL) {
         shootThread->stop();
+        shootThread = NULL;
         emit uiShootingEnded();
     }
 }
@@ -232,7 +244,7 @@ void QMLCppBridge::calibrationClicked()
 
         auto calibrationFinishedPtr = bind(&QMLCppBridge::calibrationFinished, this, _1, _2, _3, _4);
         int mic_index = getPAInput(currentMic, false).paIndex;
-        calibThread = new CalibrationThread(cap, mic_index, TRIGGER_DB, calibrationFinishedPtr, logFile);
+        calibThread = new CalibrationThread(cap, mic_index, TRIGGER_DB, minThreshold, maxThreshold, calibrationFinishedPtr, logFile);
         calibThread->start();
         emit uiCalibrationStarted();
     } else if (calibThread != NULL) {
@@ -274,7 +286,7 @@ void QMLCppBridge::shootClicked()
         ShootController controller = { removePreviousCalibCirclePtr, clearTracePtr, updateViewPtr, addToBeforeShotTracePtr, drawShotCirclePtr, addToAfterShotTracePtr };
 
         int mic_index = getPAInput(currentMic, false).paIndex;
-        shootThread = new ShootThread(shots.size(), cap, mic_index, upDownDetection, TRIGGER_DB, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
+        shootThread = new ShootThread(shots.size(), cap, mic_index, upDownDetection, TRIGGER_DB, minThreshold, maxThreshold, RATIO1, adjustmentVec, fineAdjustment, controller, logFile);
         shootThread->start();
         emit uiShootingStarted();
     } else if (shootThread != NULL) {
@@ -287,10 +299,13 @@ void QMLCppBridge::shootClicked()
 }
 
 void QMLCppBridge::calibrationFinished(bool success, double x, double y, double radius) {
-    calibThread = NULL;
-    adjustmentVec = {x, y};
-    RATIO1 = PISTOL_CIRCLE_SIZE / radius;
-    emit uiCalibrationEnded(success);
+    if (calibThread != NULL) {
+        calibThread->stop();
+        calibThread = NULL;
+        adjustmentVec = {x, y};
+        RATIO1 = PISTOL_CIRCLE_SIZE / radius;
+        emit uiCalibrationEnded(success);
+    }
 }
 
 void QMLCppBridge::removePreviousCalibCircle() {

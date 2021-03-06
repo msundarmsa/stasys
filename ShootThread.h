@@ -19,7 +19,7 @@ private:
     Vector2D fineAdjustment; // = {0, 0} for clamped test
     bool upDownDetection;
 public:
-    ShootThread(int startSn, cv::VideoCapture video, int mic_index, bool upDownDetection, float TRIGGER_DB, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
+    ShootThread(int startSn, cv::VideoCapture video, int mic_index, bool upDownDetection, float TRIGGER_DB, int minThreshold, int maxThreshold, double RATIO1, Vector2D adjustmentVec, Vector2D fineAdjustment, ShootController page, FILE* logFile);
     void audio_trigger(uint64_t trigger_time);
 	void start();
 	void stop();

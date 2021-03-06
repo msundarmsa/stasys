@@ -187,7 +187,7 @@ Window {
         id: settingsDialog
         x: (window.width - width) / 2
         y: (window.height - height) / 2
-        height: 750
+        height: 820
         width: 500
         modal: true
         focus: true
@@ -372,6 +372,66 @@ Window {
                     }
                 }
             }
+
+            RowLayout {
+                width: parent.width
+                Text {
+                    text: "Show thresholds: "
+                }
+
+                CheckBox {
+                    checked: false
+
+                    onCheckedChanged: {
+                        cameraFeed.showThresholds = checked;
+
+                    }
+                }
+            }
+
+            RowLayout {
+                id: minThresholdRect
+                width: parent.width
+                Text {
+                    id: minThresholdText
+                    text: "Min Threshold: " + minThresholdSlider.value.toFixed(0);
+                }
+
+                Slider {
+                    id: minThresholdSlider
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 255
+                    stepSize: 1
+
+                    onValueChanged: {
+                        qmlCppBridge.minThresholdChanged(value);
+                        cameraFeed.minThreshold = value;
+                    }
+                }
+            }
+
+            RowLayout {
+                id: maxThresholdRect
+                width: parent.width
+                Text {
+                    id: maxThresholdText
+                    text: "Max Threshold: " + maxThresholdSlider.value.toFixed(0);
+                }
+
+                Slider {
+                    id: maxThresholdSlider
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 255
+                    stepSize: 1
+
+                    onValueChanged: {
+                        qmlCppBridge.maxThresholdChanged(value);
+                        cameraFeed.maxThreshold = value;
+                    }
+                }
+            }
         }
     }
 
@@ -446,6 +506,9 @@ Window {
             settingsDialog.defaultCamera = defaultCamera;
             upDownDetectionCheckBox.checked = upDownDetection;
 
+            minThresholdSlider.value = minThreshold;
+            maxThresholdSlider.value = maxThreshold;
+
             cameraFeed.device = defaultCamera;
         }
 
@@ -484,7 +547,7 @@ Window {
         }
 
         Text {
-            text: "STASYS v1.0.3a"
+            text: "STASYS v1.0.4a"
             color: "white"
             font.family: "Segoe UI"
             font.pointSize: 25

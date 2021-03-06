@@ -19,7 +19,6 @@ CVCamera::CVCamera(QObject* parent)
     m_timer->setInterval(50);
     connect(m_timer, &QTimer::timeout, this, &CVCamera::presentFrame);
 
-    SimpleBlobDetector::Params params;
     params.minThreshold = 30;
     params.maxThreshold = 80;
 
@@ -91,6 +90,40 @@ void CVCamera::setDetectCircles(bool detectCircles)
     this->m_detectCircles = detectCircles;
 }
 
+bool CVCamera::showThresholds() const
+{
+    return m_showThresholds;
+}
+
+void CVCamera::setShowThresholds(bool showThresholds)
+{
+    this->m_showThresholds = showThresholds;
+}
+
+int CVCamera::minThreshold() const
+{
+    return m_minThreshold;
+}
+
+void CVCamera::setMinThreshold(int minThreshold)
+{
+    params.minThreshold = minThreshold;
+    detector = SimpleBlobDetector::create(params);
+    this->m_minThreshold = minThreshold;
+}
+
+int CVCamera::maxThreshold() const
+{
+    return m_maxThreshold;
+}
+
+void CVCamera::setMaxThreshold(int maxThreshold)
+{
+    params.maxThreshold = maxThreshold;
+    detector = SimpleBlobDetector::create(params);
+    this->m_maxThreshold = maxThreshold;
+}
+
 void CVCamera::classBegin()
 {
 }
@@ -122,12 +155,13 @@ QImage CVCamera::grabFrame()
         Mat grayFrame;
 
         if (m_detectCircles) {
-            vector<KeyPoint> keypoints;
             if (frame.channels() == 3) {
                 cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
             } else {
                 grayFrame = frame;
             }
+
+            vector<KeyPoint> keypoints;
 
             GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 0);
             detector->detect(grayFrame, keypoints);
@@ -137,6 +171,27 @@ QImage CVCamera::grabFrame()
                     circle(frame, kp.pt, kp.size / 2, Scalar(0, 0, 255), FILLED);
                 }
             }
+        }
+
+        if (m_showThresholds) {
+            if (grayFrame.rows == 0 && grayFrame.cols == 0) {
+                if (frame.channels() == 3) {
+                    cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
+                } else {
+                    grayFrame = frame;
+                }
+            }
+
+            Mat minBinImg;
+            threshold(grayFrame, minBinImg, m_minThreshold, 255, cv::THRESH_BINARY);
+            cvtColor(minBinImg, minBinImg, COLOR_GRAY2BGR);
+
+            Mat maxBinImg;
+            threshold(grayFrame, maxBinImg, m_maxThreshold, 255, cv::THRESH_BINARY);
+            cvtColor(maxBinImg, maxBinImg, COLOR_GRAY2BGR);
+
+            const Mat imgs[2] = { minBinImg, maxBinImg };
+            hconcat(imgs, 2, frame);
         }
 
         img = QImage((uchar*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_BGR888);
