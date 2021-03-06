@@ -31,10 +31,16 @@ TargetCircle RecordThread::findCircle(Mat frame)
     TargetCircle resultCircle = {{-1, -1}, -1};
 
     Mat grayFrame;
+    if (frame.channels() == 3) {
+        cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
+    } else {
+        grayFrame = frame;
+    }
+
     vector<KeyPoint> keypoints;
 
-    cvtColor(frame, grayFrame, COLOR_BGR2GRAY);
-    //cv::GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2 );
+    GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 0);
+
     detector->detect(grayFrame, keypoints);
 
     if (keypoints.size() == 1) {
