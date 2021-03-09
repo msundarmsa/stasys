@@ -154,8 +154,10 @@ void QMLCppBridge::settingsOpened()
 
 void QMLCppBridge::settingsClosed()
 {
-    micThread->stop();
-    micThread = NULL;
+    if (micThread != NULL) {
+        micThread->stop();
+        micThread = NULL;
+    }
     emit uiSettingsClosed();
 }
 
@@ -167,8 +169,10 @@ void QMLCppBridge::updateSamples(float dB)
 void QMLCppBridge::micChanged(QString newMic)
 {
     selectedMic = newMic.toStdString();
-    micThread->stop();
-    micThread = NULL;
+    if (micThread != NULL) {
+        micThread->stop();
+        micThread = NULL;
+    }
     auto updateSamplesPtr = bind(&QMLCppBridge::updateSamples, this, _1);
     micThread = new MicThread(updateSamplesPtr, getPAInput(selectedMic, false).paIndex);
     micThread->start();
