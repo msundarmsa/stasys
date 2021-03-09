@@ -238,7 +238,8 @@ void QMLCppBridge::calibrationClicked()
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
-            VideoCapture cap("/Users/msundarmsa/stasys/calibration.mp4");
+            VideoCapture cap("/Users/msundarmsa/stasys/orientation_test/720p_50fps_1 shot.mov");
+            TRIGGER_DB = -1;
         #else
             VideoCapture cap(CAMERA_INDEX);
         #endif
@@ -274,7 +275,7 @@ void QMLCppBridge::shootClicked()
 
     if (calibThread == NULL && shootThread == NULL) {
         #ifdef QT_QML_DEBUG
-            VideoCapture cap("/Users/msundarmsa/stasys/calibration.mp4");
+            VideoCapture cap("/Users/msundarmsa/stasys/orientation_test/720p_50fps_1 shot.mov");
             TRIGGER_DB = -1;
         #else
             VideoCapture cap(CAMERA_INDEX);

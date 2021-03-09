@@ -63,8 +63,8 @@ private:
     std::vector<Shot*> shots;
     const string defaultMic = "Realtek USB2.0 Mic";
     const QString qDefaultCamera = "USB Camera";
-    int minThreshold = 30;
-    int maxThreshold = 80;
+    int minThreshold = 120;
+    int maxThreshold = 150;
 
 signals:
     void uiCalibrationStarted();

@@ -61,7 +61,8 @@ class CalibrationThread : public RecordThread {
             }
 
             #ifdef QT_QML_DEBUG
-                int testTrigger = 312;
+                // int testTrigger = 312;
+                int testTrigger = 852;
             #endif
 
             while (!stopRecording) {

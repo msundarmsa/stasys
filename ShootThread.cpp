@@ -54,7 +54,7 @@ void ShootThread::run() {
     }
 
     #ifdef QT_QML_DEBUG
-        int testTriggers[30] = {
+        /*int testTriggers[30] = {
             312,
             1754,
             3295,
@@ -85,7 +85,8 @@ void ShootThread::run() {
             41795,
             43269,
             44616
-        };
+        };*/
+    int testTriggers[1] = {852};
 
         int testTriggerIndex = 0;
     #endif
@@ -176,7 +177,7 @@ void ShootThread::run() {
             // aim i.e. black circle was found
 			// flip & rotate the x, y to fit camera
             double xShift = (circle.center.y - roi.height / 2) * RATIO1 + fineAdjustment.x;
-            double yShift = (-circle.center.x + roi.width / 2) * RATIO1 + fineAdjustment.y;
+            double yShift = (circle.center.x - roi.width / 2) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
             #ifdef QT_QML_DEBUG
                 fprintf(logFile, "\t(%.3f , %.3f)", center.x, center.y);
