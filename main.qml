@@ -79,51 +79,50 @@ Window {
     ]
 
     Component.onCompleted: {
-        /*cameraMicError.open();
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(0,0);
-        shotGroupList.addShot(0,0);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(10,35);
-        shotGroupList.addShot(10,35);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(-1,2.5);
-        shotGroupList.addShot(-1,2.5);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(-10,35);
-        shotGroupList.addShot(-10,35);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(-45,0);
-        shotGroupList.addShot(-45,0);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(45,0);
-        shotGroupList.addShot(45,0);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(10,-35);
-        shotGroupList.addShot(10,-35);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(11,-35);
-        shotGroupList.addShot(11,-35);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(12,-35);
-        shotGroupList.addShot(12,-35);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(13,-35);
-        shotGroupList.addShot(13,-35);
-        targetTrace.resetTrace(true);
-        targetTrace.drawShotCircle(14,-35);
-        shotGroupList.addShot(14,-35);
+        // cameraMicError.open();
+        /*for (let i = 0; i < 1; i++) {
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(0,0);
+            shotGroupList.addShot(0,0);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(10,35);
+            shotGroupList.addShot(10,35);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(-1,2.5);
+            shotGroupList.addShot(-1,2.5);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(-10,35);
+            shotGroupList.addShot(-10,35);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(-45,0);
+            shotGroupList.addShot(-45,0);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(45,0);
+            shotGroupList.addShot(45,0);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(10,-35);
+            shotGroupList.addShot(10,-35);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(11,-35);
+            shotGroupList.addShot(11,-35);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(12,-35);
+            shotGroupList.addShot(12,-35);
+            targetTrace.resetTrace(true);
+            targetTrace.drawShotCircle(13,-35);
+            shotGroupList.addShot(13,-35);
 
-        qmlCppBridge.uiUpdateView(1, 10.0, 75, 3.6, 5.2, "top", [], [], []);
-        qmlCppBridge.uiUpdateView(2, 9.5, 82.5, 20, 60, "top_right", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(3, 10.0, 75, 3.6, 5.2, "right", [], [], []);
-        qmlCppBridge.uiUpdateView(4, 9.5, 82.5, 2, 6, "bottom_right", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(5, 10.0, 75, 3.6, 5.2, "bottom", [], [], []);
-        qmlCppBridge.uiUpdateView(6, 9.5, 82.5, 2, 6, "bottom_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(7, 10.0, 75, 3.6, 5.2, "left", [], [], []);
-        qmlCppBridge.uiUpdateView(8, 9.5, 82.5, 2, 6, "top_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
-        qmlCppBridge.uiUpdateView(9, 10.0, 75, 3.6, 5.2, "top", [], [], []);
-        qmlCppBridge.uiUpdateView(10, 9.5, 82.5, 2, 6, "top", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);*/
+            qmlCppBridge.uiUpdateView(i * 10 + 1, 10.0, 75, 3.6, 5.2, "top", [], [], []);
+            qmlCppBridge.uiUpdateView(i * 10 + 2, 9.5, 82.5, 20, 60, "top_right", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+            qmlCppBridge.uiUpdateView(i * 10 + 3, 10.0, 75, 3.6, 5.2, "right", [], [], []);
+            qmlCppBridge.uiUpdateView(i * 10 + 4, 9.5, 82.5, 2, 6, "bottom_right", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+            qmlCppBridge.uiUpdateView(i * 10 + 5, 10.0, 75, 3.6, 5.2, "bottom", [], [], []);
+            qmlCppBridge.uiUpdateView(i * 10 + 6, 9.5, 82.5, 2, 6, "bottom_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+            qmlCppBridge.uiUpdateView(i * 10 + 7, 10.0, 75, 3.6, 5.2, "left", [], [], []);
+            qmlCppBridge.uiUpdateView(i * 10 + 8, 9.5, 82.5, 2, 6, "top_left", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+            qmlCppBridge.uiUpdateView(i * 10 + 9, 10.0, 75, 3.6, 5.2, "top", [], [], []);
+            qmlCppBridge.uiUpdateView(i * 10 + 10, 9.5, 82.5, 2, 6, "top", [10, 20, 30], [3, 2, 1], [-1, 0, 1]);
+        }*/
     }
 
     SoundEffect {
@@ -187,8 +186,8 @@ Window {
         id: settingsDialog
         x: (window.width - width) / 2
         y: (window.height - height) / 2
-        height: 820
-        width: 500
+        height: grid.height + 20
+        width: 720
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -203,232 +202,243 @@ Window {
             settingsBtn.active = false;
         }
 
-        ColumnLayout {
+        GridLayout {
+            id: grid
+            columns: 2
             width: parent.width
-            height: parent.height
-            RowLayout {
-                id: micSelectRect
-                width: parent.width
-                Text {
-                    id: micText
-                    text: "Microphone: "
-                }
+            columnSpacing: 40
 
-                ComboBox {
-                    id: micSelect
-                    Layout.fillWidth: true
-                    model: settingsDialog.micOptions
-                    onCurrentValueChanged: {
-                        qmlCppBridge.micChanged(currentValue);
-                    }
-                }
-            }
-
-            ChartView {
-                id: micChart
-                title: ""
-                Layout.preferredWidth: parent.width
-                Layout.preferredHeight: 300
-                antialiasing: true
-                property var dBs: []
-                property var dBSeries: null
-                property var thresholdSeries: null
-
-                function reset() {
-                    dBs = [];
-                }
-
-                function updateMicChart(dB) {
-                    if (dBSeries != null) {
-                        this.removeSeries(dBSeries);
+            ColumnLayout {
+                width: parent.width / 2
+                height: parent.height
+                RowLayout {
+                    id: micSelectRect
+                    width: parent.width
+                    Text {
+                        id: micText
+                        text: "Microphone: "
                     }
 
-                    if (dBs.length < 60) {
-                        dBs.push(dB);
-                    } else {
-                        dBs.push(dB);
-                        dBs.shift();
-                    }
-
-                    dBSeries = this.createSeries(ChartView.SeriesTypeLine, "dB", micChartxAxis, micChartyAxis);
-
-                    for (let i = 0; i < dBs.length; i++) {
-                        dBSeries.append(i, dBs[i]);
+                    ComboBox {
+                        id: micSelect
+                        Layout.fillWidth: true
+                        model: settingsDialog.micOptions
+                        onCurrentValueChanged: {
+                            qmlCppBridge.micChanged(currentValue);
+                        }
                     }
                 }
 
-                function setThreshold(threshold) {
-                    if (thresholdSeries != null) {
-                        this.removeSeries(thresholdSeries);
+                ChartView {
+                    id: micChart
+                    title: ""
+                    Layout.preferredWidth: parent.width
+                    Layout.preferredHeight: 300
+                    antialiasing: true
+                    property var dBs: []
+                    property var dBSeries: null
+                    property var thresholdSeries: null
+
+                    function reset() {
+                        dBs = [];
                     }
 
-                    thresholdSeries = this.createSeries(ChartView.SeriesTypeLine, "threshold", micChartxAxis, micChartyAxis);
-                    for (let i = 0; i < micChartxAxis.max; i++) {
-                        thresholdSeries.append(i, threshold);
+                    function updateMicChart(dB) {
+                        if (dBSeries != null) {
+                            this.removeSeries(dBSeries);
+                        }
+
+                        if (dBs.length < 60) {
+                            dBs.push(dB);
+                        } else {
+                            dBs.push(dB);
+                            dBs.shift();
+                        }
+
+                        dBSeries = this.createSeries(ChartView.SeriesTypeLine, "dB", micChartxAxis, micChartyAxis);
+
+                        for (let i = 0; i < dBs.length; i++) {
+                            dBSeries.append(i, dBs[i]);
+                        }
+                    }
+
+                    function setThreshold(threshold) {
+                        if (thresholdSeries != null) {
+                            this.removeSeries(thresholdSeries);
+                        }
+
+                        thresholdSeries = this.createSeries(ChartView.SeriesTypeLine, "threshold", micChartxAxis, micChartyAxis);
+                        for (let i = 0; i < micChartxAxis.max; i++) {
+                            thresholdSeries.append(i, threshold);
+                        }
+                    }
+
+                    ValueAxis {
+                        id: micChartxAxis
+                        min: 0
+                        max: 60
+                    }
+
+                    ValueAxis {
+                        id: micChartyAxis
+                        min: 0
+                        max: 100
                     }
                 }
 
-                ValueAxis {
-                    id: micChartxAxis
-                    min: 0
-                    max: 60
-                }
-
-                ValueAxis {
-                    id: micChartyAxis
-                    min: 0
-                    max: 100
-                }
-            }
-
-            RowLayout {
-                id: thresholdRect
-                width: parent.width
-                Text {
-                    id: thresholdText
-                    text: "Threshold: " + thresholdSlider.value.toFixed(0);
-                }
-
-                Slider {
-                    id: thresholdSlider
-                    Layout.fillWidth: true
-                    from: 0
-                    to: 100
-                    stepSize: 1
-
-                    onValueChanged: {
-                        micChart.setThreshold(value);
-                        qmlCppBridge.micThresholdChanged(value);
+                RowLayout {
+                    id: thresholdRect
+                    width: parent.width
+                    Text {
+                        id: thresholdText
+                        text: "Threshold: " + thresholdSlider.value.toFixed(0);
                     }
-                }
-            }
 
-            RowLayout {
-                id: cameraSelectRect
-                width: parent.width
-                Text {
-                    id: cameraText
-                    text: "Camera: "
-                }
+                    Slider {
+                        id: thresholdSlider
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 100
+                        stepSize: 1
 
-                ComboBox {
-                    id: cameraSelect
-                    Layout.fillWidth: true
-                    model: settingsDialog.cameraOptions
-                    currentIndex: settingsDialog.defaultCamera
-
-                    onCurrentIndexChanged: {
-                        qmlCppBridge.cameraChanged(currentIndex);
-                        if (cameraFeed.device > -1) {
-                            cameraFeed.device = currentIndex;
+                        onValueChanged: {
+                            micChart.setThreshold(value);
+                            qmlCppBridge.micThresholdChanged(value);
                         }
                     }
                 }
             }
 
-            RowLayout {
-                height: 200
+            ColumnLayout {
+                width: parent.width / 2
+                height: parent.height
+                RowLayout {
+                    id: cameraSelectRect
+                    width: parent.width
+                    Text {
+                        id: cameraText
+                        text: "Camera: "
+                    }
 
-                CVCamera {
-                    id: cameraFeed
-                    device: -1
-                    detectCircles: false
-                }
+                    ComboBox {
+                        id: cameraSelect
+                        Layout.fillWidth: true
+                        model: settingsDialog.cameraOptions
+                        currentIndex: settingsDialog.defaultCamera
 
-                VideoOutput {
-                    id: output
-                    source: cameraFeed
-                }
-            }
-
-            RowLayout {
-                width: parent.width
-                Text {
-                    text: "Up/Down Detection: "
-                }
-
-                CheckBox {
-                    id: upDownDetectionCheckBox
-                    checked: true
-
-                    onCheckedChanged: {
-                        qmlCppBridge.upDownDetectionChanged(checked);
+                        onCurrentIndexChanged: {
+                            qmlCppBridge.cameraChanged(currentIndex);
+                            if (cameraFeed.device > -1) {
+                                cameraFeed.device = currentIndex;
+                            }
+                        }
                     }
                 }
-            }
 
-            RowLayout {
-                width: parent.width
-                Text {
-                    text: "Show detected circles: "
-                }
+                RowLayout {
+                    height: 200
 
-                CheckBox {
-                    checked: false
+                    CVCamera {
+                        id: cameraFeed
+                        device: -1
+                        detectCircles: false
+                    }
 
-                    onCheckedChanged: {
-                        cameraFeed.detectCircles = checked;
-
+                    VideoOutput {
+                        id: output
+                        source: cameraFeed
                     }
                 }
-            }
 
-            RowLayout {
-                width: parent.width
-                Text {
-                    text: "Show thresholds: "
-                }
+                RowLayout {
+                    width: parent.width
+                    Text {
+                        text: "Up/Down Detection: "
+                    }
 
-                CheckBox {
-                    checked: false
+                    CheckBox {
+                        id: upDownDetectionCheckBox
+                        checked: true
 
-                    onCheckedChanged: {
-                        cameraFeed.showThresholds = checked;
-
+                        onCheckedChanged: {
+                            qmlCppBridge.upDownDetectionChanged(checked);
+                        }
                     }
                 }
-            }
 
-            RowLayout {
-                id: minThresholdRect
-                width: parent.width
-                Text {
-                    id: minThresholdText
-                    text: "Min Threshold: " + minThresholdSlider.value.toFixed(0);
-                }
+                RowLayout {
+                    width: parent.width
+                    Text {
+                        text: "Show detected circles: "
+                    }
 
-                Slider {
-                    id: minThresholdSlider
-                    Layout.fillWidth: true
-                    from: 0
-                    to: 255
-                    stepSize: 1
+                    CheckBox {
+                        checked: false
 
-                    onValueChanged: {
-                        qmlCppBridge.minThresholdChanged(value);
-                        cameraFeed.minThreshold = value;
+                        onCheckedChanged: {
+                            cameraFeed.detectCircles = checked;
+
+                        }
                     }
                 }
-            }
 
-            RowLayout {
-                id: maxThresholdRect
-                width: parent.width
-                Text {
-                    id: maxThresholdText
-                    text: "Max Threshold: " + maxThresholdSlider.value.toFixed(0);
+                RowLayout {
+                    width: parent.width
+                    Text {
+                        text: "Show thresholds: "
+                    }
+
+                    CheckBox {
+                        checked: false
+
+                        onCheckedChanged: {
+                            cameraFeed.showThresholds = checked;
+
+                        }
+                    }
                 }
 
-                Slider {
-                    id: maxThresholdSlider
-                    Layout.fillWidth: true
-                    from: 0
-                    to: 255
-                    stepSize: 1
+                RowLayout {
+                    id: minThresholdRect
+                    width: parent.width
+                    Text {
+                        id: minThresholdText
+                        text: "Min Threshold: " + minThresholdSlider.value.toFixed(0);
+                    }
 
-                    onValueChanged: {
-                        qmlCppBridge.maxThresholdChanged(value);
-                        cameraFeed.maxThreshold = value;
+                    Slider {
+                        id: minThresholdSlider
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 255
+                        stepSize: 1
+
+                        onValueChanged: {
+                            qmlCppBridge.minThresholdChanged(value);
+                            cameraFeed.minThreshold = value;
+                        }
+                    }
+                }
+
+                RowLayout {
+                    id: maxThresholdRect
+                    width: parent.width
+                    Text {
+                        id: maxThresholdText
+                        text: "Max Threshold: " + maxThresholdSlider.value.toFixed(0);
+                    }
+
+                    Slider {
+                        id: maxThresholdSlider
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 255
+                        stepSize: 1
+
+                        onValueChanged: {
+                            qmlCppBridge.maxThresholdChanged(value);
+                            cameraFeed.maxThreshold = value;
+                        }
                     }
                 }
             }
@@ -547,7 +557,7 @@ Window {
         }
 
         Text {
-            text: "STASYS v1.0.5a"
+            text: "STASYS v1.0.6a"
             color: "white"
             font.family: "Segoe UI"
             font.pointSize: 25

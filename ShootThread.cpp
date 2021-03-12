@@ -86,10 +86,12 @@ void ShootThread::run() {
             43269,
             44616
         };*/
-    int testTriggers[1] = {852};
-
+        int testTriggers[1] = {852};
         int testTriggerIndex = 0;
     #endif
+
+    // drop framerate to 30fps until shot started
+    delay_read = 1000 / idle_fps;
 
     while (!stopRecording) {
 		video >> frame;
@@ -125,6 +127,7 @@ void ShootThread::run() {
                 shotStarted = false;
                 currShotTrace.reset();
                 page.clearTrace(false);
+                delay_read = 1000 / idle_fps;
             }
             else {
                 if (millisSinceShotStart > 60000 && !currShotTrace.isShotPointSet())
@@ -147,6 +150,8 @@ void ShootThread::run() {
                     // reset shot
                     shotStarted = false;
                     currShotTrace.reset();
+
+                    delay_read = 1000 / idle_fps;
                 }
             }
         }
@@ -174,9 +179,12 @@ void ShootThread::run() {
             fprintf(logFile, ",%d", shotStarted);
         #endif
         if (circle.radius != -1) {
+            // ramp up back to 120fps
+            delay_read = 0;
+
             // aim i.e. black circle was found
 			// flip & rotate the x, y to fit camera
-            double xShift = (circle.center.y - roi.height / 2) * RATIO1 + fineAdjustment.x;
+            double xShift = (-circle.center.y + roi.height / 2) * RATIO1 + fineAdjustment.x;
             double yShift = (circle.center.x - roi.width / 2) * RATIO1 + fineAdjustment.y;
             Vector2D center = { xShift, yShift };
             #ifdef QT_QML_DEBUG
@@ -310,6 +318,10 @@ void ShootThread::run() {
         #ifdef QT_QML_DEBUG
             this_thread::sleep_for(chrono::milliseconds(8));
         #endif
+
+        if (delay_read > 0) {
+            this_thread::sleep_for(chrono::milliseconds(delay_read));
+        }
 	}
     
     video.release();
