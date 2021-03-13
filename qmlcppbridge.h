@@ -59,12 +59,16 @@ private:
     double RATIO1 = 1; // px from camera to mm
     Vector2D adjustmentVec = {0, 0};
     Vector2D fineAdjustment = {0, 0};
-    bool upDownDetection = true;
+    bool upDownDetection = false;
     std::vector<Shot*> shots;
     const string defaultMic = "Realtek USB2.0 Mic";
     const QString qDefaultCamera = "USB Camera";
     int minThreshold = 120;
     int maxThreshold = 150;
+    Vector2D beforeShotTracePoint{-1, -1};
+    Vector2D afterShotTracePoint{-1, -1};
+    bool beforeShotTrace = false;
+    bool afterShotTrace = false;
 
 signals:
     void uiCalibrationStarted();

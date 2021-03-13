@@ -94,7 +94,7 @@ void ShootThread::run() {
     delay_read = 1000 / idle_fps;
 
     while (!stopRecording) {
-		video >> frame;
+        video >> frame;
         lFrameTime = SystemClock::getCurrentTimeMillis();
 
         if (frame.empty()) {
@@ -315,12 +315,12 @@ void ShootThread::run() {
         fprintf(logFile, "\n");
         frameid++;
 
-        #ifdef QT_QML_DEBUG
-            this_thread::sleep_for(chrono::milliseconds(8));
-        #endif
-
         if (delay_read > 0) {
             this_thread::sleep_for(chrono::milliseconds(delay_read));
+        } else {
+            #ifdef QT_QML_DEBUG
+                this_thread::sleep_for(chrono::milliseconds(8));
+            #endif
         }
 	}
     

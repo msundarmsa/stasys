@@ -325,6 +325,9 @@ void QMLCppBridge::clearTrace(bool resetGroupIfNecessary) {
 }
 
 void QMLCppBridge::updateView(Shot* shot) {
+    beforeShotTrace = false;
+    afterShotTrace = false;
+
     shots.push_back(shot);
     int sn = shot->getSn();
     double score = shot->getScore();
@@ -371,7 +374,14 @@ void QMLCppBridge::updateView(Shot* shot) {
 }
 
 void QMLCppBridge::addToBeforeShotTrace(Vector2D center) {
-    emit uiAddToBeforeShotTrace(center.x, center.y);
+    if (!beforeShotTrace) {
+        beforeShotTrace = true;
+        beforeShotTracePoint = center;
+    } else {
+        emit uiAddToBeforeShotTrace(beforeShotTracePoint.x, beforeShotTracePoint.y);
+        emit uiAddToBeforeShotTrace(center.x, center.y);
+        beforeShotTrace = false;
+    }
 }
 
 void QMLCppBridge::drawShotCircle(Vector2D center) {
@@ -379,5 +389,12 @@ void QMLCppBridge::drawShotCircle(Vector2D center) {
 }
 
 void QMLCppBridge::addToAfterShotTrace(Vector2D center) {
-    emit uiAddToAfterShotTrace(center.x, center.y);
+    if (!afterShotTrace) {
+        afterShotTrace = true;
+        afterShotTracePoint = center;
+    } else {
+        emit uiAddToAfterShotTrace(afterShotTracePoint.x, afterShotTracePoint.y);
+        emit uiAddToAfterShotTrace(center.x, center.y);
+        afterShotTrace = false;
+    }
 }
